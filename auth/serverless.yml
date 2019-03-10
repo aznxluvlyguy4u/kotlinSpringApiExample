@@ -1,0 +1,80 @@
+# For full config options, check: https://docs.serverless.com
+service: ocean-premium-tester
+
+provider:
+  name: aws
+  runtime: java8
+  deploymentBucket: ocean-prem-test
+  memorySize: 1024
+  timeout: 30
+
+stage: dev
+region: eu-west-1
+
+package:
+  artifact: build/libs/auth-0.0.1-SNAPSHOT-aws.jar
+
+functions:
+  create:
+    handler: com.oceanpremium.api.Handler::handleRequest
+    name: create
+    events:
+      - http:
+          path: /auth
+          method: post
+          cors: true
+          headers:
+            - Content-Type
+          allowCredentials: false
+  retrieve-by-id:
+    handler:  com.oceanpremium.api.Handler::handleRequest
+    name: retrieve-by-id
+    events:
+      - http:
+          path: /auth/{id}
+          method: get
+          cors: true
+          headers:
+            - Content-Type
+          request:
+            parameters:
+              paths:
+                id: true
+  retrieve-all:
+    handler: com.oceanpremium.api.Handler::handleRequest
+    name: retrieve-all
+    events:
+      - http:
+          path: /auth
+          method: get
+          cors: true
+          headers:
+            - Content-Type
+  update-by-id:
+    handler: com.oceanpremium.api.Handler::handleRequest
+    name: update-by-id
+    events:
+      - http:
+          path: /auth/{id}
+          method: put
+          cors: true
+          headers:
+            - Content-Type
+          request:
+            parameters:
+              paths:
+                id: true
+  delete-by-id:
+    handler: com.oceanpremium.api.Handler::handleRequest
+    name: delete-by-id
+    events:
+      - http:
+          path: /auth/{id}
+          method: delete
+          cors: true
+          headers:
+            - Content-Type
+          request:
+            parameters:
+              paths:
+                id: true

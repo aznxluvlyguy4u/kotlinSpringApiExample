@@ -1,0 +1,255 @@
+import com.github.jengelman.gradle.plugins.shadow.transformers.PropertiesFileTransformer
+
+apply plugin: 'kotlin'
+apply plugin: "kotlin-spring" // instead of "kotlin-allopen"
+apply plugin: 'kotlinx-serialization'
+apply plugin: "kotlin-noarg"
+apply plugin: "kotlin-jpa"
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+/**
+ * The project meta properties.
+ *
+ * Read this to learn more about naming conventions in Java / Kotlin:
+ * @link https://docs.oracle.com/javase/tutorial/java/package/namingpkgs.html
+ */
+group = 'com.oceanpremium'
+version = '0.0.1-SNAPSHOT'
+
+// Set Java compatibility
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+buildscript {
+    ext {
+        kotlinVersion = '1.3.21'
+        springBootVersion = '2.1.3.RELEASE'
+        shadowVersion = '2.0.1'
+        springCloudStarterVersion = '2.0.1.RELEASE'
+        jacksonVersion = "2.9.5"
+        gradleCheckVersion = "3.2.1"
+        sonarscannerVersion = '2.6.2'
+    }
+
+    /**
+     * The project repos (for which the project is going to download dependencies from).
+     */
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+
+    /**
+     * The project wide dependencies exposed to classpath.
+     */
+    dependencies {
+        /**
+         * Kotlin plugins
+         *
+         * @link https://kotlinlang.org/docs/reference/compiler-plugins.html
+         */
+        classpath "org.jetbrains.kotlin:kotlin-noarg:$kotlinVersion"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
+        classpath "org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}"
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        classpath "com.github.jengelman.gradle.plugins:shadow:${shadowVersion}"
+        classpath "org.owasp:dependency-check-gradle:${gradleCheckVersion}"
+    }
+}
+
+/**
+ * Needed to have open constructors because default classes in Kotlin are final,
+ * and in order to support Hibernate in conjunction with Kotlin, extending it with allOpen provides open Kotlin classes.
+ */
+allOpen {
+    annotation("javax.persistence.Entity")
+    annotation("javax.persistence.MappedSuperclass")
+    annotation("javax.persistence.Embeddable")
+}
+
+/**
+ * The project repos (for which the project is going to download dependencies from).
+ */
+repositories {
+    flatDir { dirs 'libs' }
+    jcenter()
+    mavenCentral()
+    maven { url "https://repo.spring.io/milestone" }
+    maven { setUrl("https://plugins.gradle.org/m2/") }
+    maven { setUrl("https://kotlin.bintray.com/kotlinx") }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    // Sonar scanner - Static code analyzer
+    implementation("org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:$sonarscannerVersion")
+    
+    // The modules that need to be compiled, add each newly created gradle module to this block
+//    implementation project(":auth")
+}
+
+/**
+ * The build configuration for ALL sub-modules.
+ */
+allprojects {
+    apply plugin: 'kotlin'
+    apply plugin: "kotlin-spring" // instead of "kotlin-allopen"
+    apply plugin: 'kotlinx-serialization'
+    apply plugin: "kotlin-noarg"
+    apply plugin: "kotlin-jpa"
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'com.github.johnrengelman.shadow'
+
+    /**
+     * The project repos (for which the project is going to download dependencies from).
+     */
+    repositories {
+        flatDir { dirs 'libs' }
+        jcenter()
+        mavenCentral()
+        maven { url "https://repo.spring.io/milestone" }
+        maven { setUrl("https://plugins.gradle.org/m2/") }
+        maven { setUrl("https://kotlin.bintray.com/kotlinx") }
+    }
+
+    /**
+     * Configure the shaded jar with custom settings, like the main attribute class.
+     */
+    jar {
+        manifest {
+            attributes(
+                    'Start-Class': 'com.oceanpremium.api.Handler'
+            )
+        }
+
+        from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    }
+
+    /**
+     * Configure the shaded jar.
+     */
+    shadowJar {
+        // append the classifier to the build archive as identifier for deploy-able jar
+        classifier = 'aws'
+
+        // Required for Spring
+        mergeServiceFiles()
+
+        append 'META-INF/spring.handlers'
+        append 'META-INF/spring.schemas'
+        append 'META-INF/spring.tooling'
+
+        transform(PropertiesFileTransformer) {
+            paths = [
+                    'META-INF/spring.factories',
+                    'META-INF/spring.provides',
+                    'META-INF/spring-autoconfigure-metadata.properties',
+            ]
+            mergeStrategy = "append"
+        }
+    }
+
+    /**
+     * Note that: we don't want the following dependency in our shadowedJar
+     * because, it is NOT need when creating an archive for deploying a Function to the cloud,
+     * it is used ONLY for LOCAL development.
+     */
+    configurations {
+        runtime.exclude module: "spring-boot-starter-jetty"
+        runtime.exclude module: "spring-boot-starter-test"
+        runtime.exclude module: "sonarqube-gradle-plugin"
+    }
+
+    assemble.dependsOn = [shadowJar, bootJar]
+
+    /**
+     * Configure the shaded jar with custom settings, like the main attribute class.
+     */
+    jar {
+        manifest {
+            attributes(
+                    'Start-Class': 'com.oceanpremium.api.Handler'
+            )
+        }
+
+        from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    }
+
+    /**
+     * Tasks to deploy a serverless function module.
+     */
+    //noinspection GroovyAssignabilityCheck
+    task deploy(type: Exec) {
+        group 'ocean-premium'
+        description 'Deploy serverless function to remote'
+        println("Invoke Deploy for module: $projectDir")
+        commandLine 'sls', 'deploy', '--region' , 'eu-west-1', '--verbose', '--stage', 'dev'
+    }
+
+    /**
+     * The project dependencies that are going to be downloaded for each sub-module.
+     */
+    dependencies {
+        // Kotlin - Library
+        implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+        implementation "org.jetbrains.kotlin:kotlin-reflect"
+        // Kotlin - Serializer
+        implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.9.0"
+
+        // Jackson - JSON Serialization / Deserialization
+        implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonVersion}"
+        implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+
+        // Spring - Starter for locally running the functions for local development
+        // implementation('org.springframework.boot:spring-boot-starter-web')
+        implementation("org.springframework.cloud:spring-cloud-starter-function-web:${springCloudStarterVersion}") {
+            // exclude Tomcat web server, we are going to use Jetty
+            exclude module: "spring-boot-starter-tomcat"
+        }
+
+        // Spring - Jetty - Web server, provisions project with Jetty web server instead of (default) Tomcat web server, for local development
+        implementation("org.springframework.boot:spring-boot-starter-jetty")
+
+        /**
+         * Spring - Actuator - enables endpoint mapping overview in IntelliJ.
+         * More info: https://blog.jetbrains.com/idea/2018/10/spring-boot-endpoints-and-kotlin/
+         */
+        implementation("org.springframework.boot:spring-boot-starter-actuator")
+
+        // Spring
+        testCompile('org.springframework.boot:spring-boot-starter-test')
+
+        // Spring - serverless container
+        implementation('com.amazonaws.serverless:aws-serverless-java-container-spring:1.3.1')
+
+        // AWS logging
+        implementation('io.symphonia:lambda-logging:1.0.3')
+    }
+
+    springBoot {
+        mainClassName = 'com.oceanpremium.api.ApiDriver'
+    }
+}
+
+/**
+ * Set the Kotlin compiler JVM target, default is 1.6
+ */
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
