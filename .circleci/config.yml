@@ -42,9 +42,7 @@ jobs:
     # Deploy to remote
     - run:
         name: Install Serverless CLI and dependencies
-        command: |
-          sudo npm i -g serverless
-          npm install
+        command: sudo apt-get install npm && sudo npm i -g serverless
 
     - save_cache:
         paths:
