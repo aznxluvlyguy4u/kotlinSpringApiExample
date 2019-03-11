@@ -4,9 +4,10 @@
 #
 version: 2
 jobs:
-  build:
-    docker:
+  build-dev:
+    # Provision Java for the API (Java functions)
     - image: circleci/openjdk:8-jdk
+    # Provision Node for the serverless package, to be able to deploy the functions
     - image: circleci/node:latest
 
     working_directory: ~/repo
@@ -17,37 +18,95 @@ jobs:
       TERM: dumb
 
     steps:
-    - checkout
+      - checkout
 
-    # Download and cache dependencies
-    - restore_cache:
-        keys:
-        - v1-dependencies-{{ checksum "build.gradle" }}
-        # fallback to using the latest cache if no exact match is found
-        - v1-dependencies-
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "build.gradle" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
 
-    - run: gradle dependencies --stacktrace
+      - run: gradle dependencies --stacktrace
 
-    - save_cache:
-        paths:
-        - ~/.gradle
-        key: v1-dependencies-{{ checksum "build.gradle" }}
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: v1-dependencies-{{ checksum "build.gradle" }}
 
-    # Run tests
-    - run: gradle test --stacktrace
+      # Run tests
+      - run: gradle test --stacktrace
 
-    # Finally, run sonar scanner and let scanner publish scan results to sonar host
-    - run:  gradle sonarqube -x test --info -Dsonar.login=$sonar_token -Dsonar.host.url=$sonar_host_url -Dsonar.projectKey=$sonar_project_key
+      # Finally, run sonar scanner and let scanner publish scan results to sonar host
+      - run:  gradle sonarqube -x test --info -Dsonar.login=$sonar_token -Dsonar.host.url=$sonar_host_url -Dsonar.projectKey=$sonar_project_key
+  deploy:
+    # Provision Java for the API (Java functions)
+    - image: circleci/openjdk:8-jdk
+    # Provision Node for the serverless package, to be able to deploy the functions
+    - image: circleci/node:latest
 
-    # Install npm & serverless npm package
-    - run: curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash - && sudo apt-get install -y nodejs && sudo npm i -g serverless
+    working_directory: ~/repo
 
-    - save_cache:
-        paths:
-          - node_modules
-        key: v1-dependencies-
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
 
-    # Deploy to remote
-    - run:
-        name: Deploy application
-        command: gradle auth:deploy --stacktrace
+    steps:
+      - checkout
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "build.gradle" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+
+      - run: gradle dependencies --stacktrace
+
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: v1-dependencies-{{ checksum "build.gradle" }}
+
+      # Install npm & serverless npm package
+      - run: curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash - && sudo apt-get install -y nodejs && sudo npm i -g serverless
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-
+
+      # Finally Deploy!
+      - run:
+          name: Deploy application
+          command: gradle auth:deploy --stacktrace
+
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - build-feat:
+          filters:
+            branches:
+              only:
+                - /feature/.*/
+                - /feat/.*/
+      - build-dev:
+          filters:
+            branches:
+              only:
+                - /feature/.*/
+                - /feat/.*/
+      - hold:
+          type: approval
+          requires:
+            - build-dev
+      - deploy:
+          requires:
+            - hold
+          filters:
+            branches:
+              only:
+                - /feature/.*/
+                - /feat/.*/
