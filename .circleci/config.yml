@@ -39,7 +39,7 @@ jobs:
 
       # Finally, run sonar scanner and let scanner publish scan results to sonar host
       - run:  gradle sonarqube -x test --info -Dsonar.login=$sonar_token -Dsonar.host.url=$sonar_host_url -Dsonar.projectKey=$sonar_project_key
-  deploy:
+  deploy-dev:
     # Provision Java for the API (Java functions)
     - image: circleci/openjdk:8-jdk
     # Provision Node for the serverless package, to be able to deploy the functions
@@ -80,7 +80,7 @@ jobs:
       # Finally Deploy!
       - run:
           name: Deploy application
-          command: gradle auth:deploy --stacktrace
+          command: gradle auth:deploy -Penv="dev" --stacktrace
 
 workflows:
   version: 2
