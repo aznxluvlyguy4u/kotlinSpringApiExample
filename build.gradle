@@ -34,7 +34,7 @@ buildscript {
     ext {
         kotlinVersion = '1.3.21'
         springBootVersion = '2.1.3.RELEASE'
-        shadowVersion = '2.0.1'
+        shadowVersion = '2.0.4'
         springCloudStarterVersion = '2.0.1.RELEASE'
         jacksonVersion = "2.9.5"
         gradleCheckVersion = "3.2.1"
