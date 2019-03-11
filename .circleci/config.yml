@@ -7,6 +7,7 @@ jobs:
   build-dev:
     # Provision Java for the API (Java functions)
     - image: circleci/openjdk:8-jdk
+
     # Provision Node for the serverless package, to be able to deploy the functions
     - image: circleci/node:latest
 
@@ -39,9 +40,11 @@ jobs:
 
       # Finally, run sonar scanner and let scanner publish scan results to sonar host
       - run:  gradle sonarqube -x test --info -Dsonar.login=$sonar_token -Dsonar.host.url=$sonar_host_url -Dsonar.projectKey=$sonar_project_key
+        
   deploy-dev:
     # Provision Java for the API (Java functions)
     - image: circleci/openjdk:8-jdk
+
     # Provision Node for the serverless package, to be able to deploy the functions
     - image: circleci/node:latest
 
@@ -86,25 +89,15 @@ workflows:
   version: 2
   build-deploy:
     jobs:
-      - build-feat:
-          filters:
-            branches:
-              only:
-                - /feature/.*/
-                - /feat/.*/
       - build-dev:
           filters:
             branches:
               only:
                 - /feature/.*/
                 - /feat/.*/
-      - hold:
-          type: approval
+      - deploy-dev:
           requires:
             - build-dev
-      - deploy:
-          requires:
-            - hold
           filters:
             branches:
               only:
