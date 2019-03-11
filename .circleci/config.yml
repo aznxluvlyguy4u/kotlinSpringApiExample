@@ -351,7 +351,7 @@ workflows:
       - deploy-development:
           type: approval
           requires:
-            - build-devevelopment
+            - build-development
           filters:
             branches:
               only:
