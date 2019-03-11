@@ -198,6 +198,7 @@ allprojects {
     //noinspection GroovyAssignabilityCheck
     task deploy(type: Exec) {
         group 'ocean-premium'
+        dependsOn("shadowJar")
         description 'Deploy serverless function to remote'
         println("Invoke Deploy for module: $projectDir")
         commandLine 'sls', 'deploy', '--region' , 'eu-west-1', '--verbose', '--stage', 'dev'
