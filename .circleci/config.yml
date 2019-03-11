@@ -338,15 +338,15 @@ workflows:
           filters:
             branches:
               only:
-                - feature/.*/
-                - feat/.*/
+                - /feature/.*/
+                - /feat/.*/
 
       # DEVELOPMENT
       - build-development:
           filters:
             branches:
               only:
-                - development
+                - /development
 
       - deploy-development:
           type: approval
@@ -355,14 +355,14 @@ workflows:
           filters:
             branches:
               only:
-                - development
+                - /development
 
       # PRODUCTION
       - build-production:
           filters:
             branches:
               only:
-                - master
+                - /master
 
       - deploy-production:
           type: approval
