@@ -107,7 +107,7 @@ jobs:
       # Finally Deploy, default is dev stage
       - run:
           name: Deploy application
-          command: gradle auth:deploy --stacktrace
+          command: gradle auth:deploy -Penv="test" --stacktrace
 
 
   # BUILD DEVELOPMENT
@@ -328,8 +328,8 @@ workflows:
           filters:
             branches:
               only:
-                - /feature/.*/
-                - /feat/.*/
+                - feature/.*/
+                - feat/.*/
 
       - deploy-feature:
           type: approval
@@ -338,8 +338,8 @@ workflows:
           filters:
             branches:
               only:
-                - /feature/.*/
-                - /feat/.*/
+                - feature/.*/
+                - feat/.*/
 
       # DEVELOPMENT
       - build-development:
