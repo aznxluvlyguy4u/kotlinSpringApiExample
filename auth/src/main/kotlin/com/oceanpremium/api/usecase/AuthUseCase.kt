@@ -12,10 +12,9 @@ interface AuthUseCase {
 }
 
 @Service
-class AuthUseCaseImpl : AuthUseCase {
-
+class AuthUseCaseImpl(
     @Autowired
-    private var authGateway: AuthGateway? = null
+    private var authGateway: AuthGateway) : AuthUseCase {
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
@@ -24,7 +23,7 @@ class AuthUseCaseImpl : AuthUseCase {
     override fun execute(request: User): Token? {
         logger.debug("Called ${this::class.java} with input ($request})")
 
-        val user = authGateway?.retrieveUser(request)
+        val user = authGateway.retrieveUser(request)
 
         return when {
             user?.emailAddress != request.emailAddress -> null
