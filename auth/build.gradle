@@ -4,6 +4,10 @@ repositories {
     mavenCentral()
 }
 
+springBoot {
+    mainClassName = 'com.oceanpremium.api.ApiDriver'
+}
+
 dependencies {
-//    compile project(":core")
+    compile project(":core")
 }
