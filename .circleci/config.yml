@@ -85,7 +85,7 @@ jobs:
       # Finally Deploy!
       - run:
           name: Deploy application
-          command: gradle auth:deploy -Penv="dev" --stacktrace
+          command: gradle auth:deploy --stacktrace
 
 workflows:
   version: 2
@@ -98,6 +98,7 @@ workflows:
                 - /feature/.*/
                 - /feat/.*/
       - deploy-dev:
+          type: approval
           requires:
             - build-dev
           filters:
