@@ -11,6 +11,7 @@ apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'org.sonarqube'
 
 /**
  * The project meta properties.
@@ -64,6 +65,7 @@ buildscript {
         classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
         classpath "com.github.jengelman.gradle.plugins:shadow:${shadowVersion}"
         classpath "org.owasp:dependency-check-gradle:${gradleCheckVersion}"
+        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:$sonarscannerVersion"
     }
 }
 
@@ -237,6 +239,8 @@ allprojects {
 
         // AWS logging
         implementation('io.symphonia:lambda-logging:1.0.3')
+
+        testImplementation 'org.mockito:mockito-inline:2.13.0'
     }
 
     springBoot {
