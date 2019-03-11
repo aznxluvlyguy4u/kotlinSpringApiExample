@@ -3,8 +3,13 @@
 # Check https://circleci.com/docs/2.0/language-java/ for more details
 #
 version: 2
+
+# JOBS
 jobs:
-  build-dev:
+  # BUILD FEATURE
+  build-feature:
+
+    # Images provisioned with this build
     docker:
       # Provision Java for the API (Java functions)
       - image: circleci/openjdk:8-jdk
@@ -12,25 +17,32 @@ jobs:
       # Provision Node for the serverless package, to be able to deploy the functions
       - image: circleci/node:8
 
+    # Clone the repo in the working directory
     working_directory: ~/repo
 
+    # Setup environment settings
     environment:
       # Customize the JVM maximum heap limit
       JVM_OPTS: -Xmx3200m
       TERM: dumb
 
+    # Define build steps
     steps:
+
+      # Checkout repo in working directory
       - checkout
 
-      # Download and cache dependencies
+      # Restore any dependencies that are available in cache
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "build.gradle" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
+      # Inspect dependencies
       - run: gradle dependencies --stacktrace
 
+      # Download and cache dependencies
       - save_cache:
           paths:
             - ~/.gradle
@@ -42,7 +54,9 @@ jobs:
       # Finally, run sonar scanner and let scanner publish scan results to sonar host
       - run:  gradle sonarqube -x test --info -Dsonar.login=$sonar_token -Dsonar.host.url=$sonar_host_url -Dsonar.projectKey=$sonar_project_key
 
-  deploy-dev:
+  # DEPLOY FEATURE
+  deploy-feature:
+    # Images provisioned with this build
     docker:
       # Provision Java for the API (Java functions)
       - image: circleci/openjdk:8-jdk
@@ -50,25 +64,32 @@ jobs:
       # Provision Node for the serverless package, to be able to deploy the functions
       - image: circleci/node:8
 
+    # Clone the repo in the working directory
     working_directory: ~/repo
 
+    # Setup environment settings
     environment:
       # Customize the JVM maximum heap limit
       JVM_OPTS: -Xmx3200m
       TERM: dumb
 
+    # Define build steps
     steps:
+
+      # Checkout repo in working directory
       - checkout
 
-      # Download and cache dependencies
+      # Restore any dependencies that are available in cache
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "build.gradle" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
+      # Inspect dependencies
       - run: gradle dependencies --stacktrace
 
+      # Download and cache Gradle dependencies
       - save_cache:
           paths:
             - ~/.gradle
@@ -77,32 +98,277 @@ jobs:
       # Install npm & serverless npm package
       - run: curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash - && sudo apt-get install -y nodejs && sudo npm i -g serverless
 
+      # Download and cache NPM dependencies
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-
 
-      # Finally Deploy!
+      # Finally Deploy, default is dev stage
       - run:
           name: Deploy application
           command: gradle auth:deploy --stacktrace
 
+
+  # BUILD DEVELOPMENT
+  build-development:
+
+    # Images provisioned with this build
+    docker:
+      # Provision Java for the API (Java functions)
+      - image: circleci/openjdk:8-jdk
+
+      # Provision Node for the serverless package, to be able to deploy the functions
+      - image: circleci/node:8
+
+    # Clone the repo in the working directory
+    working_directory: ~/repo
+
+    # Setup environment settings
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+
+    # Define build steps
+    steps:
+
+      # Checkout repo in working directory
+      - checkout
+
+      # Restore any dependencies that are available in cache
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "build.gradle" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+
+      # Inspect dependencies
+      - run: gradle dependencies --stacktrace
+
+      # Download and cache dependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: v1-dependencies-{{ checksum "build.gradle" }}
+
+      # Run tests
+      - run: gradle test --stacktrace
+
+      # Finally, run sonar scanner and let scanner publish scan results to sonar host
+      - run:  gradle sonarqube -x test --info -Dsonar.login=$sonar_token -Dsonar.host.url=$sonar_host_url -Dsonar.projectKey=$sonar_project_key
+
+  # DEPLOY DEVELOPMENT
+  deploy-development:
+    # Images provisioned with this build
+    docker:
+      # Provision Java for the API (Java functions)
+      - image: circleci/openjdk:8-jdk
+
+      # Provision Node for the serverless package, to be able to deploy the functions
+      - image: circleci/node:8
+
+    # Clone the repo in the working directory
+    working_directory: ~/repo
+
+    # Setup environment settings
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+
+    # Define build steps
+    steps:
+
+      # Checkout repo in working directory
+      - checkout
+
+      # Restore any dependencies that are available in cache
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "build.gradle" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+
+      # Inspect dependencies
+      - run: gradle dependencies --stacktrace
+
+      # Download and cache Gradle dependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: v1-dependencies-{{ checksum "build.gradle" }}
+
+      # Install npm & serverless npm package
+      - run: curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash - && sudo apt-get install -y nodejs && sudo npm i -g serverless
+
+      # Download and cache NPM dependencies
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-
+
+      # Finally Deploy, default is dev stage
+      - run:
+          name: Deploy application
+          command: gradle auth:deploy --stacktrace
+
+  # BUILD PRODUCTION
+  build-prod:
+
+    # Images provisioned with this build
+    docker:
+      # Provision Java for the API (Java functions)
+      - image: circleci/openjdk:8-jdk
+
+      # Provision Node for the serverless package, to be able to deploy the functions
+      - image: circleci/node:8
+
+    # Clone the repo in the working directory
+    working_directory: ~/repo
+
+    # Setup environment settings
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+
+    # Define build steps
+    steps:
+
+      # Checkout repo in working directory
+      - checkout
+
+      # Restore any dependencies that are available in cache
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "build.gradle" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+
+      # Inspect dependencies
+      - run: gradle dependencies --stacktrace
+
+      # Download and cache dependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: v1-dependencies-{{ checksum "build.gradle" }}
+
+      # Run tests
+      - run: gradle test --stacktrace
+
+      # Finally, run sonar scanner and let scanner publish scan results to sonar host
+      - run:  gradle sonarqube -x test --info -Dsonar.login=$sonar_token -Dsonar.host.url=$sonar_host_url -Dsonar.projectKey=$sonar_project_key
+
+  # DEPLOY FEATURE
+  deploy-prod:
+    # Images provisioned with this build
+    docker:
+      # Provision Java for the API (Java functions)
+      - image: circleci/openjdk:8-jdk
+
+      # Provision Node for the serverless package, to be able to deploy the functions
+      - image: circleci/node:8
+
+    # Clone the repo in the working directory
+    working_directory: ~/repo
+
+    # Setup environment settings
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+
+    # Define build steps
+    steps:
+
+      # Checkout repo in working directory
+      - checkout
+
+      # Restore any dependencies that are available in cache
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "build.gradle" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+
+      # Inspect dependencies
+      - run: gradle dependencies --stacktrace
+
+      # Download and cache Gradle dependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: v1-dependencies-{{ checksum "build.gradle" }}
+
+      # Install npm & serverless npm package
+      - run: curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash - && sudo apt-get install -y nodejs && sudo npm i -g serverless
+
+      # Download and cache NPM dependencies
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-
+
+      # Finally Deploy, default is dev stage
+      - run:
+          name: Deploy application
+          command: gradle auth:deploy -Penv="prod" --stacktrace
+
+# WORKFLOWS
 workflows:
   version: 2
+  # BUILD & DEPLOY
   build-deploy:
     jobs:
-      - build-dev:
+
+      # FEATURE
+      - build-feature:
           filters:
             branches:
               only:
                 - /feature/.*/
                 - /feat/.*/
-      - deploy-dev:
+
+      - deploy-feature:
           type: approval
           requires:
-            - build-dev
+            - build-feature
           filters:
             branches:
               only:
                 - /feature/.*/
                 - /feat/.*/
+
+      # DEVELOPMENT
+      - build-development:
+          filters:
+            branches:
+              only:
+                - development
+
+      - deploy-development:
+          type: approval
+          requires:
+            - build-devevelopment
+          filters:
+            branches:
+              only:
+                - development
+
+      # PRODUCTION
+      - build-production:
+          filters:
+            branches:
+              only:
+                - master
+
+      - deploy-production:
+          type: approval
+          requires:
+            - build-production
+          filters:
+            branches:
+              only:
+                - master
