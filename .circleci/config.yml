@@ -26,7 +26,7 @@ jobs:
         # fallback to using the latest cache if no exact match is found
         - v1-dependencies-
 
-    - run: gradle dependencies
+    - run: gradle dependencies --stacktrace
 
     - save_cache:
         paths:
@@ -34,7 +34,7 @@ jobs:
         key: v1-dependencies-{{ checksum "build.gradle" }}
 
     # Run tests
-    - run: gradle test
+    - run: gradle test --stacktrace
 
     # Finally, run sonar scanner and let scanner publish scan results to sonar host
     - run:  gradle sonarqube -x test --info -Dsonar.login=$sonar_token -Dsonar.host.url=$sonar_host_url -Dsonar.projectKey=$sonar_project_key
@@ -50,4 +50,4 @@ jobs:
     # Deploy to remote
     - run:
         name: Deploy application
-        command: gradle auth:deploy
+        command: gradle auth:deploy --stacktrace

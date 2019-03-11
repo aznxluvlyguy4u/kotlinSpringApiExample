@@ -1,5 +1,3 @@
-import com.github.jengelman.gradle.plugins.shadow.transformers.PropertiesFileTransformer
-
 apply plugin: 'kotlin'
 apply plugin: "kotlin-spring" // instead of "kotlin-allopen"
 apply plugin: 'kotlinx-serialization'
