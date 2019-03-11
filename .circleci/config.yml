@@ -5,12 +5,12 @@
 version: 2
 jobs:
   build-dev:
-    - docker:
-        # Provision Java for the API (Java functions)
-        - image: circleci/openjdk:8-jdk
+    docker:
+      # Provision Java for the API (Java functions)
+      - image: circleci/openjdk:8-jdk
 
-        # Provision Node for the serverless package, to be able to deploy the functions
-        - image: circleci/node:8
+      # Provision Node for the serverless package, to be able to deploy the functions
+      - image: circleci/node:8
 
     working_directory: ~/repo
 
@@ -43,12 +43,12 @@ jobs:
       - run:  gradle sonarqube -x test --info -Dsonar.login=$sonar_token -Dsonar.host.url=$sonar_host_url -Dsonar.projectKey=$sonar_project_key
 
   deploy-dev:
-    - docker:
-        # Provision Java for the API (Java functions)
-        - image: circleci/openjdk:8-jdk
+    docker:
+      # Provision Java for the API (Java functions)
+      - image: circleci/openjdk:8-jdk
 
-        # Provision Node for the serverless package, to be able to deploy the functions
-        - image: circleci/node:8
+      # Provision Node for the serverless package, to be able to deploy the functions
+      - image: circleci/node:8
 
     working_directory: ~/repo
 
