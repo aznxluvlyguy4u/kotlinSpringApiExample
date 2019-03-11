@@ -37,3 +37,19 @@ jobs:
 
     # Finally, run sonar scanner and let scanner publish scan results to sonar host
     - run:  gradle sonarqube -x test --info -Dsonar.login=$sonar_token -Dsonar.host.url=$sonar_host_url -Dsonar.projectKey=$sonar_project_key
+
+    # Deploy to remote
+    - run:
+        name: Install Serverless CLI and dependencies
+        command: |
+          sudo npm i -g serverless
+          npm install
+
+    - save_cache:
+        paths:
+          - node_modules
+        key: v1-dependencies-
+
+    - run:
+        name: Deploy application
+        command: gradle auth:deploy
