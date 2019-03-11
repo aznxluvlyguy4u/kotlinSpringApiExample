@@ -1,7 +1,6 @@
 package com.oceanpremium.api.presenter
 
-import com.oceanpremium.api.model.Response
-import com.oceanpremium.api.model.User
+import com.oceanpremium.api.model.*
 import com.oceanpremium.api.usecase.AuthUseCase
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.format.annotation.DateTimeFormat
@@ -15,7 +14,6 @@ class AuthPresenter {
     private var authUseCase: AuthUseCase? = null
 
     @PostMapping("/auth")
-    @RequestMapping("/auth", method =[RequestMethod.POST])
     @ResponseBody
     fun createAuth(@RequestBody user: User): Response {
         val token = authUseCase?.execute(user)
