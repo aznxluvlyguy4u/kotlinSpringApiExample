@@ -95,7 +95,9 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     // Sonar scanner - Static code analyzer
-    implementation("org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:$sonarscannerVersion")
+    implementation ("org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:$sonarscannerVersion")
+
+
     
     // The modules that need to be compiled, add each newly created gradle module to this block
 //    implementation project(":auth")
