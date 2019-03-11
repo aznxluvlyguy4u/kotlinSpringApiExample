@@ -328,8 +328,8 @@ workflows:
           filters:
             branches:
               only:
-                - feature/.*/
-                - feat/.*/
+                - /feature/.*/
+                - /feat/.*/
 
       - deploy-feature:
           type: approval
