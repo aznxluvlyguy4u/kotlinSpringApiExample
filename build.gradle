@@ -201,11 +201,11 @@ allprojects {
         dependsOn("shadowJar")
         description 'Deploy serverless function to remote'
 
-        def envToDeploy = "dev"
-        if (project.hasProperty('env')) { envToDeploy = args('env') }
-        
-        println("Invoke Deploy for module: $projectDir with env: $envToDeploy")
-        commandLine 'sls', 'deploy', '--region' , 'eu-west-1', '--verbose', '--stage', envToDeploy
+        def stageToDeployTo = "dev"
+        if (project.hasProperty('stage')) { stageToDeployTo = stage }
+        println("Invoke Deploy for module: $project.name with stage to deploy to: $stageToDeployTo")
+        commandLine 'sls', 'deploy', '--region' , 'eu-west-1', '--verbose', '--stage', "$stageToDeployTo"
+//        commandLine 'sls', 'deploy', '--region' , 'eu-west-1', '--verbose', '--package', '.serverless', '--stage', "$stageToDeployTo"
     }
 
     /**
