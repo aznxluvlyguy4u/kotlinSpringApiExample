@@ -213,7 +213,7 @@ jobs:
           command: gradle auth:deploy --stacktrace
 
   # BUILD PRODUCTION
-  build-prod:
+  build-production:
 
     # Images provisioned with this build
     docker:
@@ -261,7 +261,7 @@ jobs:
       - run:  gradle sonarqube -x test --info -Dsonar.login=$sonar_token -Dsonar.host.url=$sonar_host_url -Dsonar.projectKey=$sonar_project_key
 
   # DEPLOY FEATURE
-  deploy-prod:
+  deploy-production:
     # Images provisioned with this build
     docker:
       # Provision Java for the API (Java functions)
