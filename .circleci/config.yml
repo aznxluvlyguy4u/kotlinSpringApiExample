@@ -1,6 +1,5 @@
 # Java Gradle CircleCI 2.0 configuration file
 #
-# Check https://circleci.com/docs/2.0/language-java/ for more details
 #
 version: 2
 
@@ -12,9 +11,11 @@ jobs:
     # Images provisioned with this build
     docker:
       # Provision Java for the API (Java functions)
+      # More info: https://circleci.com/docs/2.0/language-java/
       - image: circleci/openjdk:8-jdk
 
       # Provision Node for the serverless package, to be able to deploy the functions
+      # More info: https://circleci.com/docs/2.0/language-javascript/
       - image: circleci/node:8
 
     # Clone the repo in the working directory
@@ -316,6 +317,7 @@ jobs:
           command: gradle auth:deploy -Penv="prod" --stacktrace
 
 # WORKFLOWS
+# More info on Workflows:  https://circleci.com/docs/2.0/workflows/
 workflows:
   version: 2
   # BUILD & DEPLOY
