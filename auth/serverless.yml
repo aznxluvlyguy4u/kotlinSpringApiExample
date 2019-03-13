@@ -2,7 +2,7 @@
 
 # The service name which is used to create the stack
 service:
-  name: ocean-premium-tester
+  name: ocean-premium
 
 # The provider of the cloud instance and its needed runtime configuration
 provider:
@@ -16,9 +16,15 @@ provider:
   memorySize: 1024
   # The default timeout (30 seconds)
   timeout: 30
+  # The stage to deploy (dev | test |  stage | prod) - defaults to dev
+  stage:  ${opt:stage, 'dev'}
 
-# The default stage to deploy to (dev | test |  stage | prod
-stage: dev
+# Custom variables
+custom:
+  apiPrefix: api
+  apiVersion: v1
+  # results in, for example: api/v1
+  apiPathPrefix: ${self:custom.apiPrefix}/${self:custom.apiVersion}
 
 # The default region to be deployed to
 region: eu-west-1
@@ -33,11 +39,11 @@ functions:
   create:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.Handler::handleRequest
-    name: create
+    name: create-auth
     events:
       - http:
           # The URI of the endpoint
-          path: /auth
+          path: /${self:custom.apiPathPrefix}/auth
           # The HTTP verb
           method: post
           # Additional endpoint configurations like enabling CORS
@@ -50,11 +56,11 @@ functions:
   retrieve-by-id:
     # The function handler to be called for this endpoint
     handler:  com.oceanpremium.api.Handler::handleRequest
-    name: retrieve-by-id-${opt:stage}
+    name: retrieve-auth-by-id
     events:
       - http:
           # The URI of the endpoint with a placeholder for the identifier as a PATH parameter
-          path: /auth/{id}
+          path: /${self:custom.apiPathPrefix}/auth/{id}
           # The HTTP verb supported by this endpoint
           method: get
           # Additional endpoint configurations like enabling CORS
@@ -72,11 +78,11 @@ functions:
   retrieve-all:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.Handler::handleRequest
-    name: retrieve-all-${opt:stage}
+    name: retrieve-all-auths
     events:
       - http:
           # The URI of the endpoint
-          path: /auth
+          path: /${self:custom.apiPathPrefix}/auth
           # The HTTP verb supported by this endpoint
           method: get
           # Additional endpoint configurations like enabling CORS
@@ -88,11 +94,11 @@ functions:
   update-by-id:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.Handler::handleRequest
-    name: update-by-id-${opt:stage}
+    name: update-auth-by-id
     events:
       - http:
           # The URI of the endpoint with a placeholder for the identifier as a PATH parameter
-          path: /auth/{id}
+          path: /${self:custom.apiPathPrefix}/auth/{id}
           # The HTTP verb supported by this endpoint
           method: put
           # Additional endpoint configurations like enabling CORS
@@ -110,11 +116,11 @@ functions:
   delete-by-id:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.Handler::handleRequest
-    name: delete-by-id-${opt:stage}
+    name: delete-auth-by-id
     events:
       - http:
           # The URI of the endpoint with a placeholder for the identifier as a PATH parameter
-          path: /auth/{id}
+          path: /${self:custom.apiPathPrefix}/auth/{id}
           # The HTTP verb supported by this endpoint
           method: delete
           # Additional endpoint configurations like enabling CORS
