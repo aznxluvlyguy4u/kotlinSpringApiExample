@@ -1,9 +1,5 @@
 # For full config options, check: https://docs.serverless.com
 
-# The service name which is used to create the stack
-service:
-  name: ocean-premium
-
 # The provider of the cloud instance and its needed runtime configuration
 provider:
   # Cloud provider
@@ -16,8 +12,22 @@ provider:
   memorySize: 1024
   # The default timeout (30 seconds)
   timeout: 30
-  # The stage to deploy (dev | test |  stage | prod) - defaults to dev
+
+  # The stage to deploy, stages:(dev | test |  stage | prod) - defaults to dev
+  #
+  # Either deploy through gradle task:
+  #
+  # $ ./gradlew moduleName: deploy -Pstage=<stage_name> --stacktrace
+  #
+  # or directly via serverless (which is called by the `deploy` Gradle task):
+  #
+  # $ sls deploy --region eu-west-1 --verbose --stage <stage_name>
+  #
   stage:  ${opt:stage, 'dev'}
+
+# The service name which is used to create the stack
+service:
+  name: ocean-premium
 
 # Custom variables
 custom:
@@ -33,13 +43,16 @@ region: eu-west-1
 package:
   artifact: build/libs/auth-0.0.1-SNAPSHOT-aws.jar
 
+plugins:
+  - serverless-delete-loggroups
+
 # The functions defined by HTTP verb / path and parameters (CRUD)
 functions:
   # CREATE
   create:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.Handler::handleRequest
-    name: create-auth
+    name: create-auth-${self:provider.stage}
     events:
       - http:
           # The URI of the endpoint
@@ -56,7 +69,7 @@ functions:
   retrieve-by-id:
     # The function handler to be called for this endpoint
     handler:  com.oceanpremium.api.Handler::handleRequest
-    name: retrieve-auth-by-id
+    name: retrieve-auth-by-id-${self:provider.stage}
     events:
       - http:
           # The URI of the endpoint with a placeholder for the identifier as a PATH parameter
@@ -78,7 +91,7 @@ functions:
   retrieve-all:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.Handler::handleRequest
-    name: retrieve-all-auths
+    name: retrieve-all-auths-${self:provider.stage}
     events:
       - http:
           # The URI of the endpoint
@@ -94,7 +107,7 @@ functions:
   update-by-id:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.Handler::handleRequest
-    name: update-auth-by-id
+    name: update-auth-by-id-${self:provider.stage}
     events:
       - http:
           # The URI of the endpoint with a placeholder for the identifier as a PATH parameter
@@ -116,7 +129,7 @@ functions:
   delete-by-id:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.Handler::handleRequest
-    name: delete-auth-by-id
+    name: delete-auth-by-id-${self:provider.stage}
     events:
       - http:
           # The URI of the endpoint with a placeholder for the identifier as a PATH parameter
