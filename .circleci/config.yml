@@ -259,7 +259,7 @@ jobs:
       # Finally, run sonar scanner and let scanner publish scan results to sonar host
       - run:  gradle sonarqube -x test --info -Dsonar.login=$sonar_token -Dsonar.host.url=$sonar_host_url -Dsonar.projectKey=$sonar_project_key
 
-  # DEPLOY FEATURE
+  # DEPLOY PRODUCTION
   deploy-production:
     # Images provisioned with this build
     docker:
