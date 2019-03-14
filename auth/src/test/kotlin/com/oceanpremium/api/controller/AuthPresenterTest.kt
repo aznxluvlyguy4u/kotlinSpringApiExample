@@ -2,8 +2,8 @@ package com.oceanpremium.api.controller
 
 import com.oceanpremium.api.ApiDriver
 import com.oceanpremium.api.model.Response
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
+import junit.framework.TestCase.assertEquals
+import org.hibernate.validator.internal.util.Contracts.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired

@@ -1,5 +1,15 @@
+version = '0.0.1'
 
-
+/**
+ * The repositories needed for this module.
+ */
 repositories {
     mavenCentral()
+}
+
+/**
+ * The module specific dependencies.
+ */
+dependencies {
+    // This module depends on the following module(s)
 }

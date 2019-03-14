@@ -99,13 +99,18 @@ dependencies {
     implementation ("org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:$sonarscannerVersion")
     
     // The modules that need to be compiled, add each newly created gradle module to this block
-//    implementation project(":auth")
+    compile project(":core")
+    compile project(":auth")
+}
+
+springBoot {
+    mainClassName = 'com.oceanpremium.api.ApiDriver'
 }
 
 /**
  * The build configuration for ALL sub-modules.
  */
-allprojects {
+subprojects {
     apply plugin: 'kotlin'
     apply plugin: "kotlin-spring" // instead of "kotlin-allopen"
     apply plugin: 'kotlinx-serialization'
@@ -213,6 +218,7 @@ allprojects {
         // Kotlin - Library
         implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
         implementation "org.jetbrains.kotlin:kotlin-reflect"
+
         // Kotlin - Serializer
         implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.9.0"
 
@@ -221,7 +227,6 @@ allprojects {
         implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
 
         // Spring - Starter for locally running the functions for local development
-        // implementation('org.springframework.boot:spring-boot-starter-web')
         implementation("org.springframework.cloud:spring-cloud-starter-function-web:${springCloudStarterVersion}") {
             // exclude Tomcat web server, we are going to use Jetty
             exclude module: "spring-boot-starter-tomcat"
@@ -236,9 +241,6 @@ allprojects {
          */
         implementation("org.springframework.boot:spring-boot-starter-actuator")
 
-        // Spring
-        testCompile('org.springframework.boot:spring-boot-starter-test')
-
         // Spring - serverless container
         implementation('com.amazonaws.serverless:aws-serverless-java-container-spring:1.3.1')
 
@@ -246,12 +248,32 @@ allprojects {
         implementation('io.symphonia:lambda-logging:1.0.3')
 
         testImplementation 'org.mockito:mockito-inline:2.13.0'
+
+        // Spring
+        testCompile('org.springframework.boot:spring-boot-starter-test')
     }
 
     springBoot {
         mainClassName = 'com.oceanpremium.api.ApiDriver'
     }
 }
+
+/**
+ * Create a sublist of all Serverless function modules.
+ *
+ * Register every Serverless function newly added to this list.
+ */
+project.ext {
+    subprojectList = subprojects.findAll {
+        it.name == 'auth'
+    }
+}
+
+
+/**
+ * Configure each Serverless function module.
+ */
+configure(project.subprojectList) { }
 
 /**
  * Set the Kotlin compiler JVM target, default is 1.6
