@@ -1,4 +1,4 @@
 rootProject.name = 'ocean-premium-api'
 
-include ':auth'
-include ':core'
+include 'auth'
+include 'core'
