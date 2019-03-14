@@ -4,6 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 class Response(
     @field:JsonProperty("success")
-    private val success: Boolean, @field:JsonProperty("message")
-    private val message: Any?
+    val success: Boolean, @field:JsonProperty("message")
+    val message: Any?
 )

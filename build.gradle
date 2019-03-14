@@ -77,6 +77,7 @@ allOpen {
     annotation("javax.persistence.Entity")
     annotation("javax.persistence.MappedSuperclass")
     annotation("javax.persistence.Embeddable")
+    annotation('com.oceanpremium.api.util.Mockable')
 }
 
 /**
@@ -96,8 +97,6 @@ dependencies {
 
     // Sonar scanner - Static code analyzer
     implementation ("org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:$sonarscannerVersion")
-
-
     
     // The modules that need to be compiled, add each newly created gradle module to this block
 //    implementation project(":auth")
@@ -205,7 +204,6 @@ allprojects {
         if (project.hasProperty('stage')) { stageToDeployTo = stage }
         println("Invoke Deploy for module: $project.name with stage to deploy to: $stageToDeployTo")
         commandLine 'sls', 'deploy', '--region' , 'eu-west-1', '--verbose', '--stage', "$stageToDeployTo"
-//        commandLine 'sls', 'deploy', '--region' , 'eu-west-1', '--verbose', '--package', '.serverless', '--stage', "$stageToDeployTo"
     }
 
     /**
