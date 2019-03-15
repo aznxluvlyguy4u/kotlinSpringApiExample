@@ -1,9 +1,8 @@
 package com.oceanpremium.api.usecase
 
+import com.oceanpremium.api.entity.Token
+import com.oceanpremium.api.entity.User
 import com.oceanpremium.api.gateway.AuthGateway
-import com.oceanpremium.api.model.Token
-import com.oceanpremium.api.model.User
-import com.oceanpremium.api.util.Mockable
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -15,7 +14,6 @@ interface AuthUseCase {
 }
 
 @Service
-@Mockable
 class AuthUseCaseImpl(
 
     @Autowired

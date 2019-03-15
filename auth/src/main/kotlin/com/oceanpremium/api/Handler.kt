@@ -7,20 +7,10 @@ import com.amazonaws.serverless.proxy.spring.SpringBootLambdaContainerHandler
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler
 import org.slf4j.LoggerFactory
-import org.springframework.boot.SpringApplication
-import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.web.bind.annotation.RestController
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-
-@SpringBootApplication
-class ApiDriver : SpringBootServletInitializer()
-
-fun main(args: Array<String>) {
-    SpringApplication.run(ApiDriver::class.java, *args)
-}
 
 @RestController
 class Handler : RequestStreamHandler {
@@ -28,7 +18,6 @@ class Handler : RequestStreamHandler {
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
         private var handler: SpringBootLambdaContainerHandler<AwsProxyRequest, AwsProxyResponse>? = null
-
         init {
             try {
                 handler =

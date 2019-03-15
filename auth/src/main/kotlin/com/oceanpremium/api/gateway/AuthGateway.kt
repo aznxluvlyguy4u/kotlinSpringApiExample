@@ -1,7 +1,6 @@
 package com.oceanpremium.api.gateway
 
-import com.oceanpremium.api.model.User
-import com.oceanpremium.api.util.Mockable
+import com.oceanpremium.api.entity.User
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -10,7 +9,6 @@ interface AuthGateway {
 }
 
 @Component
-@Mockable
 class AuthGatewayImpl : AuthGateway {
 
     companion object {

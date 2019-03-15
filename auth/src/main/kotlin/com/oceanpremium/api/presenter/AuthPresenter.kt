@@ -1,6 +1,7 @@
 package com.oceanpremium.api.presenter
 
-import com.oceanpremium.api.model.*
+import com.oceanpremium.api.entity.Response
+import com.oceanpremium.api.entity.User
 import com.oceanpremium.api.usecase.AuthUseCase
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.format.annotation.DateTimeFormat

@@ -27,7 +27,7 @@ provider:
 
 # The service name which is used to create the stack
 service:
-  name: ocean-premium
+  name: ocean-premium-${self:provider.stage}
 
 # Custom variables
 custom:

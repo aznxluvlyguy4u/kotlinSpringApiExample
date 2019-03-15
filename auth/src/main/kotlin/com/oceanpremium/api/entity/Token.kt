@@ -1,8 +1,8 @@
-package com.oceanpremium.api.model
+package com.oceanpremium.api.entity
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class Token(
+class Token(
     @field:JsonProperty("accessToken")
     val accessToken: String,
     @field:JsonProperty("refreshToken")
@@ -11,6 +11,4 @@ data class Token(
     val expires: Long,
     @field:JsonProperty("emailAddress")
     val emailAddress: String
-) {
-
-}
+)
