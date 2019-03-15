@@ -1,4 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.transformers.PropertiesFileTransformer
+apply plugin: 'org.sonarqube'
 
 buildscript {
     ext {
