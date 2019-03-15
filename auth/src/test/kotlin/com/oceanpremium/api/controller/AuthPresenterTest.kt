@@ -2,122 +2,127 @@ package com.oceanpremium.api.controller
 
 import com.oceanpremium.api.ApiDriver
 import com.oceanpremium.api.entity.Response
-import io.kotlintest.specs.FeatureSpec
+import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.*
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.TestContextManager
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.runner.RunWith
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.junit4.SpringRunner
+import com.oceanpremium.api.entity.Token
+import com.oceanpremium.api.entity.User
+import com.oceanpremium.api.util.ObjectMapperConfig
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
-
-@SpringBootTest(classes = [ApiDriver::class],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles(value = ["test"])
-@DirtiesContext
-class AuthPresenterTest : FeatureSpec() {
+@RunWith(SpringRunner::class)
+@SpringBootTest(classes = [ApiDriver::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class AuthPresenterTest {
 
     private val endpoint = "/api/v1/auth"
+
+    private val mapper = ObjectMapperConfig.mapper
 
     @Autowired
     val restTemplate: TestRestTemplate? = null
 
-    override fun beforeAll() {
-        TestContextManager(this.javaClass).prepareTestInstance(this)
+    /**
+     * Create auth.
+     */
+    @Test
+    fun createAuthTest() {
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+
+        val mockedUser = User("mockedUser", "mocked@address.com")
+
+        val mockedToken = Token(
+            "access-token-test",
+            "refresh-token-test",
+            LocalDateTime.now().atZone(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()!!,
+            mockedUser.emailAddress!!
+        )
+
+        val entity = HttpEntity(mapper.writeValueAsString(mockedUser), headers)
+
+        val response = restTemplate?.postForEntity(
+            endpoint,
+            entity,
+            Response::class.java
+        )
+
+        assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.OK.value()) // Needs to be 201 CREATED
+
+        val responseBody = response?.body as Response
+        val message = responseBody.message as Map<*,*>
+
+        val token = mapper.convertValue(message, Token::class.java)
+
+        assertThat(token.accessToken).isEqualTo(mockedToken.accessToken)
+        assertThat(token.refreshToken).isEqualTo(mockedToken.refreshToken)
+        assertThat(token.emailAddress).isEqualTo(mockedToken.emailAddress)
     }
 
-    init {
+    /**
+     * Get auth by date.
+     */
+    @Test
+    fun getAuthByDateTest() {
+        val date = "2001-01-01"
+        val dateQueryParameter = "date"
 
-        // CREATE
-        feature("CREATE - POST /api/v1/auth ") {
-            scenario("Assert the return of a newly created resource") {
+        val response = restTemplate?.getForEntity("$endpoint?$dateQueryParameter=$date", Response::class.java)
+        assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.OK.value())
 
-                val headers = HttpHeaders()
-                headers.contentType = MediaType.APPLICATION_JSON
+        val data = response?.body as Response
+        assertThat(data.message).isEqualTo("getAuths with params: $date")
+    }
 
-                val entity = HttpEntity("{\"name\": \"foobar\", \"emailAddress\": \"foobar@example.com\"}", headers)
+    /**
+     * Get auth by id.
+     */
+    @Test
+    fun getAuthByIdTest() {
+        val id = "123"
 
-                val response = restTemplate?.postForEntity(
-                    endpoint,
-                    entity,
-                    Response::class.java
-                )
+        val response = restTemplate?.getForEntity("$endpoint/$id", Response::class.java)
+        assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.OK.value())
 
-                response?.statusCodeValue shouldBe 200 // Needs to be 201 CREATED
+        val data = response?.body as Response
+        assertThat(data.message).isEqualTo("getAuthById: $id")
+    }
 
-                val data = response?.body as Response
+    /**
+     * Update auth.
+     */
+    @Test
+    fun updateAuthByIdTest() {
+        val id = "123"
 
-                val token = data.message as Map<*, *>
-                token["accessToken"] shouldEqual "access-token-test"
-                token["refreshToken"] shouldEqual "refresh-token-test"
-                token["emailAddress"] shouldEqual "foobar@example.com"
-            }
-        }
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
 
-        // READ
-        feature("READ - GET /api/v1/auth ") {
-            /**
-             * response
-             * {
-                "name": "foobar",
-                "emailAddress": "foobar@example.com"
-                }
-             */
-            scenario("Assert getAll with date filter returns resource by supplied date filter") {
-                val date = "2001-01-01"
-                val response = restTemplate?.getForEntity("$endpoint?date=$date", Response::class.java)
+        val mockedUser = User("mockedUser", "mocked@address.com")
 
-                response?.statusCodeValue shouldBe 200
+        val entity = HttpEntity(mapper.writeValueAsString(mockedUser), headers)
+        val response = restTemplate?.exchange("$endpoint/$id", HttpMethod.PUT, entity, Response::class.java, id)
+        assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.OK.value())
 
-                val data = response?.body as Response
+        val data = response?.body as Response
+        assertThat(data.message).isEqualTo("updateAuthById: 123Update, ${mockedUser.name}!")
+    }
 
-                data.message shouldEqual "getAuths with params: $date"
-            }
+    /**
+     * Delete auth.
+     */
+    @Test
+    fun deleteAuthByIdTest() {
+        val id = "123"
+        val response = restTemplate?.exchange("$endpoint/$id", HttpMethod.DELETE, null, Response::class.java, id)
+        assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.OK.value())
 
-            scenario("Assert getbyId is returnsresource with requested id") {
-                val id = "123"
-                val response = restTemplate?.getForEntity("$endpoint/$id", Response::class.java)
-
-                response?.statusCodeValue shouldBe 200
-
-                val data = response?.body as Response
-
-                data.message shouldEqual "getAuthById: $id"
-            }
-        }
-
-        // UPDATE
-        feature("UPDATE - PUT /api/v1/auth/{id} ") {
-            scenario("Assert updateByID returns an updated resource") {
-                val id = "123"
-                val headers = HttpHeaders()
-                headers.contentType = MediaType.APPLICATION_JSON
-
-                val name = "foobar"
-                val emailAddress = "foobar@example.com"
-                val entity = HttpEntity("{\"name\": \"$name\", \"emailAddress\": \"$emailAddress\"}", headers)
-                val response = restTemplate?.exchange("$endpoint/$id", HttpMethod.PUT, entity, Response::class.java, id)
-
-                response?.statusCodeValue shouldBe 200
-                val data = response?.body as Response
-
-                data.message shouldEqual "updateAuthById: 123Update, $name!"
-            }
-        }
-
-        // DELETE
-        feature("DELETE - DELETE /api/v1/auth/{id} ") {
-            scenario("Assert deleteByID returns an empty resource") {
-                val id = "123"
-                val response = restTemplate?.getForEntity("$endpoint/$id", Response::class.java)
-
-                response?.statusCodeValue shouldBe 200
-
-                val data = response?.body as Response
-
-                data.message shouldEqual "getAuthById: $id"
-            }
-        }
+        val data = response?.body as Response
+        assertThat(data.success).isEqualTo(true)
     }
 }

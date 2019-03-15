@@ -20,18 +20,20 @@ buildscript {
     }
 
     dependencies {
+
         /**
          * Kotlin library
          *
          * @link https://kotlinlang.org/docs/reference/compiler-plugins.html#all-open-compiler-plugin
          */
-        classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
-
+        classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
+        classpath("org.jetbrains.kotlin:kotlin-noarg:${kotlinVersion}")
+        
         // Spring
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
         classpath "io.spring.gradle:dependency-management-plugin:1.0.3.RELEASE"
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
 
         // Shaded jar
         classpath "com.github.jengelman.gradle.plugins:shadow:${shadowVersion}"
@@ -102,6 +104,7 @@ allprojects {
         implementation('io.symphonia:lambda-logging:1.0.3')
 
         // Spring test - test framework
+        testCompile("org.jsmart:zerocode-rest-bdd:1.2.11")
         testCompile("org.springframework.boot:spring-boot-starter-test")
         testCompile 'junit:junit:4.12'
         testCompile 'io.kotlintest:kotlintest:1.3.5'
@@ -169,6 +172,26 @@ allprojects {
         if (project.hasProperty('stage')) { stageToDeployTo = stage }
         println("Invoke Deploy for module: $project.name with stage to deploy to: $stageToDeployTo")
         commandLine 'sls', 'deploy', '--region' , 'eu-west-1', '--verbose', '--stage', "$stageToDeployTo"
+    }
+
+    //noinspection GroovyAssignabilityCheck
+    task integrationTests(type: Test) {
+        delete 'target/'
+        systemProperty 'zerocode.junit', 'gen-smart-charts-csv-reports'
+        include 'integrationtests/TestGetOperations.class'
+        include 'integrationtests/TestPatchOperations.class'
+        include 'integrationtests/TestPostOperations.class'
+
+        testLogging {
+            showStandardStreams = true
+        }
+    }
+
+    //noinspection GroovyAssignabilityCheck
+    task cleanAll() {
+        delete 'target/'
+        delete 'build/'
+        delete 'out/'
     }
 }
 

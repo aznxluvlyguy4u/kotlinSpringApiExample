@@ -4,11 +4,11 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 class Token(
     @field:JsonProperty("accessToken")
-    val accessToken: String,
+    var accessToken: String?,
     @field:JsonProperty("refreshToken")
-    val refresToken: String,
+    var refreshToken: String?,
     @field:JsonProperty("expires")
-    val expires: Long,
+    var expires: Long?,
     @field:JsonProperty("emailAddress")
-    val emailAddress: String
+    var emailAddress: String?
 )
