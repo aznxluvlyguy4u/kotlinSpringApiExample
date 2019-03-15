@@ -1,4 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.transformers.PropertiesFileTransformer
+
 apply plugin: 'org.sonarqube'
 
 buildscript {
@@ -30,7 +31,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
         classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
         classpath("org.jetbrains.kotlin:kotlin-noarg:${kotlinVersion}")
-        
+
         // Spring
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
         classpath "io.spring.gradle:dependency-management-plugin:1.0.3.RELEASE"
@@ -51,6 +52,7 @@ allprojects {
     apply plugin: 'io.spring.dependency-management'
     apply plugin: 'com.github.johnrengelman.shadow'
     apply plugin: 'org.springframework.boot'
+    apply plugin: "jacoco"
 
     group = 'com.oceanpremium'
     version = '0.0.1-SNAPSHOT'
@@ -159,6 +161,14 @@ allprojects {
 
     assemble.dependsOn = [shadowJar, bootJar]
 
+    jacocoTestReport {
+        group = "Reporting"
+        reports {
+            xml.enabled true
+            csv.enabled false
+        }
+    }
+    
     /**
      * Tasks to deploy a serverless function module.
      */
@@ -173,26 +183,6 @@ allprojects {
         println("Invoke Deploy for module: $project.name with stage to deploy to: $stageToDeployTo")
         commandLine 'sls', 'deploy', '--region' , 'eu-west-1', '--verbose', '--stage', "$stageToDeployTo"
     }
-
-    //noinspection GroovyAssignabilityCheck
-    task integrationTests(type: Test) {
-        delete 'target/'
-        systemProperty 'zerocode.junit', 'gen-smart-charts-csv-reports'
-        include 'integrationtests/TestGetOperations.class'
-        include 'integrationtests/TestPatchOperations.class'
-        include 'integrationtests/TestPostOperations.class'
-
-        testLogging {
-            showStandardStreams = true
-        }
-    }
-
-    //noinspection GroovyAssignabilityCheck
-    task cleanAll() {
-        delete 'target/'
-        delete 'build/'
-        delete 'out/'
-    }
 }
 
 test {
@@ -204,6 +194,7 @@ test {
         testLogging.showStandardStreams = true
     }
 }
+
 
 dependencies {
     // Register every gradle module in the top-level project dependencies list
