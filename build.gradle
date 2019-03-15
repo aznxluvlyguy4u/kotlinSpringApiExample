@@ -169,10 +169,6 @@ allprojects {
         println("Invoke Deploy for module: $project.name with stage to deploy to: $stageToDeployTo")
         commandLine 'sls', 'deploy', '--region' , 'eu-west-1', '--verbose', '--stage', "$stageToDeployTo"
     }
-
-    task wrapper(type: Wrapper) {
-        gradleVersion = '4.10'
-    }
 }
 
 dependencies {
