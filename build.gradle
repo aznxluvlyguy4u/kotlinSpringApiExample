@@ -172,6 +172,16 @@ allprojects {
     }
 }
 
+test {
+    reports {
+        junitXml.enabled = true
+        html.enabled = true
+        reports.junitXml.destination = file("$buildDir/xml")
+        reports.html.destination = file("$buildDir/html")
+        testLogging.showStandardStreams = true
+    }
+}
+
 dependencies {
     // Register every gradle module in the top-level project dependencies list
     compile project(':core')
