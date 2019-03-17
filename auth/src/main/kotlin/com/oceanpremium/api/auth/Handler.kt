@@ -1,4 +1,4 @@
-package com.oceanpremium.api
+package com.oceanpremium.api.auth
 
 import com.amazonaws.serverless.exceptions.ContainerInitializationException
 import com.amazonaws.serverless.proxy.model.AwsProxyRequest
@@ -7,11 +7,30 @@ import com.amazonaws.serverless.proxy.spring.SpringBootLambdaContainerHandler
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler
 import org.slf4j.LoggerFactory
+import org.springframework.boot.SpringApplication
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.web.bind.annotation.RestController
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 
+/**
+ * The main application entry point that spins up the API.
+ */
+@SpringBootApplication
+class Driver : SpringBootServletInitializer() {
+    companion object {
+        @JvmStatic
+        fun main(args: Array<String>) {
+            SpringApplication.run(Driver::class.java, *args)
+        }
+    }
+}
+
+/**
+ * The AWS server-less main entry point that is called when function is triggered.
+ */
 @RestController
 class Handler : RequestStreamHandler {
 
@@ -21,7 +40,7 @@ class Handler : RequestStreamHandler {
         init {
             try {
                 handler =
-                    SpringBootLambdaContainerHandler.getAwsProxyHandler(ApiDriver::class.java)
+                    SpringBootLambdaContainerHandler.getAwsProxyHandler(Driver::class.java)
             } catch (e: ContainerInitializationException) {
 
                 e.printStackTrace()
@@ -41,7 +60,6 @@ class Handler : RequestStreamHandler {
             e.printStackTrace()
             logger.error(e.message)
         } finally {
-            // just in case it wasn't closed by the mapper
             outputStream.close()
         }
     }

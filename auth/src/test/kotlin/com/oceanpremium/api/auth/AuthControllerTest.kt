@@ -1,7 +1,9 @@
-package com.oceanpremium.api.controller
+package com.oceanpremium.api.auth
 
-import com.oceanpremium.api.ApiDriver
-import com.oceanpremium.api.entity.Response
+import com.oceanpremium.api.core.util.ObjectMapperConfig
+import com.oceanpremium.api.core.model.Response
+import com.oceanpremium.api.core.model.Token
+import com.oceanpremium.api.core.model.User
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -10,15 +12,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.runner.RunWith
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit4.SpringRunner
-import com.oceanpremium.api.entity.Token
-import com.oceanpremium.api.entity.User
-import com.oceanpremium.api.util.ObjectMapperConfig
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 @RunWith(SpringRunner::class)
-@SpringBootTest(classes = [ApiDriver::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class AuthPresenterTest {
+@SpringBootTest( webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class AuthControllerTest {
 
     private val endpoint = "/api/v1/auth"
 

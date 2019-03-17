@@ -1,28 +1,2 @@
 version = '0.0.1'
 
-/**
- * The repositories needed for this module.
- */
-repositories {
-    mavenCentral()
-}
-
-/**
- * Jar configuration, for the fatJar task to be used.
- */
-jar {
-    manifest {
-        attributes "Main-Class": "com.oceanpremium.api.ApiDriver"
-    }
-
-    from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-}
-
-/**
- * The module specific dependencies.
- */
-dependencies {
-
-}

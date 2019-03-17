@@ -1,6 +1,10 @@
 import com.github.jengelman.gradle.plugins.shadow.transformers.PropertiesFileTransformer
 
 apply plugin: 'org.sonarqube'
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'kotlin'
+apply plugin: 'jacoco'
+apply plugin: 'org.springframework.boot'
 
 buildscript {
     ext {
@@ -21,7 +25,6 @@ buildscript {
     }
 
     dependencies {
-
         /**
          * Kotlin library
          *
@@ -44,15 +47,25 @@ buildscript {
     }
 }
 
+group = 'com.oceanpremium'
+version = '0.0.1-SNAPSHOT'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 allprojects {
     apply plugin: 'idea'
     apply plugin: 'kotlin'
-    apply plugin: "kotlin-spring" // instead of "kotlin-allopen"
+    apply plugin: 'kotlin-spring' // instead of "kotlin-allopen"
     apply plugin: 'kotlinx-serialization'
+    apply plugin: 'kotlin-noarg'
     apply plugin: 'io.spring.dependency-management'
-    apply plugin: 'com.github.johnrengelman.shadow'
     apply plugin: 'org.springframework.boot'
-    apply plugin: "jacoco"
+    apply plugin: 'com.github.johnrengelman.shadow'
 
     group = 'com.oceanpremium'
     version = '0.0.1-SNAPSHOT'
@@ -68,62 +81,61 @@ allprojects {
         jcenter()
         mavenLocal()
         mavenCentral()
+        maven { url 'https://dl.bintray.com/konrad-kaminski/maven' }
+        maven { setUrl('https://plugins.gradle.org/m2/') }
     }
 
+    dependencyManagement {
+        imports { mavenBom("org.springframework.boot:spring-boot-dependencies:${springBootVersion}") }
+    }
+
+    springBoot { mainClassName = "com.oceanpremium.api.${project.name}.Driver" }
+        
     dependencies {
-        // Kotlin - Library
-        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-        implementation("org.jetbrains.kotlin:kotlin-reflect")
-
-        // Jackson - JSON Serialization / Deserialization
-        implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonVersion}"
-        implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
-
-        // Spring Starter - Locally running the functions for local development
-        compile("org.springframework.boot:spring-boot-starter-web") {
+        // Spring Starter - Locally running the functions for local development - excluded from deploy-able jar
+        compile('org.springframework.boot:spring-boot-starter-web') {
             // exclude Tomcat web server, this project will use Jetty webserver
             exclude module: "spring-boot-starter-tomcat"
         }
 
-        // Spring - Jetty - Web server, provisions project with Jetty web server instead of (default) Tomcat web server, for local development
+        // Spring - Jetty - Web server, provisions project with Jetty web server instead of (default) Tomcat web server,
+        // for local development - excluded from deploy-able jar
         compile("org.springframework.boot:spring-boot-starter-jetty")
 
-        // Spring boot - dev tools - allows hotswapping
+        // Spring boot - dev tools - allows hot swapping - excluded from deploy-able jar
         compile("org.springframework.boot:spring-boot-devtools")
 
-        /**
-         * Spring - Actuator - enables endpoint mapping overview in IntelliJ.
-         * More info: https://blog.jetbrains.com/idea/2018/10/spring-boot-endpoints-and-kotlin/
-         */
-        compile("org.springframework.boot:spring-boot-starter-actuator")
+        // Kotlin - Library
+        compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+        compile("org.jetbrains.kotlin:kotlin-reflect")
 
-        // AWS
-
-        // Serverless - Java container for Spring
-        implementation('com.amazonaws.serverless:aws-serverless-java-container-spring:1.3.1')
-
-        // Lambda-logging - AWS logging
-        implementation('io.symphonia:lambda-logging:1.0.3')
+        // Jackson - JSON Serialization / Deserialization
+        compile "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonVersion}"
+        compile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
 
         // Spring test - test framework
-        testCompile("org.jsmart:zerocode-rest-bdd:1.2.11")
         testCompile("org.springframework.boot:spring-boot-starter-test")
         testCompile 'junit:junit:4.12'
         testCompile 'io.kotlintest:kotlintest:1.3.5'
+
+        // AWS
+        // Lambda-logging - AWS logging
+        compile('io.symphonia:lambda-logging:1.0.3')
+
+        // Lambda - Java container for Spring
+        compile('com.amazonaws.serverless:aws-serverless-java-container-spring:1.3.1')
     }
 
     /**
-     * Configure the shaded jar with custom settings, like the main attribute class.
+     * Configure the shaded jar with custom settings, like for example the main attribute class.
      */
     jar {
-        manifest {
-            attributes(
-                    'Main-Class' : 'com.oceanpremium.api.ApiDriver',
-                    'Start-Class': 'com.oceanpremium.api.Handler'
-            )
-        }
-
+        enabled = true
         from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    }
+
+    bootJar {
+        enabled = true
     }
 
     /**
@@ -156,11 +168,15 @@ allprojects {
      * it is used ONLY for LOCAL development.
      */
     configurations {
+        runtime.exclude module: "spring-boot-starter-web"
+        runtime.exclude module: "spring-boot-starter-test"
+        runtime.exclude module: "spring-boot-devtools"
+        runtime.exclude module: "spring-boot-starter-jetty"
+        runtime.exclude module: "junit"
+        runtime.exclude module: "kotlintest"
         runtime.exclude module: "sonarqube-gradle-plugin"
     }
-
-    assemble.dependsOn = [shadowJar, bootJar]
-
+    
     jacocoTestReport {
         group = "Reporting"
         reports {
@@ -168,9 +184,9 @@ allprojects {
             csv.enabled false
         }
     }
-    
+
     /**
-     * Tasks to deploy a serverless function module.
+     * Tasks to deploy a server-less function module.
      */
     //noinspection GroovyAssignabilityCheck
     task deploy(type: Exec) {
@@ -179,8 +195,7 @@ allprojects {
         description 'Deploy serverless function to remote'
 
         def stageToDeployTo = "dev"
-        if (project.hasProperty('stage')) { stageToDeployTo = stage }
-        println("Invoke Deploy for module: $project.name with stage to deploy to: $stageToDeployTo")
+        if (project.hasProperty('stage')) { stageToDeployTo = property('stage') }
         commandLine 'sls', 'deploy', '--region' , 'eu-west-1', '--verbose', '--stage', "$stageToDeployTo"
     }
 }
@@ -195,6 +210,12 @@ test {
     }
 }
 
+repositories {
+    jcenter()
+    mavenLocal()
+    mavenCentral()
+    maven { url 'https://dl.bintray.com/konrad-kaminski/maven' }
+}
 
 dependencies {
     // Register every gradle module in the top-level project dependencies list

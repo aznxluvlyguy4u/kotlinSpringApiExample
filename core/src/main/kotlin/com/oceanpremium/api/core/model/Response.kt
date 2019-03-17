@@ -1,4 +1,4 @@
-package com.oceanpremium.api.entity
+package com.oceanpremium.api.core.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
 

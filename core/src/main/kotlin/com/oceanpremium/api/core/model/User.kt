@@ -1,4 +1,4 @@
-package com.oceanpremium.api.entity
+package com.oceanpremium.api.core.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
@@ -7,4 +7,8 @@ class User(
     var name: String?,
     @field:JsonProperty("emailAddress")
     var emailAddress: String?
-)
+) {
+    override fun toString(): String {
+        return "name: $name, emailAddress: $emailAddress"
+    }
+}

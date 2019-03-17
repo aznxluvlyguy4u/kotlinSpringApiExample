@@ -1,5 +1,6 @@
-package com.oceanpremium.api.util
+package com.oceanpremium.api.core.util
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
@@ -11,10 +12,11 @@ class ObjectMapperConfig {
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
 
-        // Setup an object mapper and provision it with additional models, such as: Kotlin and LocalDate
-        val mapper = jacksonObjectMapper()
+        // Setup an object mapper and provision it with additional modules, such as: Kotlin and LocalDate
+        val mapper: ObjectMapper = jacksonObjectMapper()
             .registerModule(KotlinModule())
             .registerModule(JavaTimeModule())
+
             /**
              * See for more info:
              *
@@ -26,6 +28,7 @@ class ObjectMapperConfig {
          *
          */
         @Throws(Exception::class)
+        @Suppress("unused")
         fun <T> mapToObject(request: Map<String, Any>, classType: Class<T>): Any {
             // Parse the input body to a map
             try {

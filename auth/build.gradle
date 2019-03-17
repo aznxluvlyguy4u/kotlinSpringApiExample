@@ -1,15 +1,10 @@
 version = '0.0.1-SNAPSHOT'
 
 /**
- * The repositories needed for this module.
- */
-repositories {
-    mavenCentral()
-}
-
-/**
  * The module specific dependencies.
  */
 dependencies {
+    
+    // This module relies on the following sub-modules
     compile project(':core')
 }
