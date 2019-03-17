@@ -8,9 +8,9 @@ provider:
   runtime: java8
   # The S3 Bucket used for deploying the archive
   deploymentBucket: ocean-prem-test
-  # The RAM size used by the function
-  memorySize: 1024
-  # The default timeout (30 seconds)
+  # The RAM size (MB) used by the function
+  memorySize: 256
+  # The default timeout (seconds)
   timeout: 30
 
   # The stage to deploy, stages:(dev | test |  stage | prod) - defaults to dev
@@ -27,7 +27,8 @@ provider:
 
 # The service name which is used to create the stack
 service:
-  name: ocean-premium-${self:provider.stage}
+  name: ocean-premium
+  #name: ocean-premium-${self:provider.stage}
 
 # Custom variables
 custom:
@@ -45,11 +46,30 @@ package:
 
 # The functions defined by HTTP verb / path and parameters (CRUD)
 functions:
+  # HEAD
+  exists-auth:
+    # The function handler to be called for this endpoint
+    handler: com.oceanpremium.api.auth.Handler::handleRequest
+    name: exists-auth
+    #name: exists-auth-${self:provider.stage}
+    events:
+      - http:
+          # The URI of the endpoint
+          path: /${self:custom.apiPathPrefix}/auth
+          # The HTTP verb
+          method: head
+          # Additional endpoint configurations like enabling CORS
+          cors: true
+          # The default headers mandatory for this endpoint
+          headers:
+            - Content-Type
+          allowCredentials: false
   # CREATE
   create-auth:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.auth.Handler::handleRequest
-    name: create-auth-${self:provider.stage}
+    name: create-auth
+    #name: create-auth-${self:provider.stage}
     events:
       - http:
           # The URI of the endpoint
@@ -66,7 +86,8 @@ functions:
   retrieve-auth-by-id:
     # The function handler to be called for this endpoint
     handler:  com.oceanpremium.api.auth.Handler::handleRequest
-    name: retrieve-auth-by-id-${self:provider.stage}
+    name: retrieve-auth-by-id
+    #name: retrieve-auth-by-id-${self:provider.stage}
     events:
       - http:
           # The URI of the endpoint with a placeholder for the identifier as a PATH parameter
@@ -88,7 +109,8 @@ functions:
   retrieve-all-auth:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.auth.Handler::handleRequest
-    name: retrieve-all-auths-${self:provider.stage}
+    name: retrieve-all-auths
+    #name: retrieve-all-auths-${self:provider.stage}
     events:
       - http:
           # The URI of the endpoint
@@ -104,7 +126,8 @@ functions:
   update-auth-by-id:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.auth.Handler::handleRequest
-    name: update-auth-by-id-${self:provider.stage}
+    name: update-auth-by-id
+    #name: update-auth-by-id-${self:provider.stage}
     events:
       - http:
           # The URI of the endpoint with a placeholder for the identifier as a PATH parameter
@@ -126,7 +149,8 @@ functions:
   delete-auth-by-id:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.auth.Handler::handleRequest
-    name: delete-auth-by-id-${self:provider.stage}
+    name: delete-auth-by-id
+    #name: delete-auth-by-id-${self:provider.stage}
     events:
       - http:
           # The URI of the endpoint with a placeholder for the identifier as a PATH parameter

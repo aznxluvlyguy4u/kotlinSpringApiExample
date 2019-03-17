@@ -24,6 +24,19 @@ class AuthController(@Autowired private val createAuthUseCase: CreateAuthUseCase
         private val logger = LoggerFactory.getLogger(this::class.java)
     }
 
+    /***
+     * Convenience endpoint to check if the endpoint exists and for CloudWatch to keep the lambda function warm,
+     * by calling at timed intervals, thus minimizes cold starts to a certain point, as server-less containers are disposed
+     * after an arbitrary period.
+     */
+    @RequestMapping(method = [RequestMethod.HEAD])
+    @ResponseBody
+    fun existsAuth(): Response {
+        logger.debug("HEAD auth")
+
+        return Response(true, null)
+    }
+
     @PostMapping
     @ResponseBody
     fun createAuth(@RequestBody user: User): Response {
