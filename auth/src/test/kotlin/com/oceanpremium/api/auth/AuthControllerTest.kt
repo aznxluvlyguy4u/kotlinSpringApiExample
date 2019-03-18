@@ -6,17 +6,17 @@ import com.oceanpremium.api.core.model.Token
 import com.oceanpremium.api.core.model.User
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.runner.RunWith
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.test.context.junit4.SpringRunner
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 @RunWith(SpringRunner::class)
-@SpringBootTest( webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class AuthControllerTest {
 
     private val endpoint = "/api/v1/auth"
@@ -75,7 +75,7 @@ class AuthControllerTest {
         assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.OK.value())
 
         val data = response?.body as Response
-        assertThat(data.message).isEqualTo("getAuths with params: $date")
+        assertThat(data.message).isNotNull
     }
 
     /**
@@ -89,7 +89,7 @@ class AuthControllerTest {
         assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.OK.value())
 
         val data = response?.body as Response
-        assertThat(data.message).isEqualTo("getAuthById: $id")
+        assertThat(data.message).isEqualTo("getAuths with id: $id")
     }
 
     /**

@@ -9,7 +9,7 @@ provider:
   # The S3 Bucket used for deploying the archive
   deploymentBucket: ocean-prem-test
   # The RAM size (MB) used by the function
-  memorySize: 256
+  memorySize: 512
   # The default timeout (seconds)
   timeout: 30
 

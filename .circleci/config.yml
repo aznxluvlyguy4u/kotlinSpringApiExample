@@ -12,7 +12,7 @@ jobs:
       # More info: https://circleci.com/docs/2.0/language-java/
       - image: circleci/openjdk:8-jdk
 
-      # Provision Node for the serverless package, to be able to deploy the functions
+      # Provision Node for the server-less package, to be able to deploy the functions
       # More info: https://circleci.com/docs/2.0/language-javascript/
       - image: circleci/node:8
 
@@ -55,7 +55,8 @@ jobs:
           name: Save test results
           command: |
             mkdir -p ~/junit/
-            find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/junit/ \;
+            find . -type f -regex ".*/build/.*-reports/.*" -exec cp {} ~/junit/ \;
+            find . -type f -regex ".*/build/test-results/.*" -exec cp {} ~/junit/ \;
           when: always
       - store_test_results:
           path: ~/junit
@@ -63,7 +64,9 @@ jobs:
           path: ~/junit
 
       # Finally, run sonar scanner and let scanner publish scan results to sonar host
-      - run:  gradle sonarqube -x test --info -Dsonar.login=$sonar_token -Dsonar.host.url=$sonar_host_url -Dsonar.projectKey=$sonar_project_key
+      - run:
+          name: Do sonarqube analysis and publish scan results
+          command: gradle sonarqube -x test --info -Dsonar.login=$sonar_token -Dsonar.host.url=$sonar_host_url -Dsonar.projectKey=$sonar_project_key
 
   # DEPLOY FEATURE
   deploy-feature:

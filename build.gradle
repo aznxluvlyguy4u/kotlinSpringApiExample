@@ -66,6 +66,7 @@ allprojects {
     apply plugin: 'io.spring.dependency-management'
     apply plugin: 'org.springframework.boot'
     apply plugin: 'com.github.johnrengelman.shadow'
+    apply plugin: 'jacoco'
 
     group = 'com.oceanpremium'
     version = '0.0.1-SNAPSHOT'
@@ -124,6 +125,9 @@ allprojects {
 
         // Lambda - Java container for Spring
         compile('com.amazonaws.serverless:aws-serverless-java-container-spring:1.3.1')
+
+        // OkHttp - Http client
+        compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.14.0'
     }
 
     /**
@@ -167,15 +171,15 @@ allprojects {
      * because, it is NOT need when creating an archive for deploying a Function to the cloud,
      * it is used ONLY for LOCAL development.
      */
-    configurations {
-        runtime.exclude module: "spring-boot-starter-web"
-        runtime.exclude module: "spring-boot-starter-test"
-        runtime.exclude module: "spring-boot-devtools"
-        runtime.exclude module: "spring-boot-starter-jetty"
-        runtime.exclude module: "junit"
-        runtime.exclude module: "kotlintest"
-        runtime.exclude module: "sonarqube-gradle-plugin"
-    }
+//    configurations {
+//        runtime.exclude module: "spring-boot-starter-web"
+//        runtime.exclude module: "spring-boot-starter-test"
+//        runtime.exclude module: "spring-boot-devtools"
+//        runtime.exclude module: "spring-boot-starter-jetty"
+//        runtime.exclude module: "junit"
+//        runtime.exclude module: "kotlintest"
+//        runtime.exclude module: "sonarqube-gradle-plugin"
+//    }
     
     jacocoTestReport {
         group = "Reporting"
@@ -184,6 +188,17 @@ allprojects {
             csv.enabled false
         }
     }
+
+    test {
+        reports {
+            junitXml.enabled = true
+            html.enabled = true
+            reports.junitXml.destination = file("$buildDir/xml")
+            reports.html.destination = file("$buildDir/html")
+            testLogging.showStandardStreams = true
+        }
+    }
+
 
     /**
      * Tasks to deploy a server-less function module.
@@ -194,9 +209,32 @@ allprojects {
         dependsOn("shadowJar")
         description 'Deploy serverless function to remote'
 
+        /**
+         * Note that: we don't want the following dependency in our shadowedJar
+         * because it is NOT need when creating an archive for deploying a Function to the cloud,
+         * it is used ONLY for LOCAL development.
+         */
+        configurations {
+            runtime.exclude module: "spring-boot-starter-web"
+            runtime.exclude module: "spring-boot-starter-test"
+            runtime.exclude module: "spring-boot-devtools"
+            runtime.exclude module: "spring-boot-starter-jetty"
+            runtime.exclude module: "junit"
+            runtime.exclude module: "kotlintest"
+            runtime.exclude module: "sonarqube-gradle-plugin"
+        }
+        
         def stageToDeployTo = "dev"
         if (project.hasProperty('stage')) { stageToDeployTo = property('stage') }
         commandLine 'sls', 'deploy', '--region' , 'eu-west-1', '--verbose', '--stage', "$stageToDeployTo"
+    }
+}
+
+jacocoTestReport {
+    group = "Reporting"
+    reports {
+        xml.enabled true
+        csv.enabled false
     }
 }
 
