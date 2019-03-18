@@ -34,6 +34,8 @@ class AuthController(@Autowired private val createAuthUseCase: CreateAuthUseCase
     fun existsAuth(): Response {
         logger.debug("HEAD auth")
 
+        throw Exception("Test exception")
+
         return Response(true, null)
     }
 

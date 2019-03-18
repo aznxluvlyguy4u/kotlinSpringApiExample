@@ -6,25 +6,44 @@ import com.amazonaws.serverless.proxy.model.AwsProxyResponse
 import com.amazonaws.serverless.proxy.spring.SpringBootLambdaContainerHandler
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler
+import io.sentry.spring.SentryServletContextInitializer
 import org.slf4j.LoggerFactory
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.web.servlet.ServletContextInitializer
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
+import org.springframework.context.annotation.Bean
 import org.springframework.web.bind.annotation.RestController
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import org.springframework.web.servlet.HandlerExceptionResolver
 
 /**
  * The main application entry point that spins up the API.
  */
 @SpringBootApplication
 class Driver : SpringBootServletInitializer() {
+
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
             SpringApplication.run(Driver::class.java, *args)
         }
+    }
+
+    @Bean
+    fun sentryExceptionResolver(): HandlerExceptionResolver {
+        return io.sentry.spring.SentryExceptionResolver()
+    }
+
+    /**
+     * This should only be necessary in Spring Boot applications. "Classic" Spring
+     * should automatically load the `io.sentry.servlet.SentryServletContainerInitializer`.
+     */
+    @Bean
+    fun sentryServletContextInitializer(): ServletContextInitializer {
+        return SentryServletContextInitializer()
     }
 }
 
@@ -37,6 +56,7 @@ class Handler : RequestStreamHandler {
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
         private var handler: SpringBootLambdaContainerHandler<AwsProxyRequest, AwsProxyResponse>? = null
+
         init {
             try {
                 handler =
@@ -54,6 +74,7 @@ class Handler : RequestStreamHandler {
 
     @Throws(IOException::class)
     override fun handleRequest(inputStream: InputStream, outputStream: OutputStream, context: Context) {
+
         try {
             handler!!.proxyStream(inputStream, outputStream, context)
         } catch (e: ContainerInitializationException) {

@@ -12,9 +12,16 @@ buildscript {
         springBootVersion = '2.1.3.RELEASE'
         shadowVersion = '2.0.4' // Keep it to version 2.0.4 as this works on CI, lower/ higher (thus) other versions don't
         springCloudStarterVersion = '2.0.1.RELEASE'
-        jacksonVersion = "2.9.5"
+        jacksonVersion = '2.9.5'
         gradleCheckVersion = "3.2.1"
         sonarscannerVersion = '2.6.2'
+        okHttpVersion = '3.14.0'
+        sentryVersion = '1.7.22'
+        lamdaLoggingVersion = '1.0.3'
+        lambaSpringContainerVersion = '1.3.1'
+        jUnitVersion = '4.12'
+        kotlinTestVersion = '1.3.5'
+        springDependencyManagementVersion = '1.0.3.RELEASE'
     }
 
     repositories {
@@ -30,20 +37,22 @@ buildscript {
          *
          * @link https://kotlinlang.org/docs/reference/compiler-plugins.html#all-open-compiler-plugin
          */
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
-        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
-        classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
-        classpath("org.jetbrains.kotlin:kotlin-noarg:${kotlinVersion}")
+        classpath ("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+        classpath ("org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion")
+        classpath ("org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion")
+        classpath ("org.jetbrains.kotlin:kotlin-noarg:$kotlinVersion")
 
-        // Spring
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-        classpath "io.spring.gradle:dependency-management-plugin:1.0.3.RELEASE"
+        // Spring - gradle plugin
+        classpath ("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
 
-        // Shaded jar
-        classpath "com.github.jengelman.gradle.plugins:shadow:${shadowVersion}"
+        // Spring - dependency management plugin
+        classpath ("io.spring.gradle:dependency-management-plugin:$springDependencyManagementVersion")
 
-        // Sonar
-        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:$sonarscannerVersion"
+        // Shaded JAR
+        classpath ("com.github.jengelman.gradle.plugins:shadow:${shadowVersion}")
+
+        // Sonar - scanner
+        classpath ("org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:$sonarscannerVersion")
     }
 }
 
@@ -94,40 +103,44 @@ allprojects {
         
     dependencies {
         // Spring Starter - Locally running the functions for local development - excluded from deploy-able jar
-        compile('org.springframework.boot:spring-boot-starter-web') {
-            // exclude Tomcat web server, this project will use Jetty webserver
+        compile ("org.springframework.boot:spring-boot-starter-web") {
+            // exclude Tomcat web server, this project will use Jetty web server
             exclude module: "spring-boot-starter-tomcat"
         }
 
         // Spring - Jetty - Web server, provisions project with Jetty web server instead of (default) Tomcat web server,
         // for local development - excluded from deploy-able jar
-        compile("org.springframework.boot:spring-boot-starter-jetty")
+        compile ("org.springframework.boot:spring-boot-starter-jetty")
 
         // Spring boot - dev tools - allows hot swapping - excluded from deploy-able jar
-        compile("org.springframework.boot:spring-boot-devtools")
+        compile ("org.springframework.boot:spring-boot-devtools")
 
         // Kotlin - Library
-        compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-        compile("org.jetbrains.kotlin:kotlin-reflect")
+        compile ("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+        compile ("org.jetbrains.kotlin:kotlin-reflect")
 
         // Jackson - JSON Serialization / Deserialization
-        compile "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonVersion}"
-        compile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+        compile ("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+        compile ("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
 
         // Spring test - test framework
-        testCompile("org.springframework.boot:spring-boot-starter-test")
-        testCompile 'junit:junit:4.12'
-        testCompile 'io.kotlintest:kotlintest:1.3.5'
+        testCompile ("org.springframework.boot:spring-boot-starter-test")
+        testCompile ("junit:junit:$jUnitVersion")
+        testCompile ("io.kotlintest:kotlintest:$kotlinTestVersion")
 
-        // AWS
+        // AWS - provision the Spring Boot application with the AWS lambda container so it can run as an AWS lambda Function
+
         // Lambda-logging - AWS logging
-        compile('io.symphonia:lambda-logging:1.0.3')
+        compile ("io.symphonia:lambda-logging:$lamdaLoggingVersion")
 
         // Lambda - Java container for Spring
-        compile('com.amazonaws.serverless:aws-serverless-java-container-spring:1.3.1')
+        compile ("com.amazonaws.serverless:aws-serverless-java-container-spring:$lambaSpringContainerVersion")
 
         // OkHttp - Http client
-        compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.14.0'
+        compile ("com.squareup.okhttp3:okhttp:$okHttpVersion")
+
+        // Sentry.io - Error monitoring
+        compile ("io.sentry:sentry-spring:$sentryVersion")
     }
 
     /**
@@ -181,7 +194,7 @@ allprojects {
 //        runtime.exclude module: "kotlintest"
 //        runtime.exclude module: "sonarqube-gradle-plugin"
 //    }
-//    
+//
     jacocoTestReport {
         group = "Reporting"
         reports {
@@ -200,7 +213,6 @@ allprojects {
         }
     }
 
-
     /**
      * Tasks to deploy a server-less function module.
      */
@@ -210,23 +222,12 @@ allprojects {
         dependsOn("shadowJar")
         description 'Deploy serverless function to remote'
 
-        /**
-         * Note that: we don't want the following dependency in our shadowedJar
-         * because it is NOT need when creating an archive for deploying a Function to the cloud,
-         * it is used ONLY for LOCAL development.
-//         */
-//        configurations {
-//            runtime.exclude module: "spring-boot-starter-web"
-//            runtime.exclude module: "spring-boot-starter-test"
-//            runtime.exclude module: "spring-boot-devtools"
-//            runtime.exclude module: "spring-boot-starter-jetty"
-//            runtime.exclude module: "junit"
-//            runtime.exclude module: "kotlintest"
-//            runtime.exclude module: "sonarqube-gradle-plugin"
-//        }
-        
         def stageToDeployTo = "dev"
-        if (project.hasProperty('stage')) { stageToDeployTo = property('stage') }
+
+        if (project.hasProperty('stage')) {
+            stageToDeployTo = property('stage')
+        }
+
         commandLine 'sls', 'deploy', '--region' , 'eu-west-1', '--verbose', '--stage', "$stageToDeployTo"
     }
 }
