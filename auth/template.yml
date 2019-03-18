@@ -1,0 +1,115 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform:
+  - AWS::Serverless-2016-10-31
+
+# See here on setting up environment variables:
+# https://github.com/awslabs/aws-sam-cli/blob/develop/docs/advanced_usage.rst#lambda-environment-variables
+Resources: # CRUD
+  ExistsAuth:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Endpoint to utiluze to check if the resource exists
+      MemorySize: 512
+      Timeout: 30
+      Handler: com.oceanpremium.api.auth.Handler::handleRequest
+      Runtime: java8
+      Environment:
+        Variables:
+          SLACK_LOGGER_WEBHOOK: ""
+      CodeUri: build/libs/auth-0.0.1-SNAPSHOT-aws.jar
+      Events:
+        CreateSync:
+          Type: Api
+          Properties:
+            Path: /auth
+            Method: head
+  CreateAuth:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Create auth
+      MemorySize: 512
+      Timeout: 30
+      Handler: com.oceanpremium.api.auth.Handler::handleRequest
+      Runtime: java8
+      Environment:
+        Variables:
+          SLACK_LOGGER_WEBHOOK: ""
+      CodeUri: build/libs/auth-0.0.1-SNAPSHOT-aws.jar
+      Events:
+        CreateSync:
+          Type: Api
+          Properties:
+            Path: /auth
+            Method: post
+  RetrieveAuthById:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Retrieve auth by id
+      MemorySize: 512
+      Timeout: 30
+      Handler: com.oceanpremium.api.auth.Handler::handleRequest
+      Runtime: java8
+      Environment:
+        Variables:
+          SLACK_LOGGER_WEBHOOK: ""
+      CodeUri: build/libs/auth-0.0.1-SNAPSHOT-aws.jar
+      Events:
+        CreateSync:
+          Type: Api
+          Properties:
+            Path: /auth/{id}
+            Method: get
+  RetrieveAllAuths:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Retrieve all auths
+      MemorySize: 512
+      Timeout: 30
+      Handler: com.oceanpremium.api.auth.Handler::handleRequest
+      Runtime: java8
+      Environment:
+        Variables:
+          SLACK_LOGGER_WEBHOOK: ""
+      CodeUri: build/libs/auth-0.0.1-SNAPSHOT-aws.jar
+      Events:
+        CreateSync:
+          Type: Api
+          Properties:
+            Path: /auth
+            Method: get
+  UpdateAuthById:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Update auth by id
+      MemorySize: 512
+      Timeout: 30
+      Handler: com.oceanpremium.api.auth.Handler::handleRequest
+      Runtime: java8
+      Environment:
+        Variables:
+          SLACK_LOGGER_WEBHOOK: ""
+      CodeUri: build/libs/auth-0.0.1-SNAPSHOT-aws.jar
+      Events:
+        CreateSync:
+          Type: Api
+          Properties:
+            Path: /auth/{id}
+            Method: put
+  DeleteAuthById:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Delete auth by id
+      MemorySize: 512
+      Timeout: 30
+      Handler: com.oceanpremium.api.auth.Handler::handleRequest
+      Runtime: java8
+      Environment:
+        Variables:
+          SLACK_LOGGER_WEBHOOK: ""
+      CodeUri: build/libs/auth-0.0.1-SNAPSHOT-aws.jar
+      Events:
+        CreateSync:
+          Type: Api
+          Properties:
+            Path: /auth/{id}
+            Method: delete
