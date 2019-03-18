@@ -171,6 +171,7 @@ allprojects {
      * because, it is NOT need when creating an archive for deploying a Function to the cloud,
      * it is used ONLY for LOCAL development.
      */
+    //FIXME For now manually uncomment this block on manual deployment
 //    configurations {
 //        runtime.exclude module: "spring-boot-starter-web"
 //        runtime.exclude module: "spring-boot-starter-test"
@@ -180,7 +181,7 @@ allprojects {
 //        runtime.exclude module: "kotlintest"
 //        runtime.exclude module: "sonarqube-gradle-plugin"
 //    }
-    
+//    
     jacocoTestReport {
         group = "Reporting"
         reports {
