@@ -65,7 +65,7 @@ functions:
             - Content-Type
           allowCredentials: false
     environment:
-      SLACK_LOGGER_WEBHOOK: ${file(properties.json):Auth.SLACK_LOGGER_WEBHOOK}
+      SENTRY_DSN: ${file(properties.json):Auth.SENTRY_DSN}
   # CREATE
   create-auth:
     # The function handler to be called for this endpoint
@@ -85,7 +85,7 @@ functions:
             - Content-Type
           allowCredentials: false
     environment:
-      SLACK_LOGGER_WEBHOOK: ${file(properties.json):Auth.SLACK_LOGGER_WEBHOOK}
+      SENTRY_DSN: ${file(properties.json):Auth.SENTRY_DSN}
   # READ
   retrieve-auth-by-id:
     # The function handler to be called for this endpoint
@@ -110,7 +110,7 @@ functions:
                 # this key name must match the name defined int the PATH: i.e. endpoint/{PATH_PARAMETER_ID}
                 id: true
     environment:
-      SLACK_LOGGER_WEBHOOK: ${file(properties.json):Auth.SLACK_LOGGER_WEBHOOK}
+      SENTRY_DSN: ${file(properties.json):Auth.SENTRY_DSN}
   # READ
   retrieve-all-auth:
     # The function handler to be called for this endpoint
@@ -129,7 +129,7 @@ functions:
           headers:
             - Content-Type
     environment:
-      SLACK_LOGGER_WEBHOOK: ${file(properties.json):Auth.SLACK_LOGGER_WEBHOOK}
+      SENTRY_DSN: ${file(properties.json):Auth.SENTRY_DSN}
   # UPDATE
   update-auth-by-id:
     # The function handler to be called for this endpoint
@@ -154,7 +154,7 @@ functions:
                 # this key name must match the name defined int the PATH: i.e. endpoint/{PATH_PARAMETER_ID}
                 id: true
     environment:
-      SLACK_LOGGER_WEBHOOK: ${file(properties.json):Auth.SLACK_LOGGER_WEBHOOK}
+      SENTRY_DSN: ${file(properties.json):Auth.SENTRY_DSN}
   # DELETE
   delete-auth-by-id:
     # The function handler to be called for this endpoint
@@ -179,4 +179,4 @@ functions:
                 # this key name must match the name defined int the PATH: i.e. endpoint/{PATH_PARAMETER_ID}
                 id: true
     environment:
-      SLACK_LOGGER_WEBHOOK: ${file(properties.json):Auth.SLACK_LOGGER_WEBHOOK}
+      SENTRY_DSN: ${file(properties.json):Auth.SENTRY_DSN}
