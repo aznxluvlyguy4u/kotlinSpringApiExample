@@ -213,16 +213,16 @@ allprojects {
          * Note that: we don't want the following dependency in our shadowedJar
          * because it is NOT need when creating an archive for deploying a Function to the cloud,
          * it is used ONLY for LOCAL development.
-         */
-        configurations {
-            runtime.exclude module: "spring-boot-starter-web"
-            runtime.exclude module: "spring-boot-starter-test"
-            runtime.exclude module: "spring-boot-devtools"
-            runtime.exclude module: "spring-boot-starter-jetty"
-            runtime.exclude module: "junit"
-            runtime.exclude module: "kotlintest"
-            runtime.exclude module: "sonarqube-gradle-plugin"
-        }
+//         */
+//        configurations {
+//            runtime.exclude module: "spring-boot-starter-web"
+//            runtime.exclude module: "spring-boot-starter-test"
+//            runtime.exclude module: "spring-boot-devtools"
+//            runtime.exclude module: "spring-boot-starter-jetty"
+//            runtime.exclude module: "junit"
+//            runtime.exclude module: "kotlintest"
+//            runtime.exclude module: "sonarqube-gradle-plugin"
+//        }
         
         def stageToDeployTo = "dev"
         if (project.hasProperty('stage')) { stageToDeployTo = property('stage') }
