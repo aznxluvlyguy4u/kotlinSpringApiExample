@@ -36,6 +36,9 @@ custom:
   apiVersion: v1
   # results in, for example: api/v1
   apiPathPrefix: ${self:custom.apiPrefix}/${self:custom.apiVersion}
+#  epsagon:
+#    token: 7810b0ce-e905-4230-a4f7-32939bf8079c
+#    appName: Ocean-Premium-API
 
 # The default region to be deployed to
 region: eu-west-1
@@ -43,6 +46,9 @@ region: eu-west-1
 # The path and the name of the deploy-able archive
 package:
   artifact: build/libs/auth-0.0.1-SNAPSHOT-aws.jar
+
+#plugins:
+#  - serverless-plugin-epsagon
 
 # The functions defined by HTTP verb / path and parameters (CRUD)
 functions:
@@ -66,6 +72,7 @@ functions:
           allowCredentials: false
     environment:
       SENTRY_DSN: ${file(properties.json):Auth.SENTRY_DSN}
+      SLACK_LOGGER_WEBHOOK: ${file(properties.json):Auth.SLACK_LOGGER_WEBHOOK}
   # CREATE
   create-auth:
     # The function handler to be called for this endpoint
@@ -86,10 +93,11 @@ functions:
           allowCredentials: false
     environment:
       SENTRY_DSN: ${file(properties.json):Auth.SENTRY_DSN}
+      SLACK_LOGGER_WEBHOOK: ${file(properties.json):Auth.SLACK_LOGGER_WEBHOOK}
   # READ
   retrieve-auth-by-id:
     # The function handler to be called for this endpoint
-    handler:  com.oceanpremium.api.auth.Handler::handleRequest
+    handler: com.oceanpremium.api.auth.Handler::handleRequest
     name: retrieve-auth-by-id
     #name: retrieve-auth-by-id-${self:provider.stage}
     events:
@@ -111,6 +119,7 @@ functions:
                 id: true
     environment:
       SENTRY_DSN: ${file(properties.json):Auth.SENTRY_DSN}
+      SLACK_LOGGER_WEBHOOK: ${file(properties.json):Auth.SLACK_LOGGER_WEBHOOK}
   # READ
   retrieve-all-auth:
     # The function handler to be called for this endpoint
@@ -130,6 +139,7 @@ functions:
             - Content-Type
     environment:
       SENTRY_DSN: ${file(properties.json):Auth.SENTRY_DSN}
+      SLACK_LOGGER_WEBHOOK: ${file(properties.json):Auth.SLACK_LOGGER_WEBHOOK}
   # UPDATE
   update-auth-by-id:
     # The function handler to be called for this endpoint
@@ -155,6 +165,7 @@ functions:
                 id: true
     environment:
       SENTRY_DSN: ${file(properties.json):Auth.SENTRY_DSN}
+      SLACK_LOGGER_WEBHOOK: ${file(properties.json):Auth.SLACK_LOGGER_WEBHOOK}
   # DELETE
   delete-auth-by-id:
     # The function handler to be called for this endpoint
@@ -180,3 +191,4 @@ functions:
                 id: true
     environment:
       SENTRY_DSN: ${file(properties.json):Auth.SENTRY_DSN}
+      SLACK_LOGGER_WEBHOOK: ${file(properties.json):Auth.SLACK_LOGGER_WEBHOOK}
