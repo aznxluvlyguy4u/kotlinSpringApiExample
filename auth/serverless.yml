@@ -28,7 +28,6 @@ provider:
 # The service name which is used to create the stack
 service:
   name: ocean-premium
-  #name: ocean-premium-${self:provider.stage}
 
 # Custom variables
 custom:
@@ -36,9 +35,6 @@ custom:
   apiVersion: v1
   # results in, for example: api/v1
   apiPathPrefix: ${self:custom.apiPrefix}/${self:custom.apiVersion}
-#  epsagon:
-#    token: 7810b0ce-e905-4230-a4f7-32939bf8079c
-#    appName: Ocean-Premium-API
 
 # The default region to be deployed to
 region: eu-west-1
@@ -47,148 +43,25 @@ region: eu-west-1
 package:
   artifact: build/libs/auth-0.0.1-SNAPSHOT-aws.jar
 
-#plugins:
-#  - serverless-plugin-epsagon
-
 # The functions defined by HTTP verb / path and parameters (CRUD)
 functions:
-  # HEAD
-  exists-auth:
+  # GET
+  get-auth-api-docs:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.auth.Handler::handleRequest
-    name: exists-auth
-    #name: exists-auth-${self:provider.stage}
+    name: get-auth-api-docs
     events:
       - http:
           # The URI of the endpoint
-          path: /${self:custom.apiPathPrefix}/auth
+          path: /${self:custom.apiPathPrefix}/auth/docs
           # The HTTP verb
-          method: head
-          # Additional endpoint configurations like enabling CORS
-          cors: true
-          # The default headers mandatory for this endpoint
-          headers:
-            - Content-Type
-          allowCredentials: false
-    environment:
-      SENTRY_DSN: ${file(properties.json):Auth.SENTRY_DSN}
-      SLACK_LOGGER_WEBHOOK: ${file(properties.json):Auth.SLACK_LOGGER_WEBHOOK}
-  # CREATE
-  create-auth:
-    # The function handler to be called for this endpoint
-    handler: com.oceanpremium.api.auth.Handler::handleRequest
-    name: create-auth
-    #name: create-auth-${self:provider.stage}
-    events:
-      - http:
-          # The URI of the endpoint
-          path: /${self:custom.apiPathPrefix}/auth
-          # The HTTP verb
-          method: post
-          # Additional endpoint configurations like enabling CORS
-          cors: true
-          # The default headers mandatory for this endpoint
-          headers:
-            - Content-Type
-          allowCredentials: false
-    environment:
-      SENTRY_DSN: ${file(properties.json):Auth.SENTRY_DSN}
-      SLACK_LOGGER_WEBHOOK: ${file(properties.json):Auth.SLACK_LOGGER_WEBHOOK}
-  # READ
-  retrieve-auth-by-id:
-    # The function handler to be called for this endpoint
-    handler: com.oceanpremium.api.auth.Handler::handleRequest
-    name: retrieve-auth-by-id
-    #name: retrieve-auth-by-id-${self:provider.stage}
-    events:
-      - http:
-          # The URI of the endpoint with a placeholder for the identifier as a PATH parameter
-          path: /${self:custom.apiPathPrefix}/auth/{id}
-          # The HTTP verb supported by this endpoint
           method: get
           # Additional endpoint configurations like enabling CORS
           cors: true
           # The default headers mandatory for this endpoint
           headers:
             - Content-Type
-          # Configure the name and the type of the PATH parameter
-          request:
-            parameters:
-              paths:
-                # this key name must match the name defined int the PATH: i.e. endpoint/{PATH_PARAMETER_ID}
-                id: true
-    environment:
-      SENTRY_DSN: ${file(properties.json):Auth.SENTRY_DSN}
-      SLACK_LOGGER_WEBHOOK: ${file(properties.json):Auth.SLACK_LOGGER_WEBHOOK}
-  # READ
-  retrieve-all-auth:
-    # The function handler to be called for this endpoint
-    handler: com.oceanpremium.api.auth.Handler::handleRequest
-    name: retrieve-all-auths
-    #name: retrieve-all-auths-${self:provider.stage}
-    events:
-      - http:
-          # The URI of the endpoint
-          path: /${self:custom.apiPathPrefix}/auth
-          # The HTTP verb supported by this endpoint
-          method: get
-          # Additional endpoint configurations like enabling CORS
-          cors: true
-          # The default headers mandatory for this endpoint
-          headers:
-            - Content-Type
-    environment:
-      SENTRY_DSN: ${file(properties.json):Auth.SENTRY_DSN}
-      SLACK_LOGGER_WEBHOOK: ${file(properties.json):Auth.SLACK_LOGGER_WEBHOOK}
-  # UPDATE
-  update-auth-by-id:
-    # The function handler to be called for this endpoint
-    handler: com.oceanpremium.api.auth.Handler::handleRequest
-    name: update-auth-by-id
-    #name: update-auth-by-id-${self:provider.stage}
-    events:
-      - http:
-          # The URI of the endpoint with a placeholder for the identifier as a PATH parameter
-          path: /${self:custom.apiPathPrefix}/auth/{id}
-          # The HTTP verb supported by this endpoint
-          method: put
-          # Additional endpoint configurations like enabling CORS
-          cors: true
-          # The default headers mandatory for this endpoint
-          headers:
-            - Content-Type
-          # Configure the name and the type of the PATH parameter
-          request:
-            parameters:
-              paths:
-                # this key name must match the name defined int the PATH: i.e. endpoint/{PATH_PARAMETER_ID}
-                id: true
-    environment:
-      SENTRY_DSN: ${file(properties.json):Auth.SENTRY_DSN}
-      SLACK_LOGGER_WEBHOOK: ${file(properties.json):Auth.SLACK_LOGGER_WEBHOOK}
-  # DELETE
-  delete-auth-by-id:
-    # The function handler to be called for this endpoint
-    handler: com.oceanpremium.api.auth.Handler::handleRequest
-    name: delete-auth-by-id
-    #name: delete-auth-by-id-${self:provider.stage}
-    events:
-      - http:
-          # The URI of the endpoint with a placeholder for the identifier as a PATH parameter
-          path: /${self:custom.apiPathPrefix}/auth/{id}
-          # The HTTP verb supported by this endpoint
-          method: delete
-          # Additional endpoint configurations like enabling CORS
-          cors: true
-          # The default headers mandatory for this endpoint
-          headers:
-            - Content-Type
-          # Configure the name and the type of the PATH parameter
-          request:
-            parameters:
-              paths:
-                # this key name must match the name defined int the PATH: i.e. endpoint/{PATH_PARAMETER_ID}
-                id: true
+          allowCredentials: false
     environment:
       SENTRY_DSN: ${file(properties.json):Auth.SENTRY_DSN}
       SLACK_LOGGER_WEBHOOK: ${file(properties.json):Auth.SLACK_LOGGER_WEBHOOK}
