@@ -8,6 +8,26 @@ Resources: # CRUD
   GetProductApiDocs:
     Type: AWS::Serverless::Function
     Properties:
+      Description: Endpoint to get product API docs
+      MemorySize: 512
+      Timeout: 30
+      Handler: com.oceanpremium.api.products.Handler::handleRequest
+      Runtime: java8
+      Environment:
+        Variables:
+          SENTRY_DSN: ""
+          SLACK_LOGGER_WEBHOOK: ""
+          SLACK_LOGGER_WEBHOOK_OP: ""
+      CodeUri: build/libs/products-0.0.1-SNAPSHOT-aws.jar
+      Events:
+        CreateSync:
+          Type: Api
+          Properties:
+            Path: /api/v1/products/docs
+            Method: get
+  GetProduct:
+    Type: AWS::Serverless::Function
+    Properties:
       Description: Endpoint to find products
       MemorySize: 512
       Timeout: 30
@@ -18,6 +38,8 @@ Resources: # CRUD
           SENTRY_DSN: ""
           SLACK_LOGGER_WEBHOOK: ""
           SLACK_LOGGER_WEBHOOK_OP: ""
+          CURRENT_RMS_TOKEN: ""
+          CURRENT_RMS_SUBDOMAIN: ""
       CodeUri: build/libs/products-0.0.1-SNAPSHOT-aws.jar
       Events:
         CreateSync:

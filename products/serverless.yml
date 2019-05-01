@@ -64,7 +64,6 @@ functions:
     environment:
       SENTRY_DSN: ${file(properties.json):Products.SENTRY_DSN}
       SLACK_LOGGER_WEBHOOK: ${file(properties.json):Products.SLACK_LOGGER_WEBHOOK}
-      SLACK_LOGGER_WEBHOOK_OP: ${file(properties.json):Products.SLACK_LOGGER_WEBHOOK_OP}
   get-products:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
@@ -85,3 +84,5 @@ functions:
       SENTRY_DSN: ${file(properties.json):Products.SENTRY_DSN}
       SLACK_LOGGER_WEBHOOK: ${file(properties.json):Products.SLACK_LOGGER_WEBHOOK}
       SLACK_LOGGER_WEBHOOK_OP: ${file(properties.json):Products.SLACK_LOGGER_WEBHOOK_OP}
+      CURRENT_RMS_TOKEN: ${file(properties.json):Products.CURRENT_RMS_TOKEN}
+      CURRENT_RMS_SUBDOMAIN: ${file(properties.json):Products.CURRENT_RMS_SUBDOMAIN}
