@@ -48,7 +48,7 @@ functions:
   # GET
   get-product-api-docs:
     # The function handler to be called for this endpoint
-    handler: com.oceanpremium.api.auth.Handler::handleRequest
+    handler: com.oceanpremium.api.products.Handler::handleRequest
     name: get-product-api-docs
     events:
       - http:
