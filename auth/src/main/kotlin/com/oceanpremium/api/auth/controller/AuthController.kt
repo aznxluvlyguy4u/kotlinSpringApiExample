@@ -1,5 +1,6 @@
 package com.oceanpremium.api.auth.controller
 
+import com.oceanpremium.api.core.util.Constants
 import com.oceanpremium.api.core.util.ObjectMapperConfig
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -11,7 +12,6 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("api/v1/auth")
 class AuthController(@Autowired private val resourceLoader: ResourceLoader) {
-    private val API_DOC_FILE_SWAGGER = "openapi.json"
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
@@ -24,7 +24,7 @@ class AuthController(@Autowired private val resourceLoader: ResourceLoader) {
         logger.debug("GET auth api docs")
 
         return ResponseEntity(
-            mapper.readTree(resourceLoader.getResource("classpath:$API_DOC_FILE_SWAGGER").file),
+            mapper.readTree(resourceLoader.getResource("classpath:${Constants.API_DOC_FILE_SWAGGER}").file),
             HttpStatus.OK
         )
     }

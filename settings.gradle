@@ -2,3 +2,5 @@ rootProject.name = 'ocean-premium-api'
 
 include 'core'
 include 'auth'
+include 'products'
+

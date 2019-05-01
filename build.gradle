@@ -261,4 +261,5 @@ dependencies {
     // Register every gradle module in the top-level project dependencies list
     compile project(':core')
     compile project(':auth')
+    compile project(':products')
 }

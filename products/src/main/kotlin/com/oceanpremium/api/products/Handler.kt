@@ -1,4 +1,4 @@
-package com.oceanpremium.api.auth
+package com.oceanpremium.api.products
 
 import com.amazonaws.serverless.exceptions.ContainerInitializationException
 import com.amazonaws.serverless.proxy.model.AwsProxyRequest
@@ -23,12 +23,12 @@ import org.springframework.web.servlet.HandlerExceptionResolver
  * The main application entry point that spins up the API.
  */
 @SpringBootApplication
-class AuthDriver : SpringBootServletInitializer() {
+class ProductsDriver : SpringBootServletInitializer() {
 
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
-            SpringApplication.run(AuthDriver::class.java, *args)
+            SpringApplication.run(ProductsDriver::class.java, *args)
         }
     }
 
@@ -60,7 +60,7 @@ class Handler : RequestStreamHandler {
         init {
             try {
                 handler =
-                    SpringBootLambdaContainerHandler.getAwsProxyHandler(AuthDriver::class.java)
+                    SpringBootLambdaContainerHandler.getAwsProxyHandler(ProductsDriver::class.java)
             } catch (e: ContainerInitializationException) {
 
                 e.printStackTrace()
