@@ -1,0 +1,153 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Ocean Premium - Auth endpoint",
+    "description" : "A basic API for authenticating with the API",
+    "license" : {
+      "name" : "MIT"
+    },
+    "version" : "0.0.1"
+  },
+  "servers" : [
+    {"url" : "https://vk2b3q5m17.execute-api.eu-west-1.amazonaws.com/dev/api/v1"},
+    {"url" : "https://rh2urujte8.execute-api.eu-west-1.amazonaws.com/dev/api/v1"}
+  ],
+  "paths" : {
+    "/auth" : {
+      "get" : {
+        "summary" : "Get auths by date",
+        "parameters" : [ {
+          "name" : "date",
+          "in" : "query",
+          "description" : "yyyy-mmm-dd",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : { }
+          }
+        }
+      },
+      "post" : {
+        "summary" : "Creates a new auth",
+        "requestBody" : {
+          "description" : "User to be created",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/User"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : { }
+          }
+        }
+      }
+    },
+    "/auth/{id}" : {
+      "get" : {
+        "summary" : "Get an auth by id",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Id of user to retrieve",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : { }
+          }
+        }
+      },
+      "put" : {
+        "summary" : "Update an auth by Id",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Id of user to retrieve",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "User to be created",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/User"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : { }
+          }
+        }
+      },
+      "delete" : {
+        "summary" : "Delete an auth",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Id of user to retrieve",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : { }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "User" : {
+        "required" : [ "emailAddress", "name" ],
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "emailAddress" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Response" : {
+        "required" : [ "message", "success" ],
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean"
+          },
+          "message" : {
+            "type" : "object",
+            "properties" : { }
+          }
+        }
+      }
+    }
+  }
+}

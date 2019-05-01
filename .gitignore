@@ -207,5 +207,10 @@ gradle-app.setting
 properties.json
 **/**/properties.json
 
+### Node ###
+
+/**/node_modules/**
+/**/package-lock.json
+
 # End of https://www.gitignore.io/api/macos,linux,gradle,kotlin,windows,serverless,intellij+iml,visualstudiocode
 
