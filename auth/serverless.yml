@@ -7,7 +7,7 @@ provider:
   # JVM
   runtime: java8
   # The S3 Bucket used for deploying the archive
-  deploymentBucket: ocean-prem-test
+  deploymentBucket: oceanpremium-deploy
   # The RAM size (MB) used by the function
   memorySize: 512
   # The default timeout (seconds)
