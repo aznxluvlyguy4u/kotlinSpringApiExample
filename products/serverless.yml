@@ -45,7 +45,6 @@ package:
 
 # The functions defined by HTTP verb / path and parameters (CRUD)
 functions:
-  # GET
   get-product-api-docs:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
@@ -54,6 +53,26 @@ functions:
       - http:
           # The URI of the endpoint
           path: /${self:custom.apiPathPrefix}/products/docs
+          # The HTTP verb
+          method: get
+          # Additional endpoint configurations like enabling CORS
+          cors: true
+          # The default headers mandatory for this endpoint
+          headers:
+            - Content-Type
+          allowCredentials: false
+    environment:
+      SENTRY_DSN: ${file(properties.json):Products.SENTRY_DSN}
+      SLACK_LOGGER_WEBHOOK: ${file(properties.json):Products.SLACK_LOGGER_WEBHOOK}
+      SLACK_LOGGER_WEBHOOK_OP: ${file(properties.json):Products.SLACK_LOGGER_WEBHOOK_OP}
+  get-products:
+    # The function handler to be called for this endpoint
+    handler: com.oceanpremium.api.products.Handler::handleRequest
+    name: get-products
+    events:
+      - http:
+          # The URI of the endpoint
+          path: /${self:custom.apiPathPrefix}/products
           # The HTTP verb
           method: get
           # Additional endpoint configurations like enabling CORS

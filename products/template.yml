@@ -8,7 +8,7 @@ Resources: # CRUD
   GetProductApiDocs:
     Type: AWS::Serverless::Function
     Properties:
-      Description: Endpoint to get the endpoint API docs
+      Description: Endpoint to find products
       MemorySize: 512
       Timeout: 30
       Handler: com.oceanpremium.api.products.Handler::handleRequest
@@ -23,5 +23,5 @@ Resources: # CRUD
         CreateSync:
           Type: Api
           Properties:
-            Path: /api/v1/products/docs
+            Path: /api/v1/products
             Method: get
