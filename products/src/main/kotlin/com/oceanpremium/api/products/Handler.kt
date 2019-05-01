@@ -6,6 +6,8 @@ import com.amazonaws.serverless.proxy.model.AwsProxyResponse
 import com.amazonaws.serverless.proxy.spring.SpringBootLambdaContainerHandler
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler
+import com.oceanpremium.api.currentrms.ProductsApi
+import com.oceanpremium.api.currentrms.ProductsApiImpl
 import io.sentry.spring.SentryServletContextInitializer
 import org.slf4j.LoggerFactory
 import org.springframework.boot.SpringApplication
@@ -14,6 +16,9 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.boot.web.servlet.ServletContextInitializer
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.ComponentScans
+import org.springframework.context.annotation.Import
 import org.springframework.core.Ordered
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.cors.CorsConfiguration
@@ -27,6 +32,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver
 /**
  * The main application entry point that spins up the API.
  */
+@ComponentScans(ComponentScan("com.oceanpremium.api"))
 @SpringBootApplication
 class ProductsDriver : SpringBootServletInitializer() {
 
