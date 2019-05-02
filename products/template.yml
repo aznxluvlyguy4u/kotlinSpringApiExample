@@ -15,9 +15,8 @@ Resources: # CRUD
       Runtime: java8
       Environment:
         Variables:
-          SENTRY_DSN: ""
-          SLACK_LOGGER_WEBHOOK: ""
-          SLACK_LOGGER_WEBHOOK_OP: ""
+          sentry_dsn: ""
+          slack_webhook_jvt: ""
       CodeUri: build/libs/products-0.0.1-SNAPSHOT-aws.jar
       Events:
         CreateSync:
@@ -35,11 +34,12 @@ Resources: # CRUD
       Runtime: java8
       Environment:
         Variables:
-          SENTRY_DSN: ""
-          SLACK_LOGGER_WEBHOOK: ""
-          SLACK_LOGGER_WEBHOOK_OP: ""
-          CURRENT_RMS_TOKEN: ""
-          CURRENT_RMS_SUBDOMAIN: ""
+          sentry_dsn: ""
+          slack_webhook_jvt: ""
+          slack_webhook_op: ""
+          current_rms_token: ""
+          current_rms_subdomain: ""
+          current_rms_api_url: ""
       CodeUri: build/libs/products-0.0.1-SNAPSHOT-aws.jar
       Events:
         CreateSync:
