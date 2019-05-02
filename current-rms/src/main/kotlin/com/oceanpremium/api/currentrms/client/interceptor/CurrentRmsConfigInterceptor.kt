@@ -26,7 +26,7 @@ class CurrentRmsConfigInterceptor(private val currentRmsConfig: CurrentRmsConfig
 
     /**
      * Authenticator for when the token need to be provided or refresh
-     * everytime we get a 401 error code
+     * every time we get a 401 error code
      */
     @Throws(IOException::class)
     override fun authenticate(route: Route?, response: Response?): Request? {

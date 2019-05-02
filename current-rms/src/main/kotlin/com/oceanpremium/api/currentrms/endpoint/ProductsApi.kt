@@ -29,9 +29,17 @@ class ProductsApiImpl(@Autowired currentRmsClient: CurrentRmsClient) {
     fun getProducts(map: Map<String, String>): retrofit2.Response<Any>? {
         val retrofitCall = productsApi.getProducts(map = map)
         val response = retrofitCall.execute()
-        logger.debug("status: ${response.code()}")
-        logger.debug("response body: ${response.body()}")
-        logger.debug("error body: ${response.errorBody()}")
+
+        logger.debug("Current RMS API call - HTTP status: ${response.code()}")
+
+        when {
+            response.isSuccessful -> {
+                logger.debug("Current RMS API response body: ${response.body()}")
+            }
+            else ->  {
+                logger.debug("Request to Current RMS API failed: ${response.message()}")
+            }
+        }
 
         return response
     }

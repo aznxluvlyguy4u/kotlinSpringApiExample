@@ -1,4 +1,4 @@
-package com.oceanpremium.api.currentrms
+package com.oceanpremium.api.currentrms.response
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
