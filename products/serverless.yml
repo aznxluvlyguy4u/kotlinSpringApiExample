@@ -62,7 +62,7 @@ functions:
             - Content-Type
           allowCredentials: false
     environment:
-      sentry_dsn: ${file(properties.json):products.sentry_dsn}
+      SENTRY_DSN: ${file(properties.json):products.sentry_dsn}
       slack_webhook_jvt: ${file(properties.json):products.slack.webhook_jvt}
   get-products:
     # The function handler to be called for this endpoint
@@ -81,9 +81,9 @@ functions:
             - Content-Type
           allowCredentials: false
     environment:
-      sentry_dsn: ${file(properties.json):products.sentry_dsn}
+      SENTRY_DSN: ${file(properties.json):products.sentry_dsn}
       slack_webhook_jvt: ${file(properties.json):products.slack.webhook_jvt}
       slack_webhook_op: ${file(properties.json):products.slack.webhook_op}
-      current_rms_token: ${file(properties.json):Products.current_rms.token}
-      current_rms_subdomain: ${file(properties.json):Products.current_rms.subdomain}
-      current_rms_api_url: ${file(properties.json):Products.current_rms.api_url}
+      current_rms_token: ${file(properties.json):products.current_rms.token}
+      current_rms_subdomain: ${file(properties.json):products.current_rms.subdomain}
+      current_rms_api_url: ${file(properties.json):products.current_rms.api_url}
