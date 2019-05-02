@@ -14,8 +14,6 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.boot.web.servlet.ServletContextInitializer
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.ComponentScan
-import org.springframework.context.annotation.ComponentScans
 import org.springframework.core.Ordered
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.cors.CorsConfiguration
