@@ -16,7 +16,7 @@ class CurrentRmsClient {
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
         private const val CURRENT_RMS_TOKEN = "current_rms_token"
-        private const val CURRENT_RMS_SUBDOMAIN = "current_rms_token"
+        private const val CURRENT_RMS_SUBDOMAIN = "current_rms_subdomain"
         private const val CURRENT_RMS_API_URL = "current_rms_api_url"
         private const val REQUEST_TIMEOUT: Long = 20
     }
@@ -43,11 +43,12 @@ class CurrentRmsClient {
         httpClient.connectTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
         httpClient.readTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
         httpClient.addInterceptor(currentRmsConfigInterceptor)
-        httpClient.authenticator(currentRmsConfigInterceptor)
+        val okHttp = httpClient.build()
 
         retrofitClient = Retrofit.Builder()
             .baseUrl(currentRmsConfig.baseApiUrl)
             .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttp)
             .build()
 
         return retrofitClient!!
