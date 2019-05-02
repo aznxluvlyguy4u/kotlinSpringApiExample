@@ -1,9 +1,9 @@
 package com.oceanpremium.api.products.controller
 
+import com.oceanpremium.api.core.currentrms.endpoint.ProductsApiImpl
 import com.oceanpremium.api.core.util.Constants
 import com.oceanpremium.api.core.util.ObjectMapperConfig
 import com.oceanpremium.api.currentrms.response.CurrentRmsApiResponse
-import com.oceanpremium.api.currentrms.endpoint.ProductsApiImpl
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ResourceLoader
@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("api/v1/products")
-class ProductsController(@Autowired private val resourceLoader: ResourceLoader,
-                         @Autowired private val productsApi: ProductsApiImpl) {
+class ProductsController(
+    @Autowired private val resourceLoader: ResourceLoader,
+    @Autowired private val productsApi: ProductsApiImpl
+) {
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
@@ -24,7 +26,7 @@ class ProductsController(@Autowired private val resourceLoader: ResourceLoader,
     @RequestMapping("docs")
     @ResponseBody
     fun getApiDocs(): ResponseEntity<Any?> {
-        logger.debug("GET products api docs")
+        logger.debug("GET products API docs")
 
         return ResponseEntity(
             mapper.readTree(resourceLoader.getResource("classpath:${Constants.API_DOC_FILE_SWAGGER}").file),
@@ -41,11 +43,9 @@ class ProductsController(@Autowired private val resourceLoader: ResourceLoader,
         val logMessage = "[API] - GET products with request parameters: $fields"
         logger.debug(logMessage)
 
-        // val logMessage ="[Sales analytics] GET products - sales analytics: $response"
-        // logger.debug(logMessage)
-        // Slogger.send(messageBody = logMessage, salesAnalyticsLog = true)
-
-//        val response = "mocked response: input params: $fields"
+        val logMessageSales = "[Sales analytics] GET products - sales analytics: $fields"
+        logger.debug(logMessageSales)
+//         Slogger.send(messageBody = logMessage, salesAnalyticsLog = true)
 
         val response = productsApi.getProducts(fields)
 

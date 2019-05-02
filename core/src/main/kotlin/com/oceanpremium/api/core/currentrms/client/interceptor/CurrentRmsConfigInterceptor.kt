@@ -1,4 +1,4 @@
-package com.oceanpremium.api.currentrms.client.interceptor
+package com.oceanpremium.api.core.currentrms.client.interceptor
 
 import okhttp3.*
 

@@ -64,6 +64,9 @@ functions:
     environment:
       SENTRY_DSN: ${file(properties.json):products.sentry_dsn}
       slack_webhook_jvt: ${file(properties.json):products.slack.webhook_jvt}
+      current_rms_token: ${file(properties.json):products.current_rms.token}
+      current_rms_subdomain: ${file(properties.json):products.current_rms.subdomain}
+      current_rms_api_url: ${file(properties.json):products.current_rms.api_url}
   get-products:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest

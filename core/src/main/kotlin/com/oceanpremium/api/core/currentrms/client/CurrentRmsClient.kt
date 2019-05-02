@@ -1,7 +1,7 @@
-package com.oceanpremium.api.currentrms.client
+package com.oceanpremium.api.core.currentrms.client
 
-import com.oceanpremium.api.currentrms.client.interceptor.CurrentRmsConfig
-import com.oceanpremium.api.currentrms.client.interceptor.CurrentRmsConfigInterceptor
+import com.oceanpremium.api.core.currentrms.client.interceptor.CurrentRmsConfig
+import com.oceanpremium.api.core.currentrms.client.interceptor.CurrentRmsConfigInterceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.slf4j.LoggerFactory

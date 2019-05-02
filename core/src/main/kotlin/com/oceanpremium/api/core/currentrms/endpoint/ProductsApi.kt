@@ -1,6 +1,6 @@
-package com.oceanpremium.api.currentrms.endpoint
+package com.oceanpremium.api.core.currentrms.endpoint
 
-import com.oceanpremium.api.currentrms.client.CurrentRmsClient
+import com.oceanpremium.api.core.currentrms.client.CurrentRmsClient
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
