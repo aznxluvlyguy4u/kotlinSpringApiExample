@@ -1,9 +1,9 @@
 package com.oceanpremium.api.products.controller
 
-import com.oceanpremium.api.core.model.JsonBody
 import com.oceanpremium.api.core.util.Constants
 import com.oceanpremium.api.core.util.ObjectMapperConfig
-import com.oceanpremium.api.currentrms.ProductsApiImpl
+import com.oceanpremium.api.currentrms.CurrentRmsApiResponse
+import com.oceanpremium.api.currentrms.endpoint.ProductsApiImpl
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ResourceLoader
@@ -14,8 +14,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("api/v1/products")
 class ProductsController(@Autowired private val resourceLoader: ResourceLoader,
-                         @Autowired private val productsApi: ProductsApiImpl
-) {
+                         @Autowired private val productsApi: ProductsApiImpl) {
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
@@ -38,7 +37,7 @@ class ProductsController(@Autowired private val resourceLoader: ResourceLoader,
      */
     @RequestMapping
     @ResponseBody
-    fun getProducts(@RequestParam fields: Map<String, String>): ResponseEntity<Any?> {
+    fun getProducts(@RequestParam fields: Map<String, String>): ResponseEntity<*> {
         val logMessage = "[API] - GET products with request parameters: $fields"
         logger.debug(logMessage)
 
@@ -47,11 +46,12 @@ class ProductsController(@Autowired private val resourceLoader: ResourceLoader,
         // Slogger.send(messageBody = logMessage, salesAnalyticsLog = true)
 
 //        val response = "mocked response: input params: $fields"
+
         val response = productsApi.getProducts(fields)
 
-        return ResponseEntity(
-            JsonBody(HttpStatus.OK.value(), response),
-            HttpStatus.OK
-        )
+        return CurrentRmsApiResponse.build {
+            statusCode = HttpStatus.valueOf(response?.code()!!)
+            objectBody = response.body()
+        }
     }
 }

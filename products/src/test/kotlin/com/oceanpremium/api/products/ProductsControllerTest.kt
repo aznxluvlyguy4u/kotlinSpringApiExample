@@ -34,7 +34,7 @@ class ProductsControllerTest {
     @Test
     fun getProductsByQueryParameters() {
         val params = "?q[name_cont]=Wakeboard&page=1&per_page=20"
-        val response = restTemplate?.getForEntity("$endpoint/$params", Response::class.java)
+        val response = restTemplate?.getForEntity("$endpoint$params", Response::class.java)
         assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.OK.value())
     }
 }
