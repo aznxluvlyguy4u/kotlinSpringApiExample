@@ -15,9 +15,10 @@ class CurrentRmsClient {
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
-        private const val CURRENT_RMS_TOKEN = "CURRENT_RMS_TOKEN"
-        private const val CURRENT_RMS_SUBDOMAIN = "CURRENT_RMS_SUBDOMAIN"
-        private const val CURRENT_RMS_API_URL = "CURRENT_RMS_API_URL"
+        private const val CURRENT_RMS_TOKEN = "current_rms_token"
+        private const val CURRENT_RMS_SUBDOMAIN = "current_rms_token"
+        private const val CURRENT_RMS_API_URL = "current_rms_api_url"
+        private const val REQUEST_TIMEOUT: Long = 20
     }
 
     private var retrofitClient: Retrofit? = null
@@ -32,15 +33,15 @@ class CurrentRmsClient {
 
         logger.debug("Build new retrofit client")
         val logging = HttpLoggingInterceptor()
-        logging.level = HttpLoggingInterceptor.Level.HEADERS
         logging.level = HttpLoggingInterceptor.Level.BODY
 
         val currentRmsConfigInterceptor = CurrentRmsConfigInterceptor(currentRmsConfig)
 
         val httpClient = OkHttpClient.Builder()
         httpClient.addInterceptor(logging)
-        httpClient.connectTimeout(20, TimeUnit.SECONDS)
-        httpClient.readTimeout(20, TimeUnit.SECONDS)
+
+        httpClient.connectTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
+        httpClient.readTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
         httpClient.addInterceptor(currentRmsConfigInterceptor)
         httpClient.authenticator(currentRmsConfigInterceptor)
 
@@ -54,9 +55,9 @@ class CurrentRmsClient {
 
     private fun getCurrentRmsConfig(): CurrentRmsConfig {
         return CurrentRmsConfig(
-            System.getenv(CURRENT_RMS_API_URL) ?: null ?: throw Exception("Env var: $CURRENT_RMS_API_URL not set"),
             System.getenv(CURRENT_RMS_TOKEN) ?: null ?: throw Exception("Env var: $CURRENT_RMS_TOKEN not set"),
-            System.getenv(CURRENT_RMS_SUBDOMAIN) ?: null ?: throw Exception("Env var: $CURRENT_RMS_SUBDOMAIN not set")
+            System.getenv(CURRENT_RMS_SUBDOMAIN) ?: null ?: throw Exception("Env var: $CURRENT_RMS_SUBDOMAIN not set"),
+            System.getenv(CURRENT_RMS_API_URL) ?: null ?: throw Exception("Env var: $CURRENT_RMS_API_URL not set")
         )
     }
 }
