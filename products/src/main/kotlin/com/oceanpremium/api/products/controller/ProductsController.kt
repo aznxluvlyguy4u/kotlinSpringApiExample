@@ -1,6 +1,6 @@
 package com.oceanpremium.api.products.controller
 
-import com.oceanpremium.api.core.currentrms.endpoint.ProductsApiImpl
+import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.util.Constants
 import com.oceanpremium.api.core.util.ObjectMapperConfig
 import com.oceanpremium.api.currentrms.response.CurrentRmsApiResponse
@@ -15,8 +15,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("api/v1/products")
 class ProductsController(
     @Autowired private val resourceLoader: ResourceLoader,
-    @Autowired private val productsApi: ProductsApiImpl
-) {
+    private val productsApi: ProductsApiImpl = ProductsApiImpl()) {
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)

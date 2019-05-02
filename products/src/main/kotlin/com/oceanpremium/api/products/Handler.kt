@@ -29,9 +29,6 @@ import org.springframework.web.servlet.HandlerExceptionResolver
 /**
  * The main application entry point that spins up the API.
  */
-@ComponentScans(
-    ComponentScan("com.oceanpremium.api")
-)
 @SpringBootApplication
 class ProductsDriver : SpringBootServletInitializer() {
 

@@ -48,7 +48,6 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
     class Builder {
 
         private val logger = LoggerFactory.getLogger(this::class.java)
-        private var objectMapper: ObjectMapper = ObjectMapper()
         private var rawBody: Map<String, Any>? = null
 
         var statusCode: HttpStatus = HttpStatus.OK
@@ -178,12 +177,8 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
             when {
                 rawBody != null -> body = rawBody
 
-                objectBody != null -> try {
+                objectBody != null ->
                     body = mapOf("statusCode" to  statusCode.value(), "data" to objectBody)
-                } catch (e: JsonProcessingException) {
-                    logger.error("Failed to serialize object: $e")
-                    throw RuntimeException(e)
-                }
             }
 
             return ResponseEntity(body as Any, statusCode)
@@ -197,23 +192,8 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
             statusCode: HttpStatus,
             objectBody: String?
         ): ResponseEntity<Any> {
-            try {
-                val status = when {
-                    (objectBody == null) -> statusCode.name
-
-                    else ->
-                        objectBody
-                }
-
-                val body = mapOf("statusCode" to  statusCode.value(), "errorMessage" to objectBody)
-
-                return ResponseEntity(body as Any, statusCode)
-
-
-            } catch (e: JsonProcessingException) {
-                logger.error("Failed to serialize object: $e")
-                throw RuntimeException(e)
-            }
+            val body = mapOf("statusCode" to  statusCode.value(), "errorMessage" to objectBody)
+            return ResponseEntity(body as Any, statusCode)
         }
     }
 }

@@ -1,16 +1,41 @@
-package com.oceanpremium.api.core.currentrms.client
+package com.oceanpremium.api.core.currentrms
 
-import com.oceanpremium.api.core.currentrms.client.interceptor.CurrentRmsConfig
-import com.oceanpremium.api.core.currentrms.client.interceptor.CurrentRmsConfigInterceptor
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Service
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
-@Service
+class CurrentRmsConfig(val accessToken: String, val subDomain: String, val baseApiUrl: String)
+
+class CurrentRmsConfigInterceptor(private val currentRmsConfig: CurrentRmsConfig) : Interceptor {
+
+    companion object {
+        private const val CURRENT_RMS_AUTH_HEADER = "X-AUTH-TOKEN"
+        private const val CURRENT_RMS_AUTH_SUBDOMAIN = "X-SUBDOMAIN"
+    }
+
+    /**
+     * Interceptor class for setting of the headers for every request
+     */
+    override fun intercept(chain: Interceptor.Chain): Response {
+
+        val original = chain.request()
+
+        // Request customization: add request headers
+        val requestBuilder = original.newBuilder()
+            .addHeader(CURRENT_RMS_AUTH_HEADER, currentRmsConfig.accessToken)
+            .addHeader(CURRENT_RMS_AUTH_SUBDOMAIN, currentRmsConfig.subDomain)
+
+        val request = requestBuilder.build()
+
+        return chain.proceed(request)
+    }
+}
+
 class CurrentRmsClient {
 
     companion object {
@@ -35,7 +60,8 @@ class CurrentRmsClient {
         val logging = HttpLoggingInterceptor()
         logging.level = HttpLoggingInterceptor.Level.BODY
 
-        val currentRmsConfigInterceptor = CurrentRmsConfigInterceptor(currentRmsConfig)
+        val currentRmsConfigInterceptor =
+            CurrentRmsConfigInterceptor(currentRmsConfig)
 
         val httpClient = OkHttpClient.Builder()
         httpClient.addInterceptor(logging)
@@ -56,9 +82,12 @@ class CurrentRmsClient {
 
     private fun getCurrentRmsConfig(): CurrentRmsConfig {
         return CurrentRmsConfig(
-            System.getenv(CURRENT_RMS_TOKEN) ?: null ?: throw Exception("Env var: $CURRENT_RMS_TOKEN not set"),
-            System.getenv(CURRENT_RMS_SUBDOMAIN) ?: null ?: throw Exception("Env var: $CURRENT_RMS_SUBDOMAIN not set"),
-            System.getenv(CURRENT_RMS_API_URL) ?: null ?: throw Exception("Env var: $CURRENT_RMS_API_URL not set")
+            System.getenv(CURRENT_RMS_TOKEN) ?: null
+            ?: throw Exception("Env var: $CURRENT_RMS_TOKEN not set"),
+            System.getenv(CURRENT_RMS_SUBDOMAIN) ?: null
+            ?: throw Exception("Env var: $CURRENT_RMS_SUBDOMAIN not set"),
+            System.getenv(CURRENT_RMS_API_URL) ?: null
+            ?: throw Exception("Env var: $CURRENT_RMS_API_URL not set")
         )
     }
 }
