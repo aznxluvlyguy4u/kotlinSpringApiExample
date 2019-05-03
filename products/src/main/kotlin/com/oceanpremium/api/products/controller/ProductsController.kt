@@ -70,4 +70,21 @@ class ProductsController(
             objectBody = response.body()
         }
     }
+
+    /**
+     * Endpoint to get a product based on given id.
+     */
+    @RequestMapping("groups")
+    @ResponseBody
+    fun getProductGroups(@RequestParam fields: Map<String, String>): ResponseEntity<*> {
+        val logMessage = "[API] - GET products groups"
+        logger.debug(logMessage)
+
+        val response = productsApi.getProductGroups(fields)
+
+        return CurrentRmsApiResponse.build {
+            statusCode = HttpStatus.valueOf(response?.code()!!)
+            objectBody = response.body()
+        }
+    }
 }

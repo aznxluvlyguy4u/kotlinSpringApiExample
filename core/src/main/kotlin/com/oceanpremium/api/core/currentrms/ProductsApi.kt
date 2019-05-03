@@ -17,6 +17,11 @@ interface ProductsApi {
     fun getProductById(
         @Path("productId") productId: Int
     ): Call<Any>
+
+    @GET("product_groups")
+    fun getProductGroups(
+        @QueryMap map: Map<String, String>
+    ): Call<Any>
 }
 
 class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
@@ -49,6 +54,25 @@ class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
     @Throws(IOException::class)
     fun getProducts(map: Map<String, String>): retrofit2.Response<Any>? {
         val retrofitCall = productsApi.getProducts(map = map)
+        val response = retrofitCall.execute()
+
+        logger.debug("Current RMS API call - HTTP status: ${response.code()}")
+
+        when {
+            response.isSuccessful -> {
+                logger.debug("Current RMS API response body: ${response.body()}")
+            }
+            else ->  {
+                logger.debug("Request to Current RMS API failed: ${response.message()}")
+            }
+        }
+
+        return response
+    }
+
+    @Throws(IOException::class)
+    fun getProductGroups(map: Map<String, String>): retrofit2.Response<Any>? {
+        val retrofitCall = productsApi.getProductGroups(map = map)
         val response = retrofitCall.execute()
 
         logger.debug("Current RMS API call - HTTP status: ${response.code()}")
