@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("api/v1/products")
 class ProductsController(
     @Autowired private val resourceLoader: ResourceLoader,
-    private val productsApi: ProductsApiImpl = ProductsApiImpl()) {
+    @Autowired private val productsApi: ProductsApiImpl) {
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
@@ -34,7 +34,7 @@ class ProductsController(
     }
 
     /**
-     * Endpoint to get products based on given input parameters.
+     * Endpoint to find products based on given query parameters.
      */
     @RequestMapping
     @ResponseBody
@@ -47,6 +47,23 @@ class ProductsController(
 //         Slogger.send(messageBody = logMessage, salesAnalyticsLog = true)
 
         val response = productsApi.getProducts(fields)
+
+        return CurrentRmsApiResponse.build {
+            statusCode = HttpStatus.valueOf(response?.code()!!)
+            objectBody = response.body()
+        }
+    }
+
+    /**
+     * Endpoint to get a product based on given id.
+     */
+    @RequestMapping("/{productId}")
+    @ResponseBody
+    fun getProductById(@PathVariable productId:Int): ResponseEntity<*> {
+        val logMessage = "[API] - GET products with request parameters: $productId"
+        logger.debug(logMessage)
+
+        val response = productsApi.getProductById(productId)
 
         return CurrentRmsApiResponse.build {
             statusCode = HttpStatus.valueOf(response?.code()!!)
