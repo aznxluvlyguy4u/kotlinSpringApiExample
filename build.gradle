@@ -147,7 +147,9 @@ allprojects {
         // Retrofit
         compile ("com.squareup.retrofit2:retrofit:${retrofitVersion}")
         compile ("com.squareup.retrofit2:converter-gson:${retrofitVersion}")
-        compile ("com.squareup.okhttp3:logging-interceptor:3.14.1")
+        compile ("com.squareup.okhttp3:logging-interceptor:${retrofitInterceptorVersion}")
+
+        compile group: 'com.github.seratch', name: 'jslack', version: '1.5.4'
     }
 
     /**

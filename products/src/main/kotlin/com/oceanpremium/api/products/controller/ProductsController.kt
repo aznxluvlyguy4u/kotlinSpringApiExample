@@ -1,6 +1,7 @@
 package com.oceanpremium.api.products.controller
 
 import com.oceanpremium.api.core.currentrms.ProductsApiImpl
+import com.oceanpremium.api.core.messenger.Slogger
 import com.oceanpremium.api.core.util.Constants
 import com.oceanpremium.api.core.util.ObjectMapperConfig
 import com.oceanpremium.api.currentrms.response.CurrentRmsApiResponse
@@ -44,7 +45,7 @@ class ProductsController(
 
         val logMessageSales = "[Sales analytics] GET products - sales analytics: $fields"
         logger.debug(logMessageSales)
-//         Slogger.send(messageBody = logMessage, salesAnalyticsLog = true)
+         Slogger.send(messageBody = logMessage, salesLog = true)
 
         val response = productsApi.getProducts(fields)
 
