@@ -62,9 +62,11 @@ functions:
             - Content-Type
           allowCredentials: false
     environment:
-      SENTRY_DSN: ${file(properties.json):Products.SENTRY_DSN}
-      SLACK_LOGGER_WEBHOOK: ${file(properties.json):Products.SLACK_LOGGER_WEBHOOK}
-      SLACK_LOGGER_WEBHOOK_OP: ${file(properties.json):Products.SLACK_LOGGER_WEBHOOK_OP}
+      SENTRY_DSN: ${file(properties.json):products.sentry_dsn}
+      slack_webhook_jvt: ${file(properties.json):products.slack.webhook_jvt}
+      current_rms_token: ${file(properties.json):products.current_rms.token}
+      current_rms_subdomain: ${file(properties.json):products.current_rms.subdomain}
+      current_rms_api_url: ${file(properties.json):products.current_rms.api_url}
   get-products:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
@@ -82,6 +84,63 @@ functions:
             - Content-Type
           allowCredentials: false
     environment:
-      SENTRY_DSN: ${file(properties.json):Products.SENTRY_DSN}
-      SLACK_LOGGER_WEBHOOK: ${file(properties.json):Products.SLACK_LOGGER_WEBHOOK}
-      SLACK_LOGGER_WEBHOOK_OP: ${file(properties.json):Products.SLACK_LOGGER_WEBHOOK_OP}
+      SENTRY_DSN: ${file(properties.json):products.sentry_dsn}
+      slack_webhook_jvt: ${file(properties.json):products.slack.webhook_jvt}
+      slack_webhook_op: ${file(properties.json):products.slack.webhook_op}
+      current_rms_token: ${file(properties.json):products.current_rms.token}
+      current_rms_subdomain: ${file(properties.json):products.current_rms.subdomain}
+      current_rms_api_url: ${file(properties.json):products.current_rms.api_url}
+  get-product-by-id:
+    # The function handler to be called for this endpoint
+    handler: com.oceanpremium.api.products.Handler::handleRequest
+    name: get-product-by-id
+    events:
+      - http:
+          # The URI of the endpoint
+          path: /${self:custom.apiPathPrefix}/products/{productId}
+          # The HTTP verb
+          method: get
+          # Additional endpoint configurations like enabling CORS
+          cors: true
+          # The default headers mandatory for this endpoint
+          headers:
+            - Content-Type
+          request:
+            parameters:
+              paths:
+                productId: true
+          allowCredentials: false
+    environment:
+      SENTRY_DSN: ${file(properties.json):products.sentry_dsn}
+      slack_webhook_jvt: ${file(properties.json):products.slack.webhook_jvt}
+      slack_webhook_op: ${file(properties.json):products.slack.webhook_op}
+      current_rms_token: ${file(properties.json):products.current_rms.token}
+      current_rms_subdomain: ${file(properties.json):products.current_rms.subdomain}
+      current_rms_api_url: ${file(properties.json):products.current_rms.api_url}
+  get-product-groups:
+    # The function handler to be called for this endpoint
+    handler: com.oceanpremium.api.products.Handler::handleRequest
+    name: get-product-groups
+    events:
+      - http:
+          # The URI of the endpoint
+          path: /${self:custom.apiPathPrefix}/products/groups
+          # The HTTP verb
+          method: get
+          # Additional endpoint configurations like enabling CORS
+          cors: true
+          # The default headers mandatory for this endpoint
+          headers:
+            - Content-Type
+          request:
+            parameters:
+              paths:
+                productId: true
+          allowCredentials: false
+    environment:
+      SENTRY_DSN: ${file(properties.json):products.sentry_dsn}
+      slack_webhook_jvt: ${file(properties.json):products.slack.webhook_jvt}
+      slack_webhook_op: ${file(properties.json):products.slack.webhook_op}
+      current_rms_token: ${file(properties.json):products.current_rms.token}
+      current_rms_subdomain: ${file(properties.json):products.current_rms.subdomain}
+      current_rms_api_url: ${file(properties.json):products.current_rms.api_url}

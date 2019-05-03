@@ -22,6 +22,8 @@ buildscript {
         jUnitVersion = '4.12'
         kotlinTestVersion = '1.3.5'
         springDependencyManagementVersion = '1.0.3.RELEASE'
+        retrofitVersion = '2.4.0'
+        retrofitInterceptorVersion = '3.14.1'
     }
 
     repositories {
@@ -141,6 +143,11 @@ allprojects {
 
         // Sentry.io - Error monitoring
         compile ("io.sentry:sentry-spring:$sentryVersion")
+
+        // Retrofit
+        compile ("com.squareup.retrofit2:retrofit:${retrofitVersion}")
+        compile ("com.squareup.retrofit2:converter-gson:${retrofitVersion}")
+        compile ("com.squareup.okhttp3:logging-interceptor:3.14.1")
     }
 
     /**
@@ -215,6 +222,24 @@ allprojects {
 
     /**
      * Tasks to deploy a server-less function module.
+     *
+     * Make sure serverless npm package is installed, @link: https://serverless.com/framework/docs/providers/aws/guide/installation/
+     *
+     * Run example:
+     *
+     * ./gradlew module-name:deploy -Pstage=dev|test|stage|prod -Pprofile=aws-credentials-profile-name --stacktrace
+     *
+     * The gradle command will call the serverless plugin with the following default flags:
+     *
+     * sls deploy --verbose --region eu-west-1 '--stage', dev --aws-profile oceanpremium-serverless-publisher
+     *
+     * - stage: defaults to 'dev' if no explicit 'stage' flag is passed
+     * - region: defaults to 'eu-west-1' for deployment
+     * - Needs a mandatory AWS credentials profile name of: [oceanpremium-serverless-publisher] setup in an AWS credentials file
+     *
+     * See for info on setting up an AWS credentials profile:
+     * @link: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html
+     * @link: https://serverless.com/framework/docs/providers/aws/cli-reference/config-credentials/
      */
     //noinspection GroovyAssignabilityCheck
     task deploy(type: Exec) {
@@ -222,13 +247,69 @@ allprojects {
         dependsOn("shadowJar")
         description 'Deploy serverless function to remote'
 
+        def deployRegion = "eu-west-1"
+        def stagePropertyName = "stage"
+        def profilePropertyName = "profile"
         def stageToDeployTo = "dev"
+        def deployProfileName = "oceanpremium-serverless-publisher"
+        def awsProfileToUse = deployProfileName
+        def awsProfileConfigLink = "https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html"
+        def serverlessAwsProfileConfigLink = "https://serverless.com/framework/docs/providers/aws/cli-reference/config-credentials/"
 
-        if (project.hasProperty('stage')) {
-            stageToDeployTo = property('stage')
+        doFirst {
+            // Grab stage flag value
+            if (project.hasProperty(stagePropertyName)) {
+                stageToDeployTo = findProperty(stagePropertyName)
+                println("Stage to deploy to: $stageToDeployTo")
+            } else {
+                println("No explicit stage flag provided, reverting to default stage to deploy: $stageToDeployTo")
+            }
+
+            // Grab profile flag value
+            if (project.hasProperty(profilePropertyName)) {
+
+                awsProfileToUse = findProperty(profilePropertyName)
+
+                if (awsProfileToUse != deployProfileName) {
+                    throw new GradleException("The profile passed does not match the mandatory profile name: [$deployProfileName], make sure a profile is setup with the name: [$deployProfileName] " +
+                            "in your AWS credentials file. See here for more info on setting up an AWS profile: $awsProfileConfigLink\n$serverlessAwsProfileConfigLink")
+                }
+            } else {
+                throw new GradleException("Did not provide profile flag: -Pprofile=$deployProfileName in the deploy command, " +
+                        "make sure to setup a profile with the name: [$deployProfileName], in your AWS credentials file." +
+                        "\nSee here for more info on setting up a AWS profile: $awsProfileConfigLink\n$serverlessAwsProfileConfigLink\n\nThen run the deploy command again:\n\n" +
+                        "./gradlew $project.name:deploy -Pstage=dev|test|stage|prod -Pprofile=$deployProfileName")
+            }
         }
 
-        commandLine 'sls', 'deploy', '--region' , 'eu-west-1', '--verbose', '--stage', "$stageToDeployTo"
+        commandLine 'sls', 'deploy', '--verbose', '--region', "$deployRegion", '--stage', "$stageToDeployTo", '--aws-profile', "$awsProfileToUse"
+    }
+
+    /**
+     * Task to converts Swagger spec (swagger.yml) file to OpenAPI spec (swagger.json) so it can be imported into Postman.
+     *
+     * Make sure swagger codegen npm package is installed, @link: https://github.com/swagger-api/swagger-codegen
+     */
+    //noinspection GroovyAssignabilityCheck
+    task generateSwaggerJson(type: Exec) {
+        group 'ocean-premium'
+        description 'Generate openapi.json file from swagger.yml'
+        def resourcesPath = "./src/main/resources"
+
+        workingDir resourcesPath
+
+        doLast {
+            println("Cleanup of resources that are generated by swagger-codegen in: ${resourcesPath}")
+
+            delete fileTree(resourcesPath) {
+                include 'README.md'
+                include '.swagger-codegen-ignore'
+            }
+
+            delete "${resourcesPath}/.swagger-codegen"
+        }
+
+        commandLine 'swagger-codegen', 'generate', '-i', 'swagger.yml', '-l', 'openapi'
     }
 }
 

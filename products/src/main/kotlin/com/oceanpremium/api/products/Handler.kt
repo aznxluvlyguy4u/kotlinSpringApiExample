@@ -6,6 +6,7 @@ import com.amazonaws.serverless.proxy.model.AwsProxyResponse
 import com.amazonaws.serverless.proxy.spring.SpringBootLambdaContainerHandler
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler
+import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import io.sentry.spring.SentryServletContextInitializer
 import org.slf4j.LoggerFactory
 import org.springframework.boot.SpringApplication
@@ -14,6 +15,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.boot.web.servlet.ServletContextInitializer
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Import
 import org.springframework.core.Ordered
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.cors.CorsConfiguration
@@ -23,17 +25,20 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import org.springframework.web.servlet.HandlerExceptionResolver
+import kotlin.jvm.*
+import kotlin.jvm.java as java1
 
 /**
  * The main application entry point that spins up the API.
  */
 @SpringBootApplication
+@Import(ProductsApiImpl::class)
 class ProductsDriver : SpringBootServletInitializer() {
 
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
-            SpringApplication.run(ProductsDriver::class.java, *args)
+            SpringApplication.run(ProductsDriver::class.java1, *args)
         }
     }
 
@@ -78,13 +83,13 @@ class ProductsDriver : SpringBootServletInitializer() {
 class Handler : RequestStreamHandler {
 
     companion object {
-        private val logger = LoggerFactory.getLogger(this::class.java)
+        private val logger = LoggerFactory.getLogger(this::class.java1)
         private var handler: SpringBootLambdaContainerHandler<AwsProxyRequest, AwsProxyResponse>? = null
 
         init {
             try {
                 handler =
-                    SpringBootLambdaContainerHandler.getAwsProxyHandler(ProductsDriver::class.java)
+                    SpringBootLambdaContainerHandler.getAwsProxyHandler(ProductsDriver::class.java1)
             } catch (e: ContainerInitializationException) {
 
                 e.printStackTrace()

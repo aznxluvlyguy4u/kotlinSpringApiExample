@@ -1,0 +1,39 @@
+swagger: '2.0'
+
+info:
+  version: 0.0.1
+  title: Ocean Premium - Products endpoint
+  description: An API endpoint for finding products
+
+schemes:
+  - https
+
+host: ehk7r71bna.execute-api.eu-west-1.amazonaws.com
+basePath: /dev/api/v1
+
+produces:
+  - application/json
+
+paths:
+  /products:
+    get:
+      summary: Find a product
+      tags:
+        - Product
+      consumes:
+        - application/json
+      responses:
+        200:
+          description: Found products
+definitions:
+
+  Response:
+    type: object
+    required:
+      - success
+      - message
+    properties:
+      success:
+        type: boolean
+      message:
+        type: object
