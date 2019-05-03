@@ -344,6 +344,7 @@ workflows:
               only:
                 - /feature/.*/
                 - /feat/.*/
+                - /fix/.*/
 
       - deploy-feature:
           type: approval
@@ -354,6 +355,7 @@ workflows:
               only:
                 - /feature/.*/
                 - /feat/.*/
+                - /fix/.*/
 
       # DEVELOPMENT
       - build-development:
@@ -377,6 +379,7 @@ workflows:
             branches:
               only:
                 - /master
+                - /hotfix/.*/
 
       - deploy-production:
           type: approval
