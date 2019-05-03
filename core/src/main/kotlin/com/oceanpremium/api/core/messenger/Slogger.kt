@@ -1,24 +1,24 @@
+@file:Suppress("IMPLICIT_CAST_TO_ANY")
+
 package com.oceanpremium.api.core.messenger
 
-import com.palantir.roboslack.api.MessageRequest
-import com.palantir.roboslack.webhook.SlackWebHookService
-import com.palantir.roboslack.webhook.api.model.WebHookToken
-import com.palantir.roboslack.webhook.api.model.response.ResponseCode
 import org.slf4j.LoggerFactory
 import java.lang.Exception
+import com.github.seratch.jslack.Slack
+import com.github.seratch.jslack.api.webhook.Payload
 
 class SlackConfig(val platformMonitoringWebHook: String,val salesMonitoringWebHook: String)
 
 object Slogger {
-    private const val LOGGER_NAME = "Ocean Premium - API logger"
-    private const val ERROR_MESSAGE = "Failed to send message to Slack!"
+    private var slackLoggerName: String? = null
+    private const val ERROR_MESSAGE = "Failed to send message to Slack"
     private val logger = LoggerFactory.getLogger(this::class.java)
     private const val PLATFORM_MONITORING_WEBHOOK_= "slack_webhook_jvt"
     private const val SALES_MONITORING_WEBHOOK_ = "slack_webhook_op"
 
     @Throws(Exception::class)
     fun send(messageBody: String? = null,
-             messageRequest: MessageRequest? = null,
+             payload: Payload? = null,
              inDebugMode: Boolean = false,
              slackConfig: SlackConfig = getSlackConfig(),
              salesLog: Boolean = false) {
@@ -29,37 +29,38 @@ object Slogger {
             return
         }
 
-        val token = when {
-            salesLog ->  WebHookToken.fromString(slackConfig.salesMonitoringWebHook)
-            else -> WebHookToken.fromString(slackConfig.platformMonitoringWebHook)
+        val slack = Slack.getInstance()
+
+
+        val webHookUrl = when {
+            salesLog ->  {
+                slackLoggerName = "Ocean Premium - Sales Monitor Logger"
+                slackConfig.salesMonitoringWebHook
+            }
+            else -> {
+                slackLoggerName = "Ocean Premium - API logger"
+                slackConfig.platformMonitoringWebHook
+            }
         }
 
-        val messageRequestData = when (messageRequest) {
+        val payloadData = when (payload) {
             null -> {
                 when (messageBody) {
                     null -> throw Exception("Message CONTENT not set, therefore not sending message")
-                    else -> MessageRequest.builder()
-                        .username(LOGGER_NAME)
+                    else -> Payload.builder()
+                        .username(slackLoggerName)
                         .text(messageBody)
                         .build()
                 }
-            }
-            else -> {
-                when {
-                    messageRequest.text().isEmpty() ->
-                        throw Exception("Message BODY on Message Request not set, therefore not sending message")
-                    else ->
-                        messageRequest
-                }
+            } else -> {
+                payload
             }
         }
 
-        val response= SlackWebHookService.with(token).sendMessage(messageRequestData)
+        val response = slack.send(webHookUrl, payloadData)
 
-        if (response != ResponseCode.OK) {
-            logger.error(ERROR_MESSAGE)
-
-            return
+        if(response.code != 200) {
+            logger.warn("$ERROR_MESSAGE: ${response.message}")
         }
     }
 
