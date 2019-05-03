@@ -83,7 +83,6 @@ functions:
           headers:
             - Content-Type
           allowCredentials: false
-      - schedule: rate(2 minutes)
     environment:
       SENTRY_DSN: ${file(properties.json):products.sentry_dsn}
       slack_webhook_jvt: ${file(properties.json):products.slack.webhook_jvt}
