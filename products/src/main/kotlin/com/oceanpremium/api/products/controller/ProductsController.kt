@@ -72,7 +72,7 @@ class ProductsController(
     }
 
     /**
-     * Endpoint to get a product based on given id.
+     * Endpoint to get the available product groups.
      */
     @RequestMapping("groups")
     @ResponseBody
