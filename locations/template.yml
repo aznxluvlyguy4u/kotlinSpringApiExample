@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform:
+  - AWS::Serverless-2016-10-31
+
+# See here on setting up environment variables:
+# https://github.com/awslabs/aws-sam-cli/blob/develop/docs/advanced_usage.rst#lambda-environment-variables
+Resources: # CRUD
+  GetLocationsApiDocs:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Endpoint to get location API docs
+      MemorySize: 512
+      Timeout: 30
+      Handler: com.oceanpremium.api.location.Handler::handleRequest
+      Runtime: java8
+      Environment:
+        Variables:
+          sentry_dsn: ""
+          slack_webhook_jvt: ""
+      CodeUri: build/libs/locations-0.0.1-SNAPSHOT-aws.jar
+      Events:
+        CreateSync:
+          Type: Api
+          Properties:
+            Path: /api/v1/locations/docs
+            Method: get
+  GetLocations:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Endpoint to retrieve locations
+      MemorySize: 512
+      Timeout: 30
+      Handler: com.oceanpremium.api.locations.Handler::handleRequest
+      Runtime: java8
+      Environment:
+        Variables:
+          sentry_dsn: ""
+          slack_webhook_jvt: ""
+          current_rms_token: ""
+          current_rms_subdomain: ""
+          current_rms_api_url: ""
+      CodeUri: build/libs/locations-0.0.1-SNAPSHOT-aws.jar
+      Events:
+        CreateSync:
+          Type: Api
+          Properties:
+            Path: /api/v1/locations
+            Method: get
