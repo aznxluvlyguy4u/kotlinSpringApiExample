@@ -15,7 +15,7 @@ produces:
   - application/json
 
 paths:
-  /products:
+  /locations:
     get:
       summary: Find a locations
       tags:

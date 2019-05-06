@@ -13,7 +13,7 @@
     {"url" : "https://rh2urujte8.execute-api.eu-west-1.amazonaws.com/dev/api/v1"}
   ],
   "paths" : {
-    "/products": {
+    "/locations": {
       "get": {
         "summary": "Get locations",
         "parameters": [
