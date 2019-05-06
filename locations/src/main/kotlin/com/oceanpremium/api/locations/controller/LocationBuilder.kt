@@ -1,11 +1,11 @@
 package com.oceanpremium.api.locations.controller
 
-class Location(var name: String? = null, var id: Int = 0,  var store_id: Int = 0)
+class Location(var name: String? = null, var id: Int = 0,  var storeId: Int = 0)
 
 class Store(private val name: String, var id: Int = 0, val locations: MutableList<Location> = mutableListOf()) {
 
     fun addLocation(location: Location) {
-        location.store_id = id
+        location.storeId = id
 
         if (location.name == null) {
             location.name = name
@@ -30,7 +30,7 @@ class LocationBuilderImpl(private val storeBuilder: StoreBuilder = StoreBuilderI
         stores.forEach { store ->
             store.locations.forEach { location ->
                 location.id = j
-                location.store_id = store.id
+                location.storeId = store.id
                 j++
             }
 
