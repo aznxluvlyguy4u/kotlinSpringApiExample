@@ -11,7 +11,7 @@ Resources: # CRUD
       Description: Endpoint to get location API docs
       MemorySize: 512
       Timeout: 30
-      Handler: com.oceanpremium.api.location.Handler::handleRequest
+      Handler: com.oceanpremium.api.locations.Handler::handleRequest
       Runtime: java8
       Environment:
         Variables:

@@ -18,6 +18,7 @@ class LocationsController(
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
         private val mapper = ObjectMapperConfig.mapper
+        private val locationBuilder: LocationBuilder = LocationBuilderImpl()
     }
 
     @RequestMapping("docs")
@@ -40,10 +41,9 @@ class LocationsController(
         val logMessage = "[API] - GET locations: $fields"
         logger.debug(logMessage)
 
-
         return CurrentRmsApiResponse.build {
             statusCode = HttpStatus.OK
-            objectBody = null
+            objectBody = locationBuilder.getAllLocations()
         }
     }
 }

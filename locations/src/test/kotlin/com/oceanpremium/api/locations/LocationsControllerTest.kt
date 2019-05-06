@@ -18,7 +18,7 @@ class LocationsControllerTest {
     val restTemplate: TestRestTemplate? = null
 
     companion object {
-        private val endpoint = "/api/v1/locations"
+        private const val endpoint = "/api/v1/locations"
     }
 
     /**
