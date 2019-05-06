@@ -1,0 +1,39 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Ocean Premium - Locations endpoint",
+    "description" : "A basic API for retrieving locations",
+    "license" : {
+      "name" : "MIT"
+    },
+    "version" : "0.0.1"
+  },
+  "servers" : [
+    {"url" : "https://vk2b3q5m17.execute-api.eu-west-1.amazonaws.com/dev/api/v1"},
+    {"url" : "https://rh2urujte8.execute-api.eu-west-1.amazonaws.com/dev/api/v1"}
+  ],
+  "paths" : {
+    "/locations": {
+      "get": {
+        "summary": "Get locations",
+        "parameters": [
+          {
+            "name": "query-param",
+            "in": "query",
+            "description": "Based on currentRMS options, query parameters",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {}
+          }
+        }
+      }
+    }
+  }
+}

@@ -345,4 +345,5 @@ dependencies {
     compile project(':core')
     compile project(':auth')
     compile project(':products')
+    compile project(':locations')
 }
