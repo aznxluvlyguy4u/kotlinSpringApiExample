@@ -62,15 +62,15 @@ functions:
             - Content-Type
           allowCredentials: false
     environment:
-      SENTRY_DSN: ${file(properties.json):products.sentry_dsn}
-      slack_webhook_jvt: ${file(properties.json):products.slack.webhook_jvt}
-      current_rms_token: ${file(properties.json):products.current_rms.token}
-      current_rms_subdomain: ${file(properties.json):products.current_rms.subdomain}
-      current_rms_api_url: ${file(properties.json):products.current_rms.api_url}
+      SENTRY_DSN: ${file(properties.json):locations.sentry_dsn}
+      slack_webhook_jvt: ${file(properties.json):locations.slack.webhook_jvt}
+      current_rms_token: ${file(properties.json):locations.current_rms.token}
+      current_rms_subdomain: ${file(properties.json):locations.current_rms.subdomain}
+      current_rms_api_url: ${file(properties.json):locations.current_rms.api_url}
   get-locations:
     # The function handler to be called for this endpoint
-    handler: com.oceanpremium.api.products.Handler::handleRequest
-    name: get-products
+    handler: com.oceanpremium.api.locations.Handler::handleRequest
+    name: get-locations
     events:
       - http:
           # The URI of the endpoint
@@ -84,8 +84,8 @@ functions:
             - Content-Type
           allowCredentials: false
     environment:
-      SENTRY_DSN: ${file(properties.json):products.sentry_dsn}
-      slack_webhook_jvt: ${file(properties.json):products.slack.webhook_jvt}
-      current_rms_token: ${file(properties.json):products.current_rms.token}
-      current_rms_subdomain: ${file(properties.json):products.current_rms.subdomain}
-      current_rms_api_url: ${file(properties.json):products.current_rms.api_url}
+      SENTRY_DSN: ${file(properties.json):locations.sentry_dsn}
+      slack_webhook_jvt: ${file(properties.json):locations.slack.webhook_jvt}
+      current_rms_token: ${file(properties.json):locations.current_rms.token}
+      current_rms_subdomain: ${file(properties.json):locations.current_rms.subdomain}
+      current_rms_api_url: ${file(properties.json):locations.current_rms.api_url}
