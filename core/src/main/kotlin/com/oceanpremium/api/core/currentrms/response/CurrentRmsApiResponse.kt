@@ -1,7 +1,5 @@
 package com.oceanpremium.api.currentrms.response
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.oceanpremium.api.core.enum.HTTPStatusCodeRange
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -84,6 +82,12 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
                         if (objectBody == null) {
                             buildSuccessResponse(statusCode, statusCode.name)
                         } else {
+                            val isEmptyResult= isResultEmpty(objectBody as Map<*, *>)
+
+                            if (isEmptyResult) {
+                                return buildSuccessResponse(HttpStatus.NOT_FOUND, objectBody)
+                            }
+
                             buildSuccessResponse(statusCode, objectBody)
                         }
                     } catch (e: Exception) {
@@ -162,6 +166,28 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
                     )
                 }
             }
+        }
+
+        // CurrentRMS API returns 200 OK when a resource is not found / a result set is empty
+        // Proper API response code would be 404 NOT FOUND, therefore overriding a request that
+        // responds with 200 OK but has not result.
+        private fun isResultEmpty(objectBody: Map<*, *>): Boolean {
+
+            if (objectBody.containsKey("meta")) {
+                val meta = objectBody["meta"] as Map<*, *>
+                val rowCount = meta["row_count"] as Double
+
+                return when (rowCount) {
+                    0.0 -> {
+                        true
+                    }
+                    else -> {
+                        false
+                    }
+                }
+            }
+
+            return true
         }
 
         /**
