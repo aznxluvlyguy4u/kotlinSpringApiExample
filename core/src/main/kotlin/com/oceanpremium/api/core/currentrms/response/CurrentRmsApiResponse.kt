@@ -1,4 +1,4 @@
-package com.oceanpremium.api.currentrms.response
+package com.oceanpremium.api.core.currentrms.response
 
 import com.oceanpremium.api.core.enum.HTTPStatusCodeRange
 import org.slf4j.LoggerFactory
