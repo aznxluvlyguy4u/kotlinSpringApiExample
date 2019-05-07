@@ -1,10 +1,10 @@
 package com.oceanpremium.api.products.controller
 
 import com.oceanpremium.api.core.currentrms.ProductsApiImpl
+import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
 import com.oceanpremium.api.core.messenger.Slogger
 import com.oceanpremium.api.core.util.Constants
 import com.oceanpremium.api.core.util.ObjectMapperConfig
-import com.oceanpremium.api.currentrms.response.CurrentRmsApiResponse
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ResourceLoader
