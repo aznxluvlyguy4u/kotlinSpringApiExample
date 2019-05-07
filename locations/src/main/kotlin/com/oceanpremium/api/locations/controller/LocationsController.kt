@@ -1,5 +1,6 @@
 package com.oceanpremium.api.locations.controller
 
+import com.oceanpremium.api.core.model.JsonBody
 import com.oceanpremium.api.core.util.Constants
 import com.oceanpremium.api.core.util.ObjectMapperConfig
 import com.oceanpremium.api.locations.builder.LocationBuilder
@@ -42,7 +43,7 @@ class LocationsController(
         logger.debug("[API] - GET locations: $fields")
 
         return ResponseEntity(
-            locationBuilder.getAllLocations(),
+            JsonBody(statusCode = HttpStatus.OK.value(), data = locationBuilder.getAllLocations() ),
             HttpStatus.OK
         )
     }
