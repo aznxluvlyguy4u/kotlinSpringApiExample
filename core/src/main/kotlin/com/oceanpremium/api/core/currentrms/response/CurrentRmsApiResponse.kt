@@ -182,17 +182,19 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
             if (objectBody.containsKey(metaKey)) {
                 val meta = objectBody[metaKey] as Map<*, *>
 
-                return when (meta[rowCountKey] as Double) {
-                    0.0 -> {
-                        true
-                    }
-                    else -> {
-                        false
+                if (meta.containsKey(rowCountKey)) {
+                    return when (meta[rowCountKey] as Double) {
+                        0.0 -> {
+                            true
+                        }
+                        else -> {
+                            false
+                        }
                     }
                 }
             }
 
-            return true
+            return false
         }
 
         /**
