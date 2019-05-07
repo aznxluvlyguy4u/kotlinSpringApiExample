@@ -168,16 +168,21 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
             }
         }
 
-        // CurrentRMS API returns 200 OK when a resource is not found / a result set is empty
-        // Proper API response code would be 404 NOT FOUND, therefore overriding a request that
-        // responds with 200 OK but has not result.
+
+        /**
+         * CurrentRMS API returns 200 OK when a resource is not found / a result set is empty
+         * Proper API response code would be 404 NOT FOUND, therefore overriding a request that
+         * responds with 200 OK but has not result.
+         */
         private fun isResultEmpty(objectBody: Map<*, *>): Boolean {
 
-            if (objectBody.containsKey("meta")) {
-                val meta = objectBody["meta"] as Map<*, *>
-                val rowCount = meta["row_count"] as Double
+            val metaKey = "meta"
+            val rowCountKey = "row_count"
 
-                return when (rowCount) {
+            if (objectBody.containsKey(metaKey)) {
+                val meta = objectBody[metaKey] as Map<*, *>
+
+                return when (meta[rowCountKey] as Double) {
                     0.0 -> {
                         true
                     }
