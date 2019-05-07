@@ -6,6 +6,11 @@ import com.amazonaws.serverless.proxy.model.AwsProxyResponse
 import com.amazonaws.serverless.proxy.spring.SpringBootLambdaContainerHandler
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler
+import com.oceanpremium.api.core.currentrms.ProductsApiImpl
+import com.oceanpremium.api.locations.builder.LocationBuilder
+import com.oceanpremium.api.locations.builder.LocationBuilderImpl
+import com.oceanpremium.api.locations.builder.StoreBuilder
+import com.oceanpremium.api.locations.builder.StoreBuilderImpl
 import io.sentry.spring.SentryServletContextInitializer
 import org.slf4j.LoggerFactory
 import org.springframework.boot.SpringApplication
@@ -14,6 +19,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.boot.web.servlet.ServletContextInitializer
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Import
 import org.springframework.core.Ordered
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.cors.CorsConfiguration

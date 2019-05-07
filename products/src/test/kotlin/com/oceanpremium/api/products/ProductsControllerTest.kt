@@ -35,13 +35,23 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductsByQueryParameters() {
-
-        val searchKeyword = "Wakeboard"
-        val params = "?q[name_cont]=$searchKeyword&page=1&per_page=20"
+        val params = "?page=1&per_page=2&q[name_or_product_group_name_or_product_tags_name_cont]=seabob"
         val response = restTemplate?.getForEntity("$endpoint$params", Response::class.java)
 
         // Assert that the HTTP response code is OK
         assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.OK.value())
+    }
+
+    /**
+     * Find products by query parameters.
+     */
+    @Test
+    fun testGetProductsByQueryParametersNotFound() {
+        val params = "?page=1&per_page=2&q[name_or_product_group_name_or_product_tags_name_cont]=testci"
+        val response = restTemplate?.getForEntity("$endpoint$params", Response::class.java)
+
+        // Assert that the HTTP response code is OK
+        assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.NOT_FOUND.value())
     }
 
     /**
@@ -54,6 +64,18 @@ class ProductsControllerTest {
 
         // Assert that the HTTP response code is OK
         assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.OK.value())
+    }
+
+    /**
+     * Get product by id.
+     */
+    @Test
+    fun testGetProductByIdNotFound() {
+        val productId = 9999999
+        val response = restTemplate?.getForEntity("$endpoint/$productId", Response::class.java)
+
+        // Assert that the HTTP response code is OK
+        assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.NOT_FOUND.value())
     }
 
     /**

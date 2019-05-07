@@ -1,45 +1,6 @@
-package com.oceanpremium.api.locations.controller
+package com.oceanpremium.api.locations.builder
 
-class Location(var name: String? = null, var id: Int = 0,  var store_id: Int = 0)
-
-class Store(private val name: String, var id: Int = 0, val locations: MutableList<Location> = mutableListOf()) {
-
-    fun addLocation(location: Location) {
-        location.store_id = id
-
-        if (location.name == null) {
-            location.name = name
-        }
-
-        locations.add(location)
-    }
-}
-
-interface LocationBuilder {
-    fun getAllLocations(): List<Location>
-}
-
-class LocationBuilderImpl(private val storeBuilder: StoreBuilder = StoreBuilderImpl()): LocationBuilder {
-
-    override fun getAllLocations(): List<Location> {
-
-        val stores = storeBuilder.getAllStores()
-        val locations: MutableList<Location> = mutableListOf()
-
-        var j = 1
-        stores.forEach { store ->
-            store.locations.forEach { location ->
-                location.id = j
-                location.store_id = store.id
-                j++
-            }
-
-            locations.addAll(store.locations)
-        }
-
-        return locations
-    }
-}
+import org.springframework.stereotype.Service
 
 interface StoreBuilder {
     fun getAllStores(): List<Store>
@@ -48,6 +9,7 @@ interface StoreBuilder {
 /**
  * Source @link: https://docs.google.com/spreadsheets/d/1Jpx59haz_8cZw0uGUBSZX47mQDPv0V3OvgJUtr--JzA/edit#gid=0
  */
+@Service
 class StoreBuilderImpl: StoreBuilder {
 
     private fun buildSpainMainLand(): List<Store> {
@@ -66,25 +28,25 @@ class StoreBuilderImpl: StoreBuilder {
 
         val malaga = Store("Malaga")
         malaga.addLocation(Location())
-        malaga.addLocation(Location( "Almunecar"))
-        malaga.addLocation(Location( "Fuengirola"))
+        malaga.addLocation(Location("Almunecar"))
+        malaga.addLocation(Location("Fuengirola"))
         stores.add(malaga)
 
-        val almeria =  Store("Almeria")
+        val almeria = Store("Almeria")
         almeria.addLocation(Location())
-        almeria.addLocation(Location( "Aguilas"))
+        almeria.addLocation(Location("Aguilas"))
         almeria.addLocation(Location("Mortil"))
         stores.add(almeria)
 
         val alicante = Store("Alicante")
         alicante.addLocation(Location())
         alicante.addLocation(Location("Calp"))
-        alicante.addLocation(Location( "Cartagena"))
+        alicante.addLocation(Location("Cartagena"))
         stores.add(alicante)
 
         val valencia = Store("Valencia")
         valencia.addLocation(Location())
-        valencia.addLocation(Location( "Tarragona"))
+        valencia.addLocation(Location("Tarragona"))
         valencia.addLocation(Location())
         valencia.addLocation(Location())
         stores.add(valencia)
@@ -108,21 +70,21 @@ class StoreBuilderImpl: StoreBuilder {
     private fun buildBaleraicsIslands(): List<Store> {
         val stores: MutableList<Store> = mutableListOf()
 
-        //Baleraics Islands
+        //Balearic's Islands
         val ibiza = Store("Ibiza")
-        ibiza.addLocation(Location( "Ibiza Island"))
+        ibiza.addLocation(Location("Ibiza Island"))
         ibiza.addLocation(Location("Formentera island"))
         stores.add(ibiza)
 
         val mallorca = Store("Mallorca")
-        mallorca.addLocation(Location( "Island - North/East"))
-        mallorca.addLocation(Location( "Palma"))
-        mallorca.addLocation(Location( "Port Portals"))
-        mallorca.addLocation(Location( "Porto Adriano"))
+        mallorca.addLocation(Location("Island - North/East"))
+        mallorca.addLocation(Location("Palma"))
+        mallorca.addLocation(Location("Port Portals"))
+        mallorca.addLocation(Location("Porto Adriano"))
         stores.add(mallorca)
 
         val menorca = Store("Menorca")
-        menorca.addLocation(Location( "Menorca Island"))
+        menorca.addLocation(Location("Menorca Island"))
         stores.add(menorca)
 
         return stores.toList()
@@ -142,40 +104,40 @@ class StoreBuilderImpl: StoreBuilder {
 
         val toulon = Store("Toulon")
         toulon.addLocation(Location())
-        toulon.addLocation(Location( "Cavalaire sur Mer"))
-        toulon.addLocation(Location( "Hyeres"))
-        toulon.addLocation(Location( "La Ciotat"))
+        toulon.addLocation(Location("Cavalaire sur Mer"))
+        toulon.addLocation(Location("Hyeres"))
+        toulon.addLocation(Location("La Ciotat"))
         stores.add(toulon)
 
         val stTropez = Store("St. Tropez")
         stTropez.addLocation(Location())
-        stTropez.addLocation(Location( "Saint Raphael"))
-        stTropez.addLocation(Location( "Pampellonne beach"))
+        stTropez.addLocation(Location("Saint Raphael"))
+        stTropez.addLocation(Location("Pampellonne beach"))
         stores.add(stTropez)
 
         val cannes = Store("Cannes")
         cannes.addLocation(Location())
-        cannes.addLocation(Location( "Mandelieu la Napoule"))
-        cannes.addLocation(Location( "Theule sur Mer"))
+        cannes.addLocation(Location("Mandelieu la Napoule"))
+        cannes.addLocation(Location("Theule sur Mer"))
         stores.add(cannes)
 
         val antibes = Store("Antibes")
         antibes.addLocation(Location())
-        antibes.addLocation(Location( "Marina Baie Des Anges"))
-        antibes.addLocation(Location( "Golfe Juan"))
+        antibes.addLocation(Location("Marina Baie Des Anges"))
+        antibes.addLocation(Location("Golfe Juan"))
         stores.add(antibes)
 
         val nice = Store("Nice")
         nice.addLocation(Location())
-        nice.addLocation(Location( "Villefranche sur Mer"))
-        nice.addLocation(Location( "Cagnes sur Mer"))
+        nice.addLocation(Location("Villefranche sur Mer"))
+        nice.addLocation(Location("Cagnes sur Mer"))
         stores.add(nice)
 
         val monaco = Store("Monaco")
         monaco.addLocation(Location())
-        monaco.addLocation(Location( "Cap d'Ail"))
-        monaco.addLocation(Location( "Saint Jean Cap Ferrat"))
-        monaco.addLocation(Location( "Beaulieu sur Mer"))
+        monaco.addLocation(Location("Cap d'Ail"))
+        monaco.addLocation(Location("Saint Jean Cap Ferrat"))
+        monaco.addLocation(Location("Beaulieu sur Mer"))
         stores.add(monaco)
 
         return stores.toList()
@@ -184,24 +146,28 @@ class StoreBuilderImpl: StoreBuilder {
     private fun buildItaly(): List<Store> {
         val stores: MutableList<Store> = mutableListOf()
 
-        //Liguria (Italy)
+        /**
+         * Liguria Italy
+         */
         val sanremo = Store("Sanremo")
         sanremo.addLocation(Location())
-        sanremo.addLocation(Location( "Imperia"))
-        sanremo.addLocation(Location( "Ventimiglia"))
+        sanremo.addLocation(Location("Imperia"))
+        sanremo.addLocation(Location("Ventimiglia"))
         stores.add(sanremo)
 
-        //Tuscany (Italy)
+        /**
+         * Tuscany Italy
+         */
         val loano = Store("Loano")
         loano.addLocation(Location())
-        loano.addLocation(Location( "Albenga"))
-        loano.addLocation(Location( "Savona"))
-        loano.addLocation(Location( "Varazze"))
+        loano.addLocation(Location("Albenga"))
+        loano.addLocation(Location("Savona"))
+        loano.addLocation(Location("Varazze"))
         stores.add(loano)
 
         val genoa = Store("Genoa")
-        genoa.addLocation(Location( "Genoa Aeroporto"))
-        genoa.addLocation(Location( "Genoa molo vecchio"))
+        genoa.addLocation(Location("Genoa Aeroporto"))
+        genoa.addLocation(Location("Genoa molo vecchio"))
         stores.add(genoa)
 
         val portofino = Store("Portofino")
@@ -236,7 +202,9 @@ class StoreBuilderImpl: StoreBuilder {
         civitavecchia.addLocation(Location())
         stores.add(civitavecchia)
 
-        // Amalfi (Italy)
+        /**
+         * Amalfi (Italy)
+         */
         val gaeta = Store("Gaeta")
         gaeta.addLocation(Location())
         stores.add(gaeta)
@@ -328,7 +296,7 @@ class StoreBuilderImpl: StoreBuilder {
         return stores.toList()
     }
 
-    private fun buildMalta() : List<Store> {
+    private fun buildMalta(): List<Store> {
         val stores: MutableList<Store> = mutableListOf()
 
         // Malta
@@ -488,7 +456,7 @@ class StoreBuilderImpl: StoreBuilder {
         val stores: MutableList<Store> = mutableListOf()
 
         //Albania
-        val sarande =Store("Sarande")
+        val sarande = Store("Sarande")
         sarande.addLocation(Location())
         stores.add(sarande)
 
@@ -498,7 +466,9 @@ class StoreBuilderImpl: StoreBuilder {
     private fun buildGreece(): List<Store> {
         val stores: MutableList<Store> = mutableListOf()
 
-        // Greece (Ionian)
+        /**
+         * Greece (Ionian)
+         */
         val corfu = Store("Corfu")
         corfu.addLocation(Location())
         stores.add(corfu)
@@ -511,7 +481,9 @@ class StoreBuilderImpl: StoreBuilder {
         kefalonia.addLocation(Location())
         stores.add(kefalonia)
 
-        // Greece (Eagen)
+        /**
+         * Greece (Eagen)
+         */
         val athens = Store("Athens")
         athens.addLocation(Location())
         stores.add(athens)
