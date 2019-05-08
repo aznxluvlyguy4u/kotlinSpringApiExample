@@ -88,4 +88,21 @@ class ProductsController(
             objectBody = response.body()
         }
     }
+
+    /**
+     * Endpoint to get the inventory of products.
+     */
+    @RequestMapping("inventory")
+    @ResponseBody
+    fun getProductsInventory(@RequestParam fields: MutableMap<String, String>): ResponseEntity<*> {
+        val logMessage = "[API] - GET products inventory"
+        logger.debug(logMessage)
+
+        val response = productsApi.getProductsInventory(fields)
+
+        return CurrentRmsApiResponse.build {
+            statusCode = HttpStatus.valueOf(response?.code()!!)
+            objectBody = response.body()
+        }
+    }
 }

@@ -22,6 +22,11 @@ interface ProductsApi {
     fun getProductGroups(
         @QueryMap map: Map<String, String>
     ): Call<Any>
+
+    @GET("products/inventory")
+    fun getProductsInventory(
+        @QueryMap map: Map<String, String>
+    ): Call<Any>
 }
 
 class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
@@ -73,6 +78,33 @@ class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
     @Throws(IOException::class)
     fun getProductGroups(map: Map<String, String>): retrofit2.Response<Any>? {
         val retrofitCall = productsApi.getProductGroups(map = map)
+        val response = retrofitCall.execute()
+
+        logger.debug("Current RMS API call - HTTP status: ${response.code()}")
+
+        when {
+            response.isSuccessful -> {
+                logger.debug("Current RMS API response body: ${response.body()}")
+            }
+            else ->  {
+                logger.debug("Request to Current RMS API failed: ${response.message()}")
+            }
+        }
+
+        return response
+    }
+
+    @Throws(IOException::class)
+    fun getProductsInventory(map: MutableMap<String, String>): retrofit2.Response<Any>? {
+        if (!map.containsKey("q[active_eq]")) {
+            map["q[active_eq]"] = "true"
+        }
+
+        if (!map.containsKey("filtermode[]")) {
+            map["filtermode[]"] = "rental"
+        }
+
+        val retrofitCall = productsApi.getProductsInventory(map = map)
         val response = retrofitCall.execute()
 
         logger.debug("Current RMS API call - HTTP status: ${response.code()}")
