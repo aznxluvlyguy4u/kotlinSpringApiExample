@@ -1,5 +1,6 @@
 package com.oceanpremium.api.core.currentrms
 
+import com.oceanpremium.api.core.enum.CurrentRmsSaleType
 import org.slf4j.LoggerFactory
 import retrofit2.Call
 import retrofit2.http.GET
@@ -35,6 +36,9 @@ class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
+        private const val ACTIVE_PRODUCT_QUERY = "q[active_eq]"
+        private const val FILTER_MODE_QUERY = "filtermode[]"
+
     }
 
     @Throws(IOException::class)
@@ -96,12 +100,9 @@ class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
 
     @Throws(IOException::class)
     fun getProductsInventory(map: MutableMap<String, String>): retrofit2.Response<Any>? {
-        if (!map.containsKey("q[active_eq]")) {
-            map["q[active_eq]"] = "true"
-        }
-
-        if (!map.containsKey("filtermode[]")) {
-            map["filtermode[]"] = "rental"
+        when {
+            !map.containsKey(ACTIVE_PRODUCT_QUERY) -> map[ACTIVE_PRODUCT_QUERY] = "true"
+            !map.containsKey(FILTER_MODE_QUERY) -> map[FILTER_MODE_QUERY] = CurrentRmsSaleType.RENTAL.type
         }
 
         val retrofitCall = productsApi.getProductsInventory(map = map)
