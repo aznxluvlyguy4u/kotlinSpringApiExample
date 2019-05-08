@@ -95,8 +95,12 @@ class ProductsController(
     @RequestMapping("inventory")
     @ResponseBody
     fun getProductsInventory(@RequestParam fields: MutableMap<String, String>): ResponseEntity<*> {
-        val logMessage = "[API] - GET products inventory"
+        val logMessage = "[API] - GET products inventories with request parameters: $fields"
         logger.debug(logMessage)
+
+        val logMessageSales = "[Sales analytics] GET products inventories - sales analytics: $fields"
+        logger.debug(logMessageSales)
+        Slogger.send(messageBody = logMessage, salesLog = true)
 
         val response = productsApi.getProductsInventory(fields)
 
