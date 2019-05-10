@@ -1,19 +1,20 @@
 package com.oceanpremium.api.core.currentrms.response.dto.mapper
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
+import com.oceanpremium.api.core.currentrms.response.dto.product.MetaDto
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductCustomFieldsDto
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import org.springframework.http.HttpStatus
 import retrofit2.Response
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-class ProductDtoMapper(var code: Int, response: Response<Any>?) {
-
-    var httpStatus: HttpStatus = HttpStatus.valueOf(code)
-    var data: Any? = null
-    var meta = MetaDtoMapper(response)
+class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoMapper(code) {
 
     init {
+        /**
+         * The root node of the response payload that will contain the response result for data key
+         */
        data = mapToDto(response)
     }
 
@@ -23,42 +24,53 @@ class ProductDtoMapper(var code: Int, response: Response<Any>?) {
      */
     private fun mapToDto(response: Response<Any>?) : Any? {
 
-        if(response?.body() == null) {
-            return response?.message()
+        when {
+            response != null -> if(!response.isSuccessful) {
+                data = CurrentRmsApiResponse.ErrorMessage(response.code(), response.message())
+
+                return data
+            }
         }
 
-        val responseBody = response.body() as Map<String, Any>
-
-        /**
-         * CurrentRms returns a 200 OK for empty result sets. As a best practice for REST API,
-         * the response should be a 404 NOT FOUND when an empty result set is returned.
-         *
-         * See @link: https://stackoverflow.com/questions/11746894/what-is-the-proper-rest-response-code-for-a-valid-request-but-an-empty-data
-         *
-         * Therefore, override the 200 OK response code and return a 404 NOT FOUND response code and error message instead.
-         */
-        if (isResultEmpty(responseBody)) {
-            code = HttpStatus.NOT_FOUND.value()
-        }
+        val responseBody = response?.body() as Map<*, *>
 
         return when {
             responseBody.containsKey("products") -> {
+
+                /**
+                 * CurrentRms returns a 200 OK for empty result sets. As a best practice for REST API,
+                 * the response should be a 404 NOT FOUND when an empty result set is returned.
+                 *
+                 * See @link: https://stackoverflow.com/questions/11746894/what-is-the-proper-rest-response-code-for-a-valid-request-but-an-empty-data
+                 *
+                 * Therefore, override the 200 OK response code and return a 404 NOT FOUND response code and error message instead.
+                 */
+                val metaMapper = MetaDtoMapper(response)
+
+                if (metaMapper.overrideHttpStatus) {
+                    httpStatus = HttpStatus.NOT_FOUND
+                    data = CurrentRmsApiResponse.ErrorMessage(response.code(), response.message())
+
+                    return data
+                }
+
+                meta = metaMapper.meta
                 mapJsonArray(response)
             }
             responseBody.containsKey("product") -> {
-               mapJsonObjectToDto(responseBody["product"] as Map<String, Any>)
+               mapJsonObjectToDto(responseBody["product"] as Map<*, *>)
             }
             else -> null
         }
     }
 
     /**
-     * Map list of items to list of dto's
+     * Map list of items to list of dtoMapper
      */
     private fun mapJsonArray(response: Response<Any>?) : List<ProductDto> {
-        val responseBody = response?.body() as Map<String, Any>
+        val responseBody = response?.body() as Map<*, *>
         val products: MutableList<ProductDto> = mutableListOf()
-        val productsItemsBody = responseBody["products"] as List<Map<String, Any>>
+        val productsItemsBody = responseBody["products"] as List<Map<*, *>>
 
         productsItemsBody.forEach {
             products.add(mapJsonObjectToDto(it))
@@ -68,9 +80,9 @@ class ProductDtoMapper(var code: Int, response: Response<Any>?) {
     }
 
     /**
-     * Map a single item to dto
+     * Map a single item to dtoMapper
      */
-    private fun mapJsonObjectToDto(itemBody: Map<String, Any>): ProductDto {
+    private fun mapJsonObjectToDto(itemBody: Map<*, *>): ProductDto {
         var id: Double? = null
         var name: String? = null
         var description: String? = null
@@ -119,26 +131,36 @@ class ProductDtoMapper(var code: Int, response: Response<Any>?) {
     }
 
     /**
-     * Map custom fields to dto
+     * Map custom fields to dtoMapper
      */
-    private fun mapCustomFieldsToDto(itemBody: Map<String, Any>): ProductCustomFieldsDto {
+    private fun mapCustomFieldsToDto(itemBody: Map<*, *>): ProductCustomFieldsDto? {
         var storeId: String? = null
-        var publicIconUrl: String? = null
         var publicIconThumbUrl: String? = null
+        var publicIconUrl: String? = null
 
         when {
             itemBody.contains("custom_fields") -> {
-                val customFieldsBody = itemBody["custom_fields"] as Map<String, Any>
+                val customFieldsBody = itemBody["custom_fields"] as Map<*, *>
 
                 when {
                     customFieldsBody.containsKey("store_id") -> storeId =
                         customFieldsBody["store_id"] as String?
+                }
+
+                when {
                     customFieldsBody.containsKey("public_icon_thumb_url") -> publicIconThumbUrl =
                         customFieldsBody["public_icon_thumb_url"] as String?
+                }
+
+                when {
                     customFieldsBody.containsKey("public_icon_url") -> publicIconUrl =
                         customFieldsBody["public_icon_url"] as String?
                 }
             }
+        }
+
+        if (storeId.isNullOrEmpty() && publicIconThumbUrl.isNullOrEmpty() && publicIconUrl.isNullOrEmpty()) {
+            return null
         }
 
         return ProductCustomFieldsDto(
@@ -146,34 +168,5 @@ class ProductDtoMapper(var code: Int, response: Response<Any>?) {
             publicIconUrl,
             publicIconThumbUrl
         )
-    }
-
-    /**
-     *
-     * In case a result SET (array) of items is returned, current rms returns a meta object containing details about
-     * pagination and the size of the result set. Utilize the meta object to check on row_count and determine if
-     * the result set is empty or not.
-     */
-    private fun isResultEmpty(objectBody: Map<*, *>): Boolean {
-
-        val metaKey = "meta"
-        val rowCountKey = "row_count"
-
-        if (objectBody.containsKey(metaKey)) {
-            val meta = objectBody[metaKey] as Map<*, *>
-
-            if (meta.containsKey(rowCountKey)) {
-                return when (meta[rowCountKey] as Double) {
-                    0.0 -> {
-                        true
-                    }
-                    else -> {
-                        false
-                    }
-                }
-            }
-        }
-
-        return false
     }
 }

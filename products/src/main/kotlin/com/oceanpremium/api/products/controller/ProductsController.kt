@@ -47,16 +47,14 @@ class ProductsController(
 
         val logMessageSales = "[Sales analytics] GET products - sales analytics: $fields"
         logger.debug(logMessageSales)
-        Slogger.send(messageBody = logMessage, salesLog = true)
+        Slogger.send(messageBody = logMessage, salesLog = true ,inDebugMode = true)
 
         val response = productsApi.getProducts(fields)
         val dto = ProductDtoMapper(response?.code()!!, response)
 
         return CurrentRmsApiResponse.build {
-            statusCode = dto.httpStatus
             rawResponse = response
-            dtoData = dto.data
-            dtoMeta = dto.meta
+            dtoMapper = dto
         }
     }
 
@@ -73,10 +71,8 @@ class ProductsController(
         val dto = ProductDtoMapper(response?.code()!!, response)
 
         return CurrentRmsApiResponse.build {
-            statusCode = dto.httpStatus
             rawResponse = response
-            dtoData = dto.data
-            dtoMeta = dto.meta
+            dtoMapper = dto
         }
     }
 
@@ -93,10 +89,8 @@ class ProductsController(
         val dto = ProductGroupDtoMapper(response?.code()!!, response)
 
         return CurrentRmsApiResponse.build {
-            statusCode = HttpStatus.valueOf(response.code())
             rawResponse = response
-            dtoData = dto.data
-            dtoMeta = dto.meta
+            dtoMapper = dto
         }
     }
 
@@ -117,10 +111,8 @@ class ProductsController(
         val dto = ProductDtoMapper(response?.code()!!, response)
 
         return CurrentRmsApiResponse.build {
-            statusCode = dto.httpStatus
             rawResponse = response
-            dtoData = dto.data
-            dtoMeta = dto.meta
+            dtoMapper = dto
         }
     }
 }

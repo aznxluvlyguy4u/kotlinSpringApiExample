@@ -1,19 +1,18 @@
 package com.oceanpremium.api.core.currentrms.response.dto.mapper
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductGroupCustomFieldsDto
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductGroupDto
 import retrofit2.Response
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-class ProductGroupDtoMapper(var code: Int, response: Response<Any>?) {
-
-    var data: Any? = null
-
-    // A collection always has a meta node in its response
-    var meta = MetaDtoMapper(response)
+class ProductGroupDtoMapper(var code: Int, response: Response<Any>?) : CurrentRmsBaseDtoMapper(code) {
 
     init {
+        /**
+         * The root node of the response payload that will contain the response result for data key.
+         */
         data = mapToDto(response)
     }
 
@@ -22,24 +21,37 @@ class ProductGroupDtoMapper(var code: Int, response: Response<Any>?) {
      * and parse accordingly.
      */
     private fun mapToDto(response: Response<Any>?) : Any? {
-        val responseBody = response?.body() as Map<String, Any>
+
+        when {
+            response != null -> if(!response.isSuccessful) {
+                data = CurrentRmsApiResponse.ErrorMessage(response.code(), response.message())
+
+                return data
+            }
+        }
+
+        val responseBody = response?.body() as Map<*, *>
 
         return when {
             responseBody.containsKey("product_groups") -> {
+                meta = MetaDtoMapper(response).meta
                 mapJsonArray(response)
             }
             responseBody.containsKey("product_group") -> {
-                mapJsonObjectToDto(responseBody["product_group"] as Map<String, Any>)
+                mapJsonObjectToDto(responseBody["product_group"] as Map<*, *>)
             }
             else -> null
         }
 
     }
 
+    /**
+     * Map list of items to list of dtoMapper.
+     */
     private fun mapJsonArray(response: Response<Any>?) : List<ProductGroupDto> {
-        val responseBody = response?.body() as Map<String, Any>
+        val responseBody = response?.body() as Map<*, *>
         val productGroups: MutableList<ProductGroupDto> = mutableListOf()
-        val productsItemsBody = responseBody["product_groups"] as List<Map<String, Any>>
+        val productsItemsBody = responseBody["product_groups"] as List<Map<*, *>>
 
         productsItemsBody.forEach {
             productGroups.add(mapJsonObjectToDto(it))
@@ -49,9 +61,9 @@ class ProductGroupDtoMapper(var code: Int, response: Response<Any>?) {
     }
 
     /**
-     * Map a single item to dto
+     * Map a single item to dtoMapper.
      */
-    private fun mapJsonObjectToDto(itemBody: Map<String, Any>): ProductGroupDto {
+    private fun mapJsonObjectToDto(itemBody: Map<*, *>): ProductGroupDto {
         var id: Double? = null
         var name: String? = null
         var description: String? = null
@@ -82,23 +94,36 @@ class ProductGroupDtoMapper(var code: Int, response: Response<Any>?) {
     }
 
     /**
-     * Map custom fields to dto
+     * Map custom fields to dtoMapper.
      */
-    private fun mapCustomFieldsToDto(itemBody: Map<String, Any>): ProductGroupCustomFieldsDto {
+    private fun mapCustomFieldsToDto(itemBody: Map<*, *>): ProductGroupCustomFieldsDto? {
+        var storeId: String? = null
         var publicIconUrl: String? = null
         var publicIconThumbUrl: String? = null
 
         when {
             itemBody.contains("custom_fields") -> {
-                val customFieldsBody = itemBody["custom_fields"] as Map<String, Any>
+                val customFieldsBody = itemBody["custom_fields"] as Map<*, *>
+
+                when {
+                    customFieldsBody.containsKey("store_id") -> storeId =
+                        customFieldsBody["store_id"] as String?
+                }
 
                 when {
                     customFieldsBody.containsKey("public_icon_thumb_url") -> publicIconThumbUrl =
                         customFieldsBody["public_icon_thumb_url"] as String?
+                }
+
+                when {
                     customFieldsBody.containsKey("public_icon_url") -> publicIconUrl =
                         customFieldsBody["public_icon_url"] as String?
                 }
             }
+        }
+
+        if (storeId.isNullOrEmpty() && publicIconThumbUrl.isNullOrEmpty() && publicIconUrl.isNullOrEmpty()) {
+            return null
         }
 
         return ProductGroupCustomFieldsDto(

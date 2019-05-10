@@ -1,6 +1,7 @@
 package com.oceanpremium.api.core.currentrms.response
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.oceanpremium.api.core.currentrms.response.dto.mapper.CurrentRmsBaseDtoMapper
 import com.oceanpremium.api.core.enum.HTTPStatusCodeRange
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -33,9 +34,21 @@ import retrofit2.Response
  * The request was well-formed but was unable to be followed due to semantic errors.
  */
 class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any>(body, status) {
+
     companion object {
         inline fun build(block: Builder.() -> Unit) = Builder().apply(block).build()
     }
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    internal class ErrorMessage(val code: Int, val message: String)
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    internal class WrappedResponse(
+        val code: Int,
+        var data: Any? = null,
+        var meta: Any? = null,
+        var error: ErrorMessage? = null
+    )
 
     /**
      * Builder for creating a ApiGatewayResponse.
@@ -43,32 +56,31 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
     class Builder {
 
         private val logger = LoggerFactory.getLogger(this::class.java)
-        var statusCode: HttpStatus = HttpStatus.OK
         var rawResponse: Response<Any>? = null
-        var dtoData: Any? = null
-        var dtoMeta: Any? = null
-        var error: Exception? = null
+        var dtoMapper: CurrentRmsBaseDtoMapper? = null
+        var error: String? = null
 
         fun build(): ResponseEntity<*> {
-            return buildResponse(statusCode, rawResponse, dtoData, dtoMeta, error)
+            return buildResponse(rawResponse, dtoMapper, error)
         }
 
         @Throws(Exception::class)
         private fun buildResponse(
-            statusCode: HttpStatus,
             rawResponse:  Response<Any>?,
-            dtoData: Any? = null,
-            dtoMeta: Any? = null,
-            error: Exception? = null
+            dtoMapper: CurrentRmsBaseDtoMapper? = null,
+            error: String? = null
         ): ResponseEntity<*> {
+
+            val statusCode = dtoMapper?.httpStatus!!
 
             return when {
 
                 // HTTP 2xx - success's
-                statusCode.value() >= HTTPStatusCodeRange.SUCCESS.code && statusCode.value() < HTTPStatusCodeRange.REDIRECT.code -> {
+                statusCode.value() >= HTTPStatusCodeRange.SUCCESS.code
+                        && statusCode.value() < HTTPStatusCodeRange.REDIRECT.code -> {
                     logger.debug("Setting up SUCCESS response")
 
-                     buildSuccessResponse(statusCode, rawResponse, dtoData, dtoMeta)
+                     buildSuccessResponse(rawResponse, dtoMapper)
                 }
 
                 // HTTP 4xx - client errors and 5xx server errors
@@ -79,12 +91,13 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
                     logger.debug("Setting up ERROR response")
 
                      when (rawResponse) {
-                        null -> if (error != null) {
-                            buildErrorResponse(statusCode = statusCode, message = error, rawResponse = null)
-                        } else {
-                            buildErrorResponse(statusCode = statusCode, message = Exception(statusCode.reasonPhrase), rawResponse = null)
-                        }
-                        else -> buildErrorResponse(statusCode = statusCode, message = error, rawResponse = rawResponse)
+                        null ->
+                            if (error != null) {
+                                buildErrorResponse(statusCode = statusCode, errorMessage = error, rawResponse = null)
+                            } else {
+                                buildErrorResponse(statusCode = statusCode, errorMessage = statusCode.reasonPhrase, rawResponse = null)
+                            }
+                        else -> buildErrorResponse(statusCode = statusCode, errorMessage = error, rawResponse = rawResponse)
                     }
                 }
 
@@ -104,15 +117,14 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
          */
         @Throws(RuntimeException::class)
         private fun buildSuccessResponse(
-            statusCode: HttpStatus,
             rawResponse: Response<Any>?,
-            dtoData: Any? = null,
-            dtoMeta: Any? = null
+            dtoMapper: CurrentRmsBaseDtoMapper
         ): ResponseEntity<Any> {
-            val wrappedBody = WrappedResponse(code = statusCode.value(), data = rawResponse, meta = dtoMeta)
+            val statusCode = dtoMapper.httpStatus
+            val wrappedBody = WrappedResponse(code = dtoMapper.httpStatus.value(), data = rawResponse, meta = dtoMapper.meta)
 
-            if (dtoData != null ) {
-                wrappedBody.data = dtoData
+            if (dtoMapper.data != null ) {
+                wrappedBody.data = dtoMapper.data
             }
 
             return ResponseEntity(wrappedBody, statusCode)
@@ -127,27 +139,40 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
         private fun buildErrorResponse(
             statusCode: HttpStatus,
             rawResponse: Response<Any>?,
-            message: Exception?
+            errorMessage: String?
             ): ResponseEntity<Any> {
 
             val wrappedBody = when {
-                message != null -> WrappedResponse(code = statusCode.value(), error = ErrorMessage(statusCode.value(), message))
-                rawResponse?.message() != null -> WrappedResponse(code = statusCode.value(), error = ErrorMessage(statusCode.value(), Exception(rawResponse.message())))
-                else -> WrappedResponse(code = statusCode.value(), error = ErrorMessage(statusCode.value(), Exception("Something went wrong, please try again.")))
+                errorMessage != null -> {
+                    WrappedResponse(code = statusCode.value(), error = ErrorMessage(statusCode.value(), errorMessage))
+                }
+
+                rawResponse?.message() != null -> {
+                    var customErrorMessage = rawResponse.message()
+
+                    /**
+                     * Overrides a 200 OK with empty result set because current rms returns a 200 OK,
+                     * for empty result sets ;(
+                     */
+                    if (rawResponse.message() == "OK") {
+                        customErrorMessage = statusCode.reasonPhrase
+                    }
+
+                    WrappedResponse(code = statusCode.value(), error = ErrorMessage(statusCode.value(), customErrorMessage))
+                }
+
+                else ->  {
+                    WrappedResponse(
+                        code = statusCode.value(),
+                        error = ErrorMessage(
+                            statusCode.value(),
+                            message = "Something went wrong, please try again."
+                        )
+                    )
+                }
             }
 
             return ResponseEntity(wrappedBody, statusCode)
         }
     }
 }
-
-@JsonInclude(JsonInclude.Include.NON_NULL)
-class ErrorMessage(errorCode: Int, errorMessage: Exception)
-
-@JsonInclude(JsonInclude.Include.NON_NULL)
-class WrappedResponse(
-    val code: Int,
-    var data: Any? = null,
-    var meta: Any? = null,
-    var error: ErrorMessage? = ErrorMessage(418, Exception("418 - Im' a Teapot"))
-)
