@@ -4,6 +4,7 @@ import com.oceanpremium.api.core.model.JsonBody
 import com.oceanpremium.api.core.util.Constants
 import com.oceanpremium.api.core.util.ObjectMapperConfig
 import com.oceanpremium.api.locations.builder.LocationBuilder
+import com.oceanpremium.api.locations.builder.StoreBuilder
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ResourceLoader
@@ -15,7 +16,8 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("api/v1/locations")
 class LocationsController(
     @Autowired private val resourceLoader: ResourceLoader,
-    @Autowired private val locationBuilder: LocationBuilder
+    @Autowired private val locationBuilder: LocationBuilder,
+    @Autowired private val storeBuilder: StoreBuilder
 ) {
 
     companion object {
@@ -41,6 +43,8 @@ class LocationsController(
     @ResponseBody
     fun getLocations(@RequestParam fields: Map<String, String>): ResponseEntity<*> {
         logger.debug("[API] - GET locations: $fields")
+
+        val test = storeBuilder.getAllStores()
 
         return ResponseEntity(
             JsonBody(statusCode = HttpStatus.OK.value(), data = locationBuilder.getAllLocations() ),
