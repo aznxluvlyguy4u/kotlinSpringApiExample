@@ -50,10 +50,10 @@ class ProductsSearchDto(response: Response<Any>?) {
     internal class Product(
         val id: Double,
         val name: String,
-        val description: String,
-        val rental_quantity_available: String,
-        val rental_price: String,
-        val rental_lead_charge_period_name: String,
+        val description: String?,
+        val rental_quantity_available: String?,
+        val rental_price: String?,
+        val rental_lead_charge_period_name: String?,
         var custom_fields: ProductCustomFields? = null
     )
 
@@ -70,10 +70,18 @@ class ProductsSearchDto(response: Response<Any>?) {
                 productsBody.forEach {
                     val id = it["id"] as Double
                     val name = it["name"] as String
-                    val description = it["description"] as String
-                    val rentalPrice = it["rental_price"] as String
-                    val rentalQuantityAvailable = it["rental_quantity_available"] as String
-                    val rentalLeadChargePeriodName = it["rental_lead_charge_period_name"] as String
+                    val description = it["description"] as String?
+                    val rentalPrice = it["rental_price"] as String?
+                    var rentalQuantityAvailable: String? = null
+                    var rentalLeadChargePeriodName: String? = null
+
+                    if(it.containsKey("rental_quantity_available")) {
+                        rentalQuantityAvailable = it["rental_quantity_available"] as String?
+                    }
+
+                    if(it.containsKey("rental_lead_charge_period_name")) {
+                        rentalLeadChargePeriodName = it["rental_lead_charge_period_name"] as String?
+                    }
 
                     var storeId: String? = null
                     var publicIconUrl: String? = null
@@ -85,11 +93,11 @@ class ProductsSearchDto(response: Response<Any>?) {
 
                             when {
                                 customFieldsBody.containsKey("store_id") -> storeId =
-                                    customFieldsBody["store_id"] as String
+                                    customFieldsBody["store_id"] as String?
                                 customFieldsBody.containsKey("public_icon_thumb_url") -> publicIconThumbUrl =
-                                    customFieldsBody["public_icon_thumb_url"] as String
+                                    customFieldsBody["public_icon_thumb_url"] as String?
                                 customFieldsBody.containsKey("public_icon_url") -> publicIconUrl =
-                                    customFieldsBody["public_icon_url"] as String
+                                    customFieldsBody["public_icon_url"] as String?
                             }
                         }
                     }
