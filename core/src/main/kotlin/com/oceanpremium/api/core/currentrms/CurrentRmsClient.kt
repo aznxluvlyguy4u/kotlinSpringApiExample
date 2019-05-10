@@ -8,8 +8,42 @@ import org.slf4j.LoggerFactory
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+import java.io.IOException
 
 class CurrentRmsConfig(val accessToken: String, val subDomain: String, val baseApiUrl: String)
+
+/**
+ * Provides delay duration in milliseconds.
+ **/
+class DelayProvider(val delay: Long)
+
+/**
+ * Constructs [DelayInterceptor] where delay duration is set fixed on given initial value.
+ *
+ * @param delayProvider delay duration in milliseconds provider. Negative values provided by
+ * this provider will cause no delay.
+ */
+class DelayInterceptor(private val delayProvider: DelayProvider) : Interceptor {
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(this::class.java)
+    }
+
+    @Throws(IOException::class)
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val delay = delayProvider.delay
+        if (delay > 0) {
+            try {
+                logger.debug("Delay request for: ${delayProvider.delay} ms")
+                Thread.sleep(delay)
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
+                logger.error(e.message)
+            }
+        }
+        return chain.proceed(chain.request())
+    }
+}
 
 class CurrentRmsConfigInterceptor(private val currentRmsConfig: CurrentRmsConfig) : Interceptor {
 
@@ -44,6 +78,7 @@ class CurrentRmsClient {
         private const val CURRENT_RMS_SUBDOMAIN = "current_rms_subdomain"
         private const val CURRENT_RMS_API_URL = "current_rms_api_url"
         private const val REQUEST_TIMEOUT: Long = 20
+        private const val REQUEST_DELAY: Long = 1500
     }
 
     private var retrofitClient: Retrofit? = null
@@ -69,6 +104,7 @@ class CurrentRmsClient {
         httpClient.connectTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
         httpClient.readTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
         httpClient.addInterceptor(currentRmsConfigInterceptor)
+        httpClient.addInterceptor(DelayInterceptor(DelayProvider(REQUEST_DELAY)))
         val okHttp = httpClient.build()
 
         retrofitClient = Retrofit.Builder()
