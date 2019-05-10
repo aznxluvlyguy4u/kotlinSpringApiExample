@@ -104,17 +104,8 @@ class ProductsController(
         Slogger.send(messageBody = logMessage, salesLog = true, inDebugMode = true)
 
         val response = productsApi.getProductsInventory(fields)
-
         val dto = ProductsSearchDto(response)
 
-        /**
-         *         var statusCode: HttpStatus = HttpStatus.OK
-        var rawResponse: Response<Any>? = null
-        var dtoData: Any? = null
-        var dtoMeta: Any? = null
-        var error: Exception? = null
-
-         */
         return CurrentRmsApiResponse.build {
             statusCode = HttpStatus.valueOf(response?.code()!!)
             rawResponse = response
