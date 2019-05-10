@@ -378,7 +378,7 @@ workflows:
           filters:
             branches:
               only:
-                - /master
+                - /master/
                 - /hotfix/.*/
 
       - deploy-production:
@@ -388,4 +388,4 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - /master/
