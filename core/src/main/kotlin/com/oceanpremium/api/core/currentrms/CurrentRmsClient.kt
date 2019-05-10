@@ -78,6 +78,7 @@ class CurrentRmsClient {
         private const val CURRENT_RMS_SUBDOMAIN = "current_rms_subdomain"
         private const val CURRENT_RMS_API_URL = "current_rms_api_url"
         private const val REQUEST_TIMEOUT: Long = 20
+        private const val REQUEST_DELAY: Long = 1500
     }
 
     private var retrofitClient: Retrofit? = null
@@ -103,7 +104,7 @@ class CurrentRmsClient {
         httpClient.connectTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
         httpClient.readTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
         httpClient.addInterceptor(currentRmsConfigInterceptor)
-        httpClient.addInterceptor(DelayInterceptor(DelayProvider(1500L)))
+        httpClient.addInterceptor(DelayInterceptor(DelayProvider(REQUEST_DELAY)))
         val okHttp = httpClient.build()
 
         retrofitClient = Retrofit.Builder()
