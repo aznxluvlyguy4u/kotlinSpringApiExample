@@ -2,6 +2,7 @@ package com.oceanpremium.api.products.controller
 
 import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
+import com.oceanpremium.api.core.currentrms.response.models.ProductsSearchDto
 import com.oceanpremium.api.core.messenger.Slogger
 import com.oceanpremium.api.core.util.Constants
 import com.oceanpremium.api.core.util.ObjectMapperConfig
@@ -51,7 +52,7 @@ class ProductsController(
 
         return CurrentRmsApiResponse.build {
             statusCode = HttpStatus.valueOf(response?.code()!!)
-            objectBody = response.body()
+            rawResponse = response
         }
     }
 
@@ -68,7 +69,7 @@ class ProductsController(
 
         return CurrentRmsApiResponse.build {
             statusCode = HttpStatus.valueOf(response?.code()!!)
-            objectBody = response.body()
+            rawResponse = response
         }
     }
 
@@ -85,7 +86,7 @@ class ProductsController(
 
         return CurrentRmsApiResponse.build {
             statusCode = HttpStatus.valueOf(response?.code()!!)
-            objectBody = response.body()
+            rawResponse = response
         }
     }
 
@@ -100,13 +101,25 @@ class ProductsController(
 
         val logMessageSales = "[Sales analytics] GET products inventories - sales analytics: $fields"
         logger.debug(logMessageSales)
-        Slogger.send(messageBody = logMessage, salesLog = true)
+        Slogger.send(messageBody = logMessage, salesLog = true, inDebugMode = true)
 
         val response = productsApi.getProductsInventory(fields)
 
+        val dto = ProductsSearchDto(response)
+
+        /**
+         *         var statusCode: HttpStatus = HttpStatus.OK
+        var rawResponse: Response<Any>? = null
+        var dtoData: Any? = null
+        var dtoMeta: Any? = null
+        var error: Exception? = null
+
+         */
         return CurrentRmsApiResponse.build {
             statusCode = HttpStatus.valueOf(response?.code()!!)
-            objectBody = response.body()
+            rawResponse = response
+            dtoData = dto.data
+            dtoMeta = dto.meta
         }
     }
 }
