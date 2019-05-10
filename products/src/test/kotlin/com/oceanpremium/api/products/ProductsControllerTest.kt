@@ -74,7 +74,7 @@ class ProductsControllerTest {
         val productId = 9999999
         val response = restTemplate?.getForEntity("$endpoint/$productId", Response::class.java)
 
-        // Assert that the HTTP response code is OK
+        // Assert that the HTTP response code NOT FOUND
         assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.NOT_FOUND.value())
     }
 
@@ -87,5 +87,31 @@ class ProductsControllerTest {
 
         // Assert that the HTTP response code is OK
         assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.OK.value())
+    }
+
+    /**
+     * Get products inventory.
+     */
+    @Test
+    fun testGetProductsInventory() {
+
+        val params = "?q[product_id_eq]=43&store_id=5&starts_at=2019-05-08&ends_at=2019-05-10"
+        val response = restTemplate?.getForEntity("$endpoint/inventory$params", Response::class.java)
+
+        // Assert that the HTTP response code is OK
+        assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.OK.value())
+    }
+
+    /**
+     * Get products inventory not found.
+     */
+    @Test
+    fun testGetProductsInventoryNotFound() {
+
+        val params = "?q[product_name_cont]=testci&store_id=5&starts_at=2019-05-08&ends_at=2019-05-10"
+        val response = restTemplate?.getForEntity("$endpoint/inventory$params", Response::class.java)
+
+        // Assert that the HTTP response code NOT FOUND
+        assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.NOT_FOUND.value())
     }
 }
