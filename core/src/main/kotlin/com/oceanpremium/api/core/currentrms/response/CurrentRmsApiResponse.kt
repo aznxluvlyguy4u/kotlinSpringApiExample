@@ -8,11 +8,6 @@ import org.springframework.http.ResponseEntity
 import retrofit2.Response
 
 /**
- * Response class that will contain response body.
- *
- */
-
-/**
  * Response builder that will create a wrapped response based on input code and data.
  *
  * Current RMS API uses the standard HTML status codes as follows:
@@ -69,28 +64,11 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
 
             return when {
 
-                // HTTP 2.x.x - success's
+                // HTTP 2xx - success's
                 statusCode.value() >= HTTPStatusCodeRange.SUCCESS.code && statusCode.value() < HTTPStatusCodeRange.REDIRECT.code -> {
                     logger.debug("Setting up SUCCESS response")
 
-                    try {
-
-                        /**
-                         * CurrentRms returns a 200 OK for empty result sets. As a best practice for REST API,
-                         * the response should be a 404 NOT FOUND when an empty result set is returned.
-                         *
-                         * See @link: https://stackoverflow.com/questions/11746894/what-is-the-proper-rest-response-code-for-a-valid-request-but-an-empty-data
-                         *
-                         * Therefore, override the 200 OK response code and return a 404 NOT FOUND response code and error message instead.
-                         */
-                        if (isResultEmpty(rawResponse?.body() as Map<*, *>)) {
-                            return buildErrorResponse(HttpStatus.NOT_FOUND, rawResponse, error)
-                        }
-
-                        return buildSuccessResponse(statusCode, rawResponse, dtoData, dtoMeta)
-                    } catch (e: Exception) {
-                        logger.error("Failed to build SUCCESS response: ${e.message}")
-                    } as ResponseEntity<*>
+                     buildSuccessResponse(statusCode, rawResponse, dtoData, dtoMeta)
                 }
 
                 // HTTP 4xx - client errors and 5xx server errors
@@ -99,25 +77,15 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
                         statusCode.value() >= HTTPStatusCodeRange.SERVER_ERROR.code
                         && statusCode.value() < HTTPStatusCodeRange.CUSTOM.code -> {
                     logger.debug("Setting up ERROR response")
-                    /**
-                     *    statusCode: HttpStatus,
-                    rawResponse: Response<Any>?,
-                    message: Exception?
-                     */
-                    try {
-                        if (rawResponse == null) {
-                            if (error != null) {
-                                return buildErrorResponse(statusCode = statusCode, message = error, rawResponse = null)
-                            } else {
-                               return buildErrorResponse(statusCode = statusCode, message = Exception(statusCode.reasonPhrase), rawResponse = null)
-                            }
-                        } else {
-                            return buildErrorResponse(statusCode = statusCode, message = error, rawResponse = rawResponse)
-                        }
 
-                    } catch (e: Exception) {
-                        logger.error("Failed to build CLIENT ERROR response: $e")
-                    } as ResponseEntity<*>
+                     when (rawResponse) {
+                        null -> if (error != null) {
+                            buildErrorResponse(statusCode = statusCode, message = error, rawResponse = null)
+                        } else {
+                            buildErrorResponse(statusCode = statusCode, message = Exception(statusCode.reasonPhrase), rawResponse = null)
+                        }
+                        else -> buildErrorResponse(statusCode = statusCode, message = error, rawResponse = rawResponse)
+                    }
                 }
 
                 /**
@@ -129,29 +97,6 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
             }
         }
 
-        private fun isResultEmpty(objectBody: Map<*, *>): Boolean {
-
-            val metaKey = "meta"
-            val rowCountKey = "row_count"
-
-            if (objectBody.containsKey(metaKey)) {
-                val meta = objectBody[metaKey] as Map<*, *>
-
-                if (meta.containsKey(rowCountKey)) {
-                    return when (meta[rowCountKey] as Double) {
-                        0.0 -> {
-                            true
-                        }
-                        else -> {
-                            false
-                        }
-                    }
-                }
-            }
-
-            return false
-        }
-
         /**
          * Build a response for Informationals: 1xx, OK's: 2xx and Redirects: 3xx
          *
@@ -160,7 +105,7 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
         @Throws(RuntimeException::class)
         private fun buildSuccessResponse(
             statusCode: HttpStatus,
-            rawResponse: Response<Any>,
+            rawResponse: Response<Any>?,
             dtoData: Any? = null,
             dtoMeta: Any? = null
         ): ResponseEntity<Any> {
@@ -185,14 +130,10 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
             message: Exception?
             ): ResponseEntity<Any> {
 
-            var wrappedBody: WrappedResponse? = null
-
-            if (message != null) {
-                wrappedBody = WrappedResponse(code = statusCode.value(), error = ErrorMessage(statusCode.value(), message))
-            } else if (rawResponse != null && rawResponse.message() != null) {
-                wrappedBody = WrappedResponse(code = statusCode.value(), error = ErrorMessage(statusCode.value(), Exception(rawResponse.message())))
-            } else {
-                wrappedBody = WrappedResponse(code = statusCode.value(), error = ErrorMessage(statusCode.value(), Exception("Something went wrong, please try again.")))
+            val wrappedBody = when {
+                message != null -> WrappedResponse(code = statusCode.value(), error = ErrorMessage(statusCode.value(), message))
+                rawResponse?.message() != null -> WrappedResponse(code = statusCode.value(), error = ErrorMessage(statusCode.value(), Exception(rawResponse.message())))
+                else -> WrappedResponse(code = statusCode.value(), error = ErrorMessage(statusCode.value(), Exception("Something went wrong, please try again.")))
             }
 
             return ResponseEntity(wrappedBody, statusCode)

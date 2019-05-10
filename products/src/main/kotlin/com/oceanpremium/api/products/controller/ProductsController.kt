@@ -2,7 +2,8 @@ package com.oceanpremium.api.products.controller
 
 import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
-import com.oceanpremium.api.core.currentrms.response.models.ProductsSearchDto
+import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductDtoMapper
+import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductGroupDtoMapper
 import com.oceanpremium.api.core.messenger.Slogger
 import com.oceanpremium.api.core.util.Constants
 import com.oceanpremium.api.core.util.ObjectMapperConfig
@@ -46,13 +47,16 @@ class ProductsController(
 
         val logMessageSales = "[Sales analytics] GET products - sales analytics: $fields"
         logger.debug(logMessageSales)
-         Slogger.send(messageBody = logMessage, salesLog = true)
+        Slogger.send(messageBody = logMessage, salesLog = true)
 
         val response = productsApi.getProducts(fields)
+        val dto = ProductDtoMapper(response?.code()!!, response)
 
         return CurrentRmsApiResponse.build {
-            statusCode = HttpStatus.valueOf(response?.code()!!)
+            statusCode = dto.httpStatus
             rawResponse = response
+            dtoData = dto.data
+            dtoMeta = dto.meta
         }
     }
 
@@ -66,10 +70,13 @@ class ProductsController(
         logger.debug(logMessage)
 
         val response = productsApi.getProductById(productId)
+        val dto = ProductDtoMapper(response?.code()!!, response)
 
         return CurrentRmsApiResponse.build {
-            statusCode = HttpStatus.valueOf(response?.code()!!)
+            statusCode = dto.httpStatus
             rawResponse = response
+            dtoData = dto.data
+            dtoMeta = dto.meta
         }
     }
 
@@ -83,10 +90,13 @@ class ProductsController(
         logger.debug(logMessage)
 
         val response = productsApi.getProductGroups(fields)
+        val dto = ProductGroupDtoMapper(response?.code()!!, response)
 
         return CurrentRmsApiResponse.build {
-            statusCode = HttpStatus.valueOf(response?.code()!!)
+            statusCode = HttpStatus.valueOf(response.code())
             rawResponse = response
+            dtoData = dto.data
+            dtoMeta = dto.meta
         }
     }
 
@@ -104,10 +114,10 @@ class ProductsController(
         Slogger.send(messageBody = logMessage, salesLog = true, inDebugMode = true)
 
         val response = productsApi.getProductsInventory(fields)
-        val dto = ProductsSearchDto(response)
+        val dto = ProductDtoMapper(response?.code()!!, response)
 
         return CurrentRmsApiResponse.build {
-            statusCode = HttpStatus.valueOf(response?.code()!!)
+            statusCode = dto.httpStatus
             rawResponse = response
             dtoData = dto.data
             dtoMeta = dto.meta
