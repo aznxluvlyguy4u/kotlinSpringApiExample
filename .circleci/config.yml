@@ -362,7 +362,7 @@ workflows:
           filters:
             branches:
               only:
-                - /development
+                - /development/
 
       - deploy-development:
           type: approval
@@ -371,7 +371,7 @@ workflows:
           filters:
             branches:
               only:
-                - /development
+                - /development/
 
       # PRODUCTION
       - build-production:
