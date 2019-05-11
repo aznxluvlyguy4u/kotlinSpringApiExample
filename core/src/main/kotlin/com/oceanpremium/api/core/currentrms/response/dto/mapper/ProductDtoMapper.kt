@@ -83,7 +83,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
      * Map a single item to dtoMapper
      */
     private fun mapJsonObjectToDto(itemBody: Map<*, *>): ProductDto {
-        var id: Double? = null
+        var id: Int? = null
         var name: String? = null
         var description: String? = null
         var rentalPrice: String? = null
@@ -92,7 +92,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         var rentalLeadChargePeriodName: String? = null
 
         if (itemBody.containsKey("id")) {
-            id = itemBody["id"] as Double?
+            id = (itemBody["id"] as Double?)?.toInt()
         }
 
         if (itemBody.containsKey("name")) {
@@ -134,7 +134,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
      * Map custom fields to dtoMapper
      */
     private fun mapCustomFieldsToDto(itemBody: Map<*, *>): ProductCustomFieldsDto? {
-        var storeId: String? = null
+        var storeId: Int? = null
         var publicIconThumbUrl: String? = null
         var publicIconUrl: String? = null
 
@@ -143,8 +143,11 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                 val customFieldsBody = itemBody["custom_fields"] as Map<*, *>
 
                 when {
-                    customFieldsBody.containsKey("store_id") -> storeId =
-                        customFieldsBody["store_id"] as String?
+                    customFieldsBody.containsKey("store_id") ->
+
+                        if ((customFieldsBody["store_id"] as String?)!!.isNotEmpty()) {
+                            storeId = (customFieldsBody["store_id"] as String?)!!.toInt()
+                        }
                 }
 
                 when {
@@ -159,7 +162,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             }
         }
 
-        if (storeId.isNullOrEmpty() && publicIconThumbUrl.isNullOrEmpty() && publicIconUrl.isNullOrEmpty()) {
+        if (storeId == null && publicIconThumbUrl.isNullOrEmpty() && publicIconUrl.isNullOrEmpty()) {
             return null
         }
 

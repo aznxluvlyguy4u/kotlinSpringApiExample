@@ -64,13 +64,13 @@ class ProductGroupDtoMapper(var code: Int, response: Response<Any>?) : CurrentRm
      * Map a single item to dtoMapper.
      */
     private fun mapJsonObjectToDto(itemBody: Map<*, *>): ProductGroupDto {
-        var id: Double? = null
+        var id: Int? = null
         var name: String? = null
         var description: String? = null
         var customFields: ProductGroupCustomFieldsDto? = null
 
         if (itemBody.containsKey("id")) {
-            id = itemBody["id"] as Double?
+            id = itemBody["id"] as Int?
         }
 
         if (itemBody.containsKey("name")) {

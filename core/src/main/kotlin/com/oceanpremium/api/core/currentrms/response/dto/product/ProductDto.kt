@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class ProductDto(
-    val id: Double?,
+    val id: Int?,
     val name: String?,
     val description: String?,
     val rentalQuantityAvailable: String?,
