@@ -103,20 +103,22 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             description = itemBody["description"] as String?
         }
 
-        if (itemBody.containsKey("rental_price")) {
-            rentalPrice = itemBody["rental_price"] as String?
-        }
-
         if (itemBody.containsKey("custom_fields")) {
             customFields = mapCustomFieldsToDto(itemBody)
         }
 
-        if (itemBody.containsKey("rental_quantity_available")) {
-            rentalQuantityAvailable = itemBody["rental_quantity_available"] as String?
+        val rates = mapProductRates(itemBody)
+
+        if (rates.containsKey("rental_price")) {
+            rentalPrice = rates["rental_price"] as String?
         }
 
-        if (itemBody.containsKey("rental_lead_charge_period_name")) {
-            rentalLeadChargePeriodName = itemBody["rental_lead_charge_period_name"] as String?
+        if (rates.containsKey("rental_quantity_available")) {
+            rentalQuantityAvailable = rates["rental_quantity_available"] as String?
+        }
+
+        if (rates.containsKey("rental_lead_charge_period_name")) {
+            rentalLeadChargePeriodName = rates["rental_lead_charge_period_name"] as String?
         }
 
         return ProductDto(
@@ -128,6 +130,27 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             rentalLeadChargePeriodName,
             customFields
         )
+    }
+
+    private fun mapProductRates(itemBody: Map<*, *>): Map<*, *> {
+        val rates: MutableMap<String, Any?> = mutableMapOf()
+
+        if (itemBody.containsKey("rental_price")
+            && itemBody.containsKey("rental_quantity_available")
+            && itemBody.containsKey("rental_lead_charge_period_name")) {
+            rates["rental_price"] = itemBody["rental_price"]
+            rates["rental_quantity_available"] = itemBody["rental_quantity_available"] as String?
+            rates["rental_lead_charge_period_name"] = itemBody["rental_lead_charge_period_name"] as String?
+        } else {
+            if (itemBody.containsKey("rental_rate")) {
+                val rentalRate = (itemBody["rental_rates"] as List<Map<*, *>>).first()
+
+                rates["rental_price"] = rentalRate["price"]
+                rates["rental_lead_charge_period_name"] = rentalRate["rate_definition_name"] as String?
+            }
+        }
+
+        return rates
     }
 
     /**
