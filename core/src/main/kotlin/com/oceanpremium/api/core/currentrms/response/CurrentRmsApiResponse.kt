@@ -2,7 +2,10 @@ package com.oceanpremium.api.core.currentrms.response
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.CurrentRmsBaseDtoMapper
+import com.oceanpremium.api.core.enum.AuthorizationType
 import com.oceanpremium.api.core.enum.HTTPStatusCodeRange
+import com.oceanpremium.api.core.exception.BadRequestException
+import com.oceanpremium.api.core.exception.UnauthorizedException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -64,7 +67,7 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
             return buildResponse(rawResponse, dtoMapper, error)
         }
 
-        @Throws(Exception::class)
+        @Throws(Exception::class, UnauthorizedException::class, BadRequestException::class)
         private fun buildResponse(
             rawResponse:  Response<Any>?,
             dtoMapper: CurrentRmsBaseDtoMapper? = null,
@@ -89,6 +92,14 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
                         statusCode.value() >= HTTPStatusCodeRange.SERVER_ERROR.code
                         && statusCode.value() < HTTPStatusCodeRange.CUSTOM.code -> {
                     logger.debug("Setting up ERROR response")
+
+                    if (HttpStatus.valueOf(statusCode.value()) == HttpStatus.UNAUTHORIZED) {
+                        throw UnauthorizedException("Could not authenticate with current rms", AuthorizationType.THIRD_PARTY)
+                    }
+
+                    if (HttpStatus.valueOf(statusCode.value()) == HttpStatus.BAD_REQUEST) {
+                        throw BadRequestException("")
+                    }
 
                      when (rawResponse) {
                         null ->

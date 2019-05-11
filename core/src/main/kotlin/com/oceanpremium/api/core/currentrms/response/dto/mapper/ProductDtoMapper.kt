@@ -2,14 +2,19 @@ package com.oceanpremium.api.core.currentrms.response.dto.mapper
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
-import com.oceanpremium.api.core.currentrms.response.dto.product.MetaDto
+import com.oceanpremium.api.core.exception.ServerErrorException
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductCustomFieldsDto
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import retrofit2.Response
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoMapper(code) {
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(this::class.java)
+    }
 
     init {
         /**
@@ -82,6 +87,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
     /**
      * Map a single item to dtoMapper
      */
+    @Throws(ServerErrorException::class)
     private fun mapJsonObjectToDto(itemBody: Map<*, *>): ProductDto {
         var id: Int? = null
         var name: String? = null
@@ -91,34 +97,39 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         var rentalQuantityAvailable: String? = null
         var rentalLeadChargePeriodName: String? = null
 
-        if (itemBody.containsKey("id")) {
-            id = (itemBody["id"] as Double?)?.toInt()
-        }
+        try {
+            if (itemBody.containsKey("id")) {
+                id = (itemBody["id"] as Double?)?.toInt()
+            }
 
-        if (itemBody.containsKey("name")) {
-            name = itemBody["name"] as String?
-        }
+            if (itemBody.containsKey("name")) {
+                name = itemBody["name"] as String?
+            }
 
-        if (itemBody.containsKey("description")) {
-            description = itemBody["description"] as String?
-        }
+            if (itemBody.containsKey("description")) {
+                description = itemBody["description"] as String?
+            }
 
-        if (itemBody.containsKey("custom_fields")) {
-            customFields = mapCustomFieldsToDto(itemBody)
-        }
+            if (itemBody.containsKey("custom_fields")) {
+                customFields = mapCustomFieldsToDto(itemBody)
+            }
 
-        val rates = mapProductRates(itemBody)
+            val rates = mapProductRates(itemBody)
 
-        if (rates.containsKey("rental_price")) {
-            rentalPrice = rates["rental_price"] as String?
-        }
+            if (rates.containsKey("rental_price")) {
+                rates["rental_price"] as String?
+            }
 
-        if (rates.containsKey("rental_quantity_available")) {
-            rentalQuantityAvailable = rates["rental_quantity_available"] as String?
-        }
+            if (rates.containsKey("rental_quantity_available")) {
+                rentalQuantityAvailable = rates["rental_quantity_available"] as String?
+            }
 
-        if (rates.containsKey("rental_lead_charge_period_name")) {
-            rentalLeadChargePeriodName = rates["rental_lead_charge_period_name"] as String?
+            if (rates.containsKey("rental_lead_charge_period_name")) {
+                rentalLeadChargePeriodName = rates["rental_lead_charge_period_name"] as String?
+            }
+        } catch (e: Exception) {
+            val message = "Failed to map product response to Dto: ${e.message}"
+            logger.error(message)
         }
 
         return ProductDto(
