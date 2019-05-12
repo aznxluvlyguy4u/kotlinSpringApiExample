@@ -2,35 +2,35 @@
   "openapi" : "3.0.1",
   "info" : {
     "title" : "Ocean Premium - Locations endpoint",
-    "description" : "A basic API for retrieving locations",
-    "license" : {
-      "name" : "MIT"
-    },
+    "description" : "An API endpoint for retrieving locations",
     "version" : "0.0.1"
   },
-  "servers" : [
-    {"url" : "https://vk2b3q5m17.execute-api.eu-west-1.amazonaws.com/dev/api/v1"},
-    {"url" : "https://rh2urujte8.execute-api.eu-west-1.amazonaws.com/dev/api/v1"}
-  ],
+  "servers" : [ {
+    "url" : "https://https://3rk3xtficb.execute-api.eu-west-1.amazonaws.com/dev/api/v1/locations"
+  } ],
   "paths" : {
-    "/locations": {
-      "get": {
-        "summary": "Get locations",
-        "parameters": [
-          {
-            "name": "query-param",
-            "in": "query",
-            "description": "Based on currentRMS options, query parameters",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
+    "/locations" : {
+      "get" : {
+        "tags" : [ "Location" ],
+        "summary" : "Find a locations",
+        "responses" : {
+          "200" : {
+            "description" : "Found Locations",
+            "content" : { }
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {}
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Response" : {
+        "required" : [ "data" ],
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "type" : "object",
+            "properties" : { }
           }
         }
       }

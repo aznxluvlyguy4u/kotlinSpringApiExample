@@ -8,8 +8,8 @@ info:
 schemes:
   - https
 
-host: ehk7r71bna.execute-api.eu-west-1.amazonaws.com
-basePath: /dev/api/v1
+host: https://3rk3xtficb.execute-api.eu-west-1.amazonaws.com
+basePath: /dev/api/v1/locations
 
 produces:
   - application/json
@@ -19,21 +19,40 @@ paths:
     get:
       summary: Find a locations
       tags:
-        - Product
+        - Location
       consumes:
         - application/json
       responses:
         200:
           description: Found Locations
-definitions:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Location'
 
+components:
+  schemas:
+    Location:
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        storeId:
+          type: integer
+      # Both properties are required
+      required:
+        - id
+        - name
+        - storeId
+definitions:
   Response:
     type: object
     required:
-      - success
-      - message
+      - code
+      - data
     properties:
-      success:
-        type: boolean
-      message:
+      code:
+        type: Int
+      data:
         type: object
