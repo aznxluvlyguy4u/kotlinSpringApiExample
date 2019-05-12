@@ -42,6 +42,6 @@ class LocationBuilderImpl(@Autowired private val storeBuilder: StoreBuilder): Lo
             locations.addAll(store.locations)
         }
 
-        return locations
+        return locations.sortedWith(compareBy({ it.name }))
     }
 }
