@@ -45,7 +45,7 @@ class GlobalExceptionHandler {
     }
 
     /**
-     * Catch unauthorized exception, and return a custom error response.
+     * 404 Catch not found exception, and return a custom error response.
      */
     @ExceptionHandler(NotFoundException::class)
     fun handleNotFoundException(ex: Exception, request: WebRequest): ResponseEntity<ApiError> {
@@ -60,7 +60,7 @@ class GlobalExceptionHandler {
     }
 
     /**
-     * Catch unauthorized exception, and return a custom error response.
+     * 401 Catch unauthorized exception, and return a custom error response.
      */
     @ExceptionHandler(UnauthorizedException::class)
     fun handleUnauthorizedException(ex: Exception, request: WebRequest): ResponseEntity<ApiError> {
@@ -75,7 +75,7 @@ class GlobalExceptionHandler {
     }
 
     /**
-     * Catch bad request exception, and return a custom error response.
+     * 400 Catch bad request exception, and return a custom error response.
      */
     @ExceptionHandler(BadRequestException::class)
     fun handleBadRequestException(ex: BadRequestException, request: WebRequest): ResponseEntity<ApiError> {
@@ -86,14 +86,11 @@ class GlobalExceptionHandler {
             else -> ApiError(code = status.value(), message = status.reasonPhrase)
         }
         
-        return ResponseEntity(
-            apiError,
-            status
-        )
+        return ResponseEntity(apiError, status)
     }
 
     /**
-     * Catch internal server exception, and return a custom error response.
+     * 500 Catch internal server exception, and return a custom error response.
      */
     @ExceptionHandler(ServerErrorException::class)
     fun handleInternalServerErrorException(ex: ServerErrorException, request: WebRequest): ResponseEntity<ApiError> {
@@ -106,14 +103,11 @@ class GlobalExceptionHandler {
 
         Sentry.capture(ex)
 
-        return ResponseEntity(
-            apiError,
-            status
-        )
+        return ResponseEntity(apiError, status)
     }
 
     /**
-     * Catch throwable, and return a custom error response.
+     * 500 Catch throwable, and return a custom error response.
      */
     @ExceptionHandler(Throwable::class)
     fun handleThrowable(ex: Throwable, request: WebRequest): ResponseEntity<ApiError> {
@@ -128,9 +122,6 @@ class GlobalExceptionHandler {
 
         Sentry.capture(ex)
 
-        return ResponseEntity(
-            apiError,
-            status
-        )
+        return ResponseEntity(apiError, status)
     }
 }
