@@ -46,8 +46,7 @@ class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
         private const val FILTER_MODE_QUERY = "filtermode[]"
     }
 
-    @Throws(UnauthorizedException::class)
-    fun getProductById(productId: Int): retrofit2.Response<Any>? {
+    fun getProductById(productId: Int): Response<Any>? {
         val retrofitCall = productsApi.getProductById(productId)
         val response = retrofitCall.execute()
 
@@ -67,8 +66,7 @@ class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
         return response
     }
 
-    @Throws(UnauthorizedException::class)
-    fun getProducts(map: Map<String, String>): retrofit2.Response<Any>? {
+    fun getProducts(map: Map<String, String>): Response<Any>? {
         val retrofitCall = productsApi.getProducts(map = map)
         val response = retrofitCall.execute()
 
@@ -88,8 +86,7 @@ class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
         return response
     }
 
-    @Throws(UnauthorizedException::class)
-    fun getProductGroups(map: Map<String, String>): retrofit2.Response<Any>? {
+    fun getProductGroups(map: Map<String, String>): Response<Any>? {
         val retrofitCall = productsApi.getProductGroups(map = map)
         val response = retrofitCall.execute()
 
@@ -109,8 +106,7 @@ class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
         return response
     }
 
-    @Throws(UnauthorizedException::class)
-    fun getProductsInventory(map: MutableMap<String, String>): retrofit2.Response<Any>? {
+    fun getProductsInventory(map: MutableMap<String, String>): Response<Any>? {
         when {
             !map.containsKey(ACTIVE_PRODUCT_QUERY) -> map[ACTIVE_PRODUCT_QUERY] = "true"
             !map.containsKey(FILTER_MODE_QUERY) -> map[FILTER_MODE_QUERY] = CurrentRmsSaleType.RENTAL.type
@@ -134,6 +130,11 @@ class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
         return response
     }
 
+    /**
+     * Based on returned HTTP Status Code, throw appropriate exception so that a corresponding (wrapped) error response
+     * payload can be build and returned.
+     */
+    @Throws(UnauthorizedException::class, NotFoundException::class, BadRequestException::class, ServerErrorException::class)
     private fun handleException(response: Response<Any>) {
         if (response.code() == HttpStatus.UNAUTHORIZED.value()) {
             throw UnauthorizedException(type = AuthorizationType.THIRD_PARTY)
