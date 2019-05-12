@@ -6,7 +6,7 @@
     "version" : "0.0.1"
   },
   "servers" : [ {
-    "url" : "https://https://3rk3xtficb.execute-api.eu-west-1.amazonaws.com/dev/api/v1/locations"
+    "url" : "https://3rk3xtficb.execute-api.eu-west-1.amazonaws.com/dev/api/v1/locations"
   } ],
   "paths" : {
     "/locations" : {

@@ -8,7 +8,7 @@ info:
 schemes:
   - https
 
-host: https://3rk3xtficb.execute-api.eu-west-1.amazonaws.com
+host: 3rk3xtficb.execute-api.eu-west-1.amazonaws.com
 basePath: /dev/api/v1/locations
 
 produces:
@@ -20,8 +20,6 @@ paths:
       summary: Find a locations
       tags:
         - Location
-      consumes:
-        - application/json
       responses:
         200:
           description: Found Locations
