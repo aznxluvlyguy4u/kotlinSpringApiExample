@@ -56,8 +56,6 @@ class GlobalExceptionHandler {
             else -> ApiError(code = status.value(), message = status.reasonPhrase)
         }
 
-        Sentry.capture(ex)
-
         return ResponseEntity(apiError, status)
     }
 
@@ -73,8 +71,6 @@ class GlobalExceptionHandler {
             else -> ApiError(code = status.value(), message = status.reasonPhrase)
         }
 
-        Sentry.capture(ex)
-
         return ResponseEntity(apiError, status)
     }
 
@@ -89,9 +85,7 @@ class GlobalExceptionHandler {
             showStacktrace -> ApiError(status.value(), ex, status.reasonPhrase)
             else -> ApiError(code = status.value(), message = status.reasonPhrase)
         }
-
-        Sentry.capture(ex)
-
+        
         return ResponseEntity(
             apiError,
             status
