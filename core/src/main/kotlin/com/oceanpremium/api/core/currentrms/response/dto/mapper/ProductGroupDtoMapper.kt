@@ -4,10 +4,16 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductGroupCustomFieldsDto
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductGroupDto
+import com.oceanpremium.api.core.exception.ServerErrorException
+import org.slf4j.LoggerFactory
 import retrofit2.Response
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class ProductGroupDtoMapper(var code: Int, response: Response<Any>?) : CurrentRmsBaseDtoMapper(code) {
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(this::class.java)
+    }
 
     init {
         /**
@@ -69,20 +75,28 @@ class ProductGroupDtoMapper(var code: Int, response: Response<Any>?) : CurrentRm
         var description: String? = null
         var customFields: ProductGroupCustomFieldsDto? = null
 
-        if (itemBody.containsKey("id")) {
-            id = itemBody["id"] as Int?
-        }
+        try {
+            if (itemBody.containsKey("id")) {
+                id = (itemBody["id"] as Double?)?.toInt()
+            }
 
-        if (itemBody.containsKey("name")) {
-            name = itemBody["name"] as String?
-        }
+            if (itemBody.containsKey("name")) {
+                name = itemBody["name"] as String?
+            }
 
-        if (itemBody.containsKey("description")) {
-            description = itemBody["description"] as String?
-        }
+            if (itemBody.containsKey("description")) {
+                description = itemBody["description"] as String?
+            }
 
-        if (itemBody.containsKey("custom_fields")) {
-            customFields = mapCustomFieldsToDto(itemBody)
+            if (itemBody.containsKey("custom_fields")) {
+                customFields = mapCustomFieldsToDto(itemBody)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            val message = "Failed to map product response to Dto: ${e.message}"
+            logger.error(message)
+
+            throw ServerErrorException(message)
         }
 
         return ProductGroupDto(
