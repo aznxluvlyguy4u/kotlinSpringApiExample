@@ -2,10 +2,10 @@ package com.oceanpremium.api.core.currentrms
 
 import com.oceanpremium.api.core.enum.AuthorizationType
 import com.oceanpremium.api.core.enum.CurrentRmsSaleType
-import com.oceanpremium.api.core.exception.BadRequestException
-import com.oceanpremium.api.core.exception.NotFoundException
-import com.oceanpremium.api.core.exception.ServerErrorException
-import com.oceanpremium.api.core.exception.UnauthorizedException
+import com.oceanpremium.api.core.exception.throwable.BadRequestException
+import com.oceanpremium.api.core.exception.throwable.NotFoundException
+import com.oceanpremium.api.core.exception.throwable.ServerErrorException
+import com.oceanpremium.api.core.exception.throwable.UnauthorizedException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import retrofit2.Call

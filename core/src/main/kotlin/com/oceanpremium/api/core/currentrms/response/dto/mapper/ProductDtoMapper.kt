@@ -3,10 +3,9 @@ package com.oceanpremium.api.core.currentrms.response.dto.mapper
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
 import com.oceanpremium.api.core.currentrms.response.dto.product.*
-import com.oceanpremium.api.core.exception.NotFoundException
-import com.oceanpremium.api.core.exception.ServerErrorException
+import com.oceanpremium.api.core.exception.throwable.NotFoundException
+import com.oceanpremium.api.core.exception.throwable.ServerErrorException
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import retrofit2.Response
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -54,7 +53,9 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                 val metaMapper = MetaDtoMapper(response)
 
                 when {
-                    metaMapper.overrideHttpStatus -> throw NotFoundException("Could not find products for query: ${response.raw().request().url().encodedQuery()}")
+                    metaMapper.overrideHttpStatus -> throw NotFoundException(
+                        "Could not find products for query: ${response.raw().request().url().encodedQuery()}"
+                    )
                     else -> {
                         meta = metaMapper.meta
                         mapJsonArray(response)

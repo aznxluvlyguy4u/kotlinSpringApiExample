@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductGroupCustomFieldsDto
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductGroupDto
-import com.oceanpremium.api.core.exception.ServerErrorException
+import com.oceanpremium.api.core.exception.throwable.ServerErrorException
 import org.slf4j.LoggerFactory
 import retrofit2.Response
 

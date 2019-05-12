@@ -2,11 +2,11 @@ package com.oceanpremium.api.products.controller
 
 import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
-import com.oceanpremium.api.core.exception.NotFoundException
+import com.oceanpremium.api.core.exception.throwable.NotFoundException
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductGroupDtoMapper
-import com.oceanpremium.api.core.exception.BadRequestException
-import com.oceanpremium.api.core.exception.UnauthorizedException
+import com.oceanpremium.api.core.exception.throwable.BadRequestException
+import com.oceanpremium.api.core.exception.throwable.UnauthorizedException
 import com.oceanpremium.api.core.messenger.Slogger
 import com.oceanpremium.api.core.util.Constants
 import com.oceanpremium.api.core.util.ObjectMapperConfig

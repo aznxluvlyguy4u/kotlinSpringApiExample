@@ -1,4 +1,4 @@
-package com.oceanpremium.api.core.exception
+package com.oceanpremium.api.core.exception.throwable
 
 import com.oceanpremium.api.core.enum.AuthorizationType
 

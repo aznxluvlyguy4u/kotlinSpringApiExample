@@ -1,11 +1,11 @@
-package com.oceanpremium.api.products.controller
+package com.oceanpremium.api.core.exception.handler
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.oceanpremium.api.core.enum.EnvironmentType
-import com.oceanpremium.api.core.exception.BadRequestException
-import com.oceanpremium.api.core.exception.NotFoundException
-import com.oceanpremium.api.core.exception.ServerErrorException
-import com.oceanpremium.api.core.exception.UnauthorizedException
+import com.oceanpremium.api.core.exception.throwable.BadRequestException
+import com.oceanpremium.api.core.exception.throwable.NotFoundException
+import com.oceanpremium.api.core.exception.throwable.ServerErrorException
+import com.oceanpremium.api.core.exception.throwable.UnauthorizedException
 import io.sentry.Sentry
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -52,8 +52,15 @@ class GlobalExceptionHandler {
         logger.debug("Build 404 NOT FOUND response")
         val status = HttpStatus.NOT_FOUND
         val apiError = when {
-            showStacktrace -> ApiError(status.value(), ex, status.reasonPhrase)
-            else -> ApiError(code = status.value(), message = status.reasonPhrase)
+            showStacktrace -> ApiError(
+                status.value(),
+                ex,
+                status.reasonPhrase
+            )
+            else -> ApiError(
+                code = status.value(),
+                message = status.reasonPhrase
+            )
         }
 
         return ResponseEntity(apiError, status)
@@ -67,8 +74,15 @@ class GlobalExceptionHandler {
         logger.debug("Build 401 Unauthorized response")
         val status = HttpStatus.UNAUTHORIZED
         val apiError = when {
-            showStacktrace -> ApiError(status.value(), ex, status.reasonPhrase)
-            else -> ApiError(code = status.value(), message = status.reasonPhrase)
+            showStacktrace -> ApiError(
+                status.value(),
+                ex,
+                status.reasonPhrase
+            )
+            else -> ApiError(
+                code = status.value(),
+                message = status.reasonPhrase
+            )
         }
 
         return ResponseEntity(apiError, status)
@@ -82,8 +96,15 @@ class GlobalExceptionHandler {
         logger.debug("Build 400 BAD REQUEST response")
         val status = HttpStatus.BAD_REQUEST
         val apiError = when {
-            showStacktrace -> ApiError(status.value(), ex, status.reasonPhrase)
-            else -> ApiError(code = status.value(), message = status.reasonPhrase)
+            showStacktrace -> ApiError(
+                status.value(),
+                ex,
+                status.reasonPhrase
+            )
+            else -> ApiError(
+                code = status.value(),
+                message = status.reasonPhrase
+            )
         }
         
         return ResponseEntity(apiError, status)
@@ -97,8 +118,15 @@ class GlobalExceptionHandler {
         logger.debug("Build 500 INTERNAL SERVER ERROR response")
         val status = HttpStatus.INTERNAL_SERVER_ERROR
         val apiError = when {
-            showStacktrace -> ApiError(status.value(), ex, status.reasonPhrase)
-            else -> ApiError(code = status.value(), message = status.reasonPhrase)
+            showStacktrace -> ApiError(
+                status.value(),
+                ex,
+                status.reasonPhrase
+            )
+            else -> ApiError(
+                code = status.value(),
+                message = status.reasonPhrase
+            )
         }
 
         Sentry.capture(ex)
@@ -116,8 +144,15 @@ class GlobalExceptionHandler {
         val status = HttpStatus.INTERNAL_SERVER_ERROR
         val exception = ServerErrorException(ex.message)
         val apiError = when {
-            showStacktrace -> ApiError(status.value(), exception, status.reasonPhrase)
-            else -> ApiError(code = status.value(), message = status.reasonPhrase)
+            showStacktrace -> ApiError(
+                status.value(),
+                exception,
+                status.reasonPhrase
+            )
+            else -> ApiError(
+                code = status.value(),
+                message = status.reasonPhrase
+            )
         }
 
         Sentry.capture(ex)

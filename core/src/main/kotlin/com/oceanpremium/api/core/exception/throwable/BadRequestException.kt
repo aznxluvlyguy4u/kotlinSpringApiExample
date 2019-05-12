@@ -1,4 +1,4 @@
-package com.oceanpremium.api.core.exception
+package com.oceanpremium.api.core.exception.throwable
 
 /**
  * Code: 400 Bad Request
