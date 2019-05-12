@@ -6,6 +6,7 @@ import com.oceanpremium.api.core.exception.BadRequestException
 import com.oceanpremium.api.core.exception.NotFoundException
 import com.oceanpremium.api.core.exception.ServerErrorException
 import com.oceanpremium.api.core.exception.UnauthorizedException
+import io.sentry.Sentry
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -55,6 +56,7 @@ class GlobalExceptionHandler {
             else -> ApiError(code = status.value(), message = status.reasonPhrase)
         }
 
+        Sentry.capture(ex)
 
         return ResponseEntity(apiError, status)
     }
@@ -70,6 +72,9 @@ class GlobalExceptionHandler {
             showStacktrace -> ApiError(status.value(), ex, status.reasonPhrase)
             else -> ApiError(code = status.value(), message = status.reasonPhrase)
         }
+
+        Sentry.capture(ex)
+
         return ResponseEntity(apiError, status)
     }
 
@@ -84,6 +89,9 @@ class GlobalExceptionHandler {
             showStacktrace -> ApiError(status.value(), ex, status.reasonPhrase)
             else -> ApiError(code = status.value(), message = status.reasonPhrase)
         }
+
+        Sentry.capture(ex)
+
         return ResponseEntity(
             apiError,
             status
@@ -101,6 +109,9 @@ class GlobalExceptionHandler {
             showStacktrace -> ApiError(status.value(), ex, status.reasonPhrase)
             else -> ApiError(code = status.value(), message = status.reasonPhrase)
         }
+
+        Sentry.capture(ex)
+
         return ResponseEntity(
             apiError,
             status
@@ -120,6 +131,9 @@ class GlobalExceptionHandler {
             showStacktrace -> ApiError(status.value(), exception, status.reasonPhrase)
             else -> ApiError(code = status.value(), message = status.reasonPhrase)
         }
+
+        Sentry.capture(ex)
+
         return ResponseEntity(
             apiError,
             status
