@@ -2,9 +2,8 @@ package com.oceanpremium.api.core.currentrms.response.dto.mapper
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
+import com.oceanpremium.api.core.currentrms.response.dto.product.*
 import com.oceanpremium.api.core.exception.ServerErrorException
-import com.oceanpremium.api.core.currentrms.response.dto.product.ProductCustomFieldsDto
-import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import retrofit2.Response
@@ -20,17 +19,17 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         /**
          * The root node of the response payload that will contain the response result for data key
          */
-       data = mapToDto(response)
+        data = mapToDto(response)
     }
 
     /**
      * Determine if response contains either a JSON object response or a JSON array response,
      * and parse accordingly.
      */
-    private fun mapToDto(response: Response<Any>?) : Any? {
+    private fun mapToDto(response: Response<Any>?): Any? {
 
         when {
-            response != null -> if(!response.isSuccessful) {
+            response != null -> if (!response.isSuccessful) {
                 data = CurrentRmsApiResponse.ErrorMessage(response.code(), response.message())
 
                 return data
@@ -63,7 +62,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                 mapJsonArray(response)
             }
             responseBody.containsKey("product") -> {
-               mapJsonObjectToDto(responseBody["product"] as Map<*, *>)
+                mapJsonObjectToDto(responseBody["product"] as Map<*, *>)
             }
             else -> null
         }
@@ -72,7 +71,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
     /**
      * Map list of items to list of dtoMapper
      */
-    private fun mapJsonArray(response: Response<Any>?) : List<ProductDto> {
+    private fun mapJsonArray(response: Response<Any>?): List<ProductDto> {
         val responseBody = response?.body() as Map<*, *>
         val products: MutableList<ProductDto> = mutableListOf()
         val productsItemsBody = responseBody["products"] as List<Map<*, *>>
@@ -92,10 +91,9 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         var id: Int? = null
         var name: String? = null
         var description: String? = null
-        var rentalPrice: String? = null
         var customFields: ProductCustomFieldsDto? = null
-        var rentalQuantityAvailable: String? = null
-        var rentalLeadChargePeriodName: String? = null
+        val rates = mapProductRatesToDto(itemBody)
+        val imageSources = mapImageSourcesToDto(itemBody, customFields)
 
         try {
             if (itemBody.containsKey("id")) {
@@ -113,55 +111,91 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             if (itemBody.containsKey("custom_fields")) {
                 customFields = mapCustomFieldsToDto(itemBody)
             }
-
-            val rates = mapProductRates(itemBody)
-
-            if (rates.containsKey("rental_price")) {
-                rates["rental_price"] as String?
-            }
-
-            if (rates.containsKey("rental_quantity_available")) {
-                rentalQuantityAvailable = rates["rental_quantity_available"] as String?
-            }
-
-            if (rates.containsKey("rental_lead_charge_period_name")) {
-                rentalLeadChargePeriodName = rates["rental_lead_charge_period_name"] as String?
-            }
         } catch (e: Exception) {
+            e.printStackTrace()
+
             val message = "Failed to map product response to Dto: ${e.message}"
             logger.error(message)
+
+            throw ServerErrorException(e.message)
         }
 
         return ProductDto(
             id,
             name,
             description,
-            rentalQuantityAvailable,
-            rentalPrice,
-            rentalLeadChargePeriodName,
+            rates.pricings,
+            imageSources.sources,
             customFields
         )
     }
 
-    private fun mapProductRates(itemBody: Map<*, *>): Map<*, *> {
-        val rates: MutableMap<String, Any?> = mutableMapOf()
+    /**
+     * image urls are setup as both primary fields and custom fields in current rms.
+     * Per default get the primary image fields, if custom fields are set, check if public image icon url is set
+     */
+    @Throws(ServerErrorException::class)
+    private fun mapImageSourcesToDto(itemBody: Map<*, *>, customFieldsDto: ProductCustomFieldsDto?): ImageDto {
+        val imageSources: MutableList<ImageSource> = mutableListOf()
 
-        if (itemBody.containsKey("rental_price")
-            && itemBody.containsKey("rental_quantity_available")
-            && itemBody.containsKey("rental_lead_charge_period_name")) {
-            rates["rental_price"] = itemBody["rental_price"]
-            rates["rental_quantity_available"] = itemBody["rental_quantity_available"] as String?
-            rates["rental_lead_charge_period_name"] = itemBody["rental_lead_charge_period_name"] as String?
-        } else {
-            if (itemBody.containsKey("rental_rate")) {
-                val rentalRate = (itemBody["rental_rates"] as List<Map<*, *>>).first()
+        when {
+            itemBody.containsKey("icon_thumb_url") && itemBody.containsKey("icon_url") -> {
+                imageSources.add(ImageSource(itemBody["icon_url"] as String?, itemBody["icon_thumb_url"] as String?))
+            }
+            else -> if (!customFieldsDto?.publicIconUrl.isNullOrEmpty()) {
+                val imageUrl = customFieldsDto!!.publicIconUrl
+                var imageThumbUrl: String? = imageUrl
 
-                rates["rental_price"] = rentalRate["price"]
-                rates["rental_lead_charge_period_name"] = rentalRate["rate_definition_name"] as String?
+                if (!customFieldsDto.publicIconThumbUrl.isNullOrEmpty()) {
+                    imageThumbUrl = customFieldsDto.publicIconThumbUrl
+                }
+
+                if (imageUrl != null && imageThumbUrl != null) {
+                    imageSources.add(ImageSource(imageUrl, imageThumbUrl))
+                }
             }
         }
 
-        return rates
+        return ImageDto(imageSources)
+    }
+
+    @Throws(ServerErrorException::class)
+    private fun mapProductRatesToDto(itemBody: Map<*, *>): RateDto {
+        val rates: MutableList<PricingDto> = mutableListOf()
+        try {
+            if (itemBody.containsKey("rental_price")
+                && itemBody.containsKey("rental_quantity_available")
+                && itemBody.containsKey("rental_lead_charge_period_name")
+            ) {
+                val rentalPrice = itemBody["rental_price"] as String?
+                val rentalQuantityAvailable = itemBody["rental_quantity_available"] as String?
+                val rentalLeadChargePeriodName = itemBody["rental_lead_charge_period_name"] as String?
+
+                rates.add(PricingDto(rentalQuantityAvailable, rentalPrice, rentalLeadChargePeriodName))
+            } else {
+                if (itemBody.containsKey("rental_rates")) {
+                    val rentalRate = (itemBody["rental_rates"] as List<Map<*, *>>).first()
+
+                    val rentalPrice = rentalRate["price"] as String?
+                    val rentalLeadChargePeriodName = rentalRate["rate_definition_name"] as String?
+
+                    when {
+                        !rentalPrice.isNullOrEmpty() -> if (!rentalLeadChargePeriodName.isNullOrEmpty()) {
+                            rates.add(PricingDto(price = rentalPrice, chargePeriod = rentalLeadChargePeriodName))
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+
+            val message = "Failed to map product response to Dto: ${e.message}"
+            logger.error(message)
+
+            throw ServerErrorException(e.message)
+        }
+
+        return RateDto(rates)
     }
 
     /**
@@ -172,32 +206,40 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         var publicIconThumbUrl: String? = null
         var publicIconUrl: String? = null
 
-        when {
-            itemBody.contains("custom_fields") -> {
-                val customFieldsBody = itemBody["custom_fields"] as Map<*, *>
+        try {
+            when {
+                itemBody.contains("custom_fields") -> {
+                    val customFieldsBody = itemBody["custom_fields"] as Map<*, *>
 
-                when {
-                    customFieldsBody.containsKey("store_id") ->
+                    when {
+                        customFieldsBody.containsKey("store_id") ->
+                            if ((customFieldsBody["store_id"] as String?)!!.isNotEmpty()) {
+                                storeId = (customFieldsBody["store_id"] as String?)!!.toInt()
+                            }
+                    }
 
-                        if ((customFieldsBody["store_id"] as String?)!!.isNotEmpty()) {
-                            storeId = (customFieldsBody["store_id"] as String?)!!.toInt()
-                        }
-                }
+                    when {
+                        customFieldsBody.containsKey("public_icon_thumb_url") -> publicIconThumbUrl =
+                            customFieldsBody["public_icon_thumb_url"] as String?
+                    }
 
-                when {
-                    customFieldsBody.containsKey("public_icon_thumb_url") -> publicIconThumbUrl =
-                        customFieldsBody["public_icon_thumb_url"] as String?
-                }
-
-                when {
-                    customFieldsBody.containsKey("public_icon_url") -> publicIconUrl =
-                        customFieldsBody["public_icon_url"] as String?
+                    when {
+                        customFieldsBody.containsKey("public_icon_url") -> publicIconUrl =
+                            customFieldsBody["public_icon_url"] as String?
+                    }
                 }
             }
-        }
 
-        if (storeId == null && publicIconThumbUrl.isNullOrEmpty() && publicIconUrl.isNullOrEmpty()) {
-            return null
+            if (storeId == null && publicIconThumbUrl.isNullOrEmpty() && publicIconUrl.isNullOrEmpty()) {
+                return null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+
+            val message = "Failed to map product response to Dto: ${e.message}"
+            logger.error(message)
+
+            throw ServerErrorException(e.message)
         }
 
         return ProductCustomFieldsDto(

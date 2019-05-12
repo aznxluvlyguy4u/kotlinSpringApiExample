@@ -7,8 +7,7 @@ class ProductDto(
     val id: Int?,
     val name: String?,
     val description: String?,
-    val rentalQuantityAvailable: String?,
-    val rentalPrice: String?,
-    val rentalLeadChargePeriodName: String?,
+    val rates: List<PricingDto>,
+    val images: List<ImageSource>,
     var customFields: ProductCustomFieldsDto? = null
 )
