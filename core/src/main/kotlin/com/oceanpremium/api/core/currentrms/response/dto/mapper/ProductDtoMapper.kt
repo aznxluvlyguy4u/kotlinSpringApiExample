@@ -3,6 +3,7 @@ package com.oceanpremium.api.core.currentrms.response.dto.mapper
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
 import com.oceanpremium.api.core.currentrms.response.dto.product.*
+import com.oceanpremium.api.core.exception.NotFoundException
 import com.oceanpremium.api.core.exception.ServerErrorException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -26,6 +27,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
      * Determine if response contains either a JSON object response or a JSON array response,
      * and parse accordingly.
      */
+    @Throws(NotFoundException::class)
     private fun mapToDto(response: Response<Any>?): Any? {
 
         when {
@@ -51,15 +53,14 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                  */
                 val metaMapper = MetaDtoMapper(response)
 
-                if (metaMapper.overrideHttpStatus) {
-                    httpStatus = HttpStatus.NOT_FOUND
-                    data = CurrentRmsApiResponse.ErrorMessage(response.code(), response.message())
-
-                    return data
+                when {
+                    metaMapper.overrideHttpStatus -> throw NotFoundException("Could not find products for query: ${response.raw().request().url().encodedQuery()}")
+                    else -> {
+                        meta = metaMapper.meta
+                        mapJsonArray(response)
+                    }
                 }
 
-                meta = metaMapper.meta
-                mapJsonArray(response)
             }
             responseBody.containsKey("product") -> {
                 mapJsonObjectToDto(responseBody["product"] as Map<*, *>)
