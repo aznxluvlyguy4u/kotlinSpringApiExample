@@ -57,6 +57,7 @@ class ProductGroupDtoMapper(var code: Int, response: Response<Any>?) : CurrentRm
     private fun mapJsonArray(response: Response<Any>?) : List<ProductGroupDto> {
         val responseBody = response?.body() as Map<*, *>
         val productGroups: MutableList<ProductGroupDto> = mutableListOf()
+        @Suppress("UNCHECKED_CAST")
         val productsItemsBody = responseBody["product_groups"] as List<Map<*, *>>
 
         productsItemsBody.forEach {

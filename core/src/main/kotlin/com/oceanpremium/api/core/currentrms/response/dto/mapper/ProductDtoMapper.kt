@@ -76,6 +76,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
     private fun mapJsonArray(response: Response<Any>?): List<ProductDto> {
         val responseBody = response?.body() as Map<*, *>
         val products: MutableList<ProductDto> = mutableListOf()
+        @Suppress("UNCHECKED_CAST")
         val productsItemsBody = responseBody["products"] as List<Map<*, *>>
 
         productsItemsBody.forEach {
@@ -176,14 +177,15 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                 rates.add(PricingDto(rentalQuantityAvailable, rentalPrice, rentalLeadChargePeriodName))
             } else {
                 if (itemBody.containsKey("rental_rates")) {
+                    @Suppress("UNCHECKED_CAST")
                     val rentalRate = (itemBody["rental_rates"] as List<Map<*, *>>).first()
 
                     val rentalPrice = rentalRate["price"] as String?
                     val rentalLeadChargePeriodName = rentalRate["rate_definition_name"] as String?
 
                     when {
-                        !rentalPrice.isNullOrEmpty() -> if (!rentalLeadChargePeriodName.isNullOrEmpty()) {
-                            rates.add(PricingDto(price = rentalPrice, chargePeriod = rentalLeadChargePeriodName))
+                        !rentalPrice.isNullOrEmpty() -> when {
+                            !rentalLeadChargePeriodName.isNullOrEmpty() -> rates.add(PricingDto(price = rentalPrice, chargePeriod = rentalLeadChargePeriodName))
                         }
                     }
                 }
