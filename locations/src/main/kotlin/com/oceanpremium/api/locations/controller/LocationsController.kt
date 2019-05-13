@@ -37,14 +37,12 @@ class LocationsController(
     }
 
     /**
-     * Endpoint to retrieve locations know to the platform.
+     * Endpoint to retrieve locations known to the platform.
      */
     @RequestMapping
     @ResponseBody
     fun getLocations(@RequestParam fields: Map<String, String>): ResponseEntity<*> {
         logger.debug("[API] - GET locations: $fields")
-
-        val test = storeBuilder.getAllStores()
 
         return ResponseEntity(
             JsonBody(statusCode = HttpStatus.OK.value(), data = locationBuilder.getAllLocations() ),
