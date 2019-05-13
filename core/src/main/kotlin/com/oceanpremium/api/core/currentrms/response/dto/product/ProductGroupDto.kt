@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class ProductGroupDto (
-    val id: Int?,
-    val name: String?,
-    val description: String?,
+    var id: Int? = null,
+    var name: String? = null,
+    var description: String? = null,
     var customFields: ProductGroupCustomFieldsDto? = null
 )

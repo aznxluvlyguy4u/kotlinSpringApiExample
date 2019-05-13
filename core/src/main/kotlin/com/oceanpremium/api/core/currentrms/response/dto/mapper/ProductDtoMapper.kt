@@ -94,6 +94,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         var id: Int? = null
         var name: String? = null
         var description: String? = null
+        val productGroup: ProductGroupDto? = mapProductGroupToDto(itemBody)
         var customFields: ProductCustomFieldsDto? = null
         val rates = mapProductRatesToDto(itemBody)
         val imageSources = mapImageSourcesToDto(itemBody, customFields)
@@ -127,6 +128,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             id,
             name,
             description,
+            productGroup,
             rates.pricings,
             imageSources.sources,
             customFields
@@ -200,6 +202,45 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         }
 
         return RateDto(rates)
+    }
+
+    private fun mapProductGroupToDto(itemBody: Map<*, *>): ProductGroupDto? {
+        var productGroupId: Int? = null
+        var productGroupName: String? = null
+
+        try {
+            if (itemBody.containsKey("product_group_id")
+                && itemBody.containsKey("product_group_name")
+            ) {
+                productGroupId = (itemBody["product_group_id"] as Double?)?.toInt()
+                productGroupName = itemBody["product_group_name"] as String?
+
+            } else {
+                if (itemBody.containsKey("product_group")) {
+                    val productGroup = itemBody["product_group"] as Map<*,*>
+
+                    when {
+                        productGroup.containsKey("id") && productGroup.containsKey("name") -> {
+                            productGroupId = (productGroup["id"] as Double?)?.toInt()
+                            productGroupName = productGroup["name"] as String?
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+
+            val message = "Failed to map product response to Dto: ${e.message}"
+            logger.error(message)
+
+            throw ServerErrorException(e.message)
+        }
+
+        if (productGroupId == null && productGroupName == null) {
+            return null
+        }
+
+        return ProductGroupDto(id = productGroupId, name = productGroupName)
     }
 
     /**

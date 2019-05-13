@@ -7,6 +7,7 @@ class ProductDto(
     val id: Int?,
     val name: String?,
     val description: String?,
+    val productGroup: ProductGroupDto?,
     val rates: List<PricingDto>,
     val images: List<ImageSource>,
     var customFields: ProductCustomFieldsDto? = null
