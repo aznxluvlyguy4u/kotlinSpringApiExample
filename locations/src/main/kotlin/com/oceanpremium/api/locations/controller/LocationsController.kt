@@ -43,7 +43,7 @@ class LocationsController(
         logger.debug("[API] - GET locations: $fields")
 
         return ResponseEntity(
-            JsonBody(statusCode = HttpStatus.OK.value(), data = locationBuilder.getAllLocations() ),
+            JsonBody(HttpStatus.OK.value(), locationBuilder.getAllLocations()),
             HttpStatus.OK
         )
     }
