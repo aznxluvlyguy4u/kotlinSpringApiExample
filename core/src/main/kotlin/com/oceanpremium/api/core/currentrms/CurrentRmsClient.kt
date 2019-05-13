@@ -93,7 +93,7 @@ class CurrentRmsClient {
 
         logger.debug("Build new retrofit client")
         val logging = HttpLoggingInterceptor()
-        logging.level = HttpLoggingInterceptor.Level.BODY
+        logging.level = HttpLoggingInterceptor.Level.NONE
 
         val currentRmsConfigInterceptor =
             CurrentRmsConfigInterceptor(currentRmsConfig)
