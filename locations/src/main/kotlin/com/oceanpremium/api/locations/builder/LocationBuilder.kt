@@ -57,6 +57,6 @@ class LocationBuilderImpl(
             locations.addAll(region.locations)
         }
 
-        return locations
+        return locations.sortedWith(compareBy({ it.name }))
     }
 }

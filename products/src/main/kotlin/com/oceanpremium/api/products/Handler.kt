@@ -7,6 +7,7 @@ import com.amazonaws.serverless.proxy.spring.SpringBootLambdaContainerHandler
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler
 import com.oceanpremium.api.core.currentrms.ProductsApiImpl
+import com.oceanpremium.api.core.exception.handler.GlobalExceptionHandler
 import io.sentry.spring.SentryServletContextInitializer
 import org.slf4j.LoggerFactory
 import org.springframework.boot.SpringApplication
@@ -32,7 +33,7 @@ import kotlin.jvm.java as java1
  * The main application entry point that spins up the API.
  */
 @SpringBootApplication
-@Import(ProductsApiImpl::class)
+@Import(ProductsApiImpl::class, GlobalExceptionHandler::class)
 class ProductsDriver : SpringBootServletInitializer() {
 
     companion object {

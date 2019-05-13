@@ -1,14 +1,15 @@
 package com.oceanpremium.api.core.currentrms.response
 
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.oceanpremium.api.core.currentrms.response.dto.mapper.CurrentRmsBaseDtoMapper
+import com.oceanpremium.api.core.enum.AuthorizationType
 import com.oceanpremium.api.core.enum.HTTPStatusCodeRange
+import com.oceanpremium.api.core.exception.throwable.BadRequestException
+import com.oceanpremium.api.core.exception.throwable.UnauthorizedException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-
-/**
- * Response class that will contain response body.
- *
- */
+import retrofit2.Response
 
 /**
  * Response builder that will create a wrapped response based on input code and data.
@@ -36,9 +37,21 @@ import org.springframework.http.ResponseEntity
  * The request was well-formed but was unable to be followed due to semantic errors.
  */
 class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any>(body, status) {
+
     companion object {
         inline fun build(block: Builder.() -> Unit) = Builder().apply(block).build()
     }
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    internal class ErrorMessage(val code: Int, val message: String)
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    internal class WrappedResponse(
+        val code: Int,
+        var data: Any? = null,
+        var meta: Any? = null,
+        var error: ErrorMessage? = null
+    )
 
     /**
      * Builder for creating a ApiGatewayResponse.
@@ -46,187 +59,134 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
     class Builder {
 
         private val logger = LoggerFactory.getLogger(this::class.java)
-        private var rawBody: Map<String, Any>? = null
-
-        var statusCode: HttpStatus = HttpStatus.OK
-        var objectBody: Any? = null
+        var rawResponse: Response<Any>? = null
+        var dtoMapper: CurrentRmsBaseDtoMapper? = null
+        var error: String? = null
 
         fun build(): ResponseEntity<*> {
-            return buildResponse(statusCode, objectBody)
+            return buildResponse(rawResponse, dtoMapper, error)
         }
 
-        @Throws(Exception::class)
-        private fun buildResponse(statusCode: HttpStatus, objectBody: Any?): ResponseEntity<*> {
+        @Throws(Exception::class, UnauthorizedException::class, BadRequestException::class)
+        private fun buildResponse(
+            rawResponse:  Response<Any>?,
+            dtoMapper: CurrentRmsBaseDtoMapper? = null,
+            error: String? = null
+        ): ResponseEntity<*> {
+
+            val statusCode = dtoMapper?.httpStatus!!
 
             return when {
-                // HTTP 1.x.x - informational
-                statusCode.value() >= HTTPStatusCodeRange.INFORMATIONAL.code && statusCode.value() < HTTPStatusCodeRange.SUCCESS.code -> {
-                    logger.debug("Setting up INFORMATIONAL response")
 
-                    try {
-                        if (objectBody == null) {
-                            buildSuccessResponse(statusCode, statusCode.name)
-                        } else {
-                            buildSuccessResponse(statusCode, objectBody)
-                        }
-                    } catch (e: Exception) {
-                        logger.error("Failed to build INFORMATIONAL response: $e")
-                    } as ResponseEntity<*>
-                }
-
-                // HTTP 2.x.x - success's
-                statusCode.value() >= HTTPStatusCodeRange.SUCCESS.code && statusCode.value() < HTTPStatusCodeRange.REDIRECT.code -> {
+                // HTTP 2xx - success's
+                statusCode.value() >= HTTPStatusCodeRange.SUCCESS.code
+                        && statusCode.value() < HTTPStatusCodeRange.REDIRECT.code -> {
                     logger.debug("Setting up SUCCESS response")
 
-                    try {
-                        if (objectBody == null) {
-                            buildSuccessResponse(statusCode, statusCode.name)
-                        } else {
-                            val isEmptyResult= isResultEmpty(objectBody as Map<*, *>)
+                     buildSuccessResponse(rawResponse, dtoMapper)
+                }
 
-                            if (isEmptyResult) {
-                                return buildSuccessResponse(HttpStatus.NOT_FOUND, objectBody)
+                // HTTP 4xx - client errors and 5xx server errors
+                statusCode.value() >= HTTPStatusCodeRange.CLIENT_ERROR.code
+                        && statusCode.value() < HTTPStatusCodeRange.SERVER_ERROR.code ||
+                        statusCode.value() >= HTTPStatusCodeRange.SERVER_ERROR.code
+                        && statusCode.value() < HTTPStatusCodeRange.CUSTOM.code -> {
+                    logger.debug("Setting up ERROR response")
+
+                    if (HttpStatus.valueOf(statusCode.value()) == HttpStatus.UNAUTHORIZED) {
+                        throw UnauthorizedException(
+                            "Could not authenticate with current rms",
+                            AuthorizationType.THIRD_PARTY
+                        )
+                    }
+
+                    if (HttpStatus.valueOf(statusCode.value()) == HttpStatus.BAD_REQUEST) {
+                        throw BadRequestException("")
+                    }
+
+                     when (rawResponse) {
+                        null ->
+                            if (error != null) {
+                                buildErrorResponse(statusCode = statusCode, errorMessage = error, rawResponse = null)
+                            } else {
+                                buildErrorResponse(statusCode = statusCode, errorMessage = statusCode.reasonPhrase, rawResponse = null)
                             }
-
-                            buildSuccessResponse(statusCode, objectBody)
-                        }
-                    } catch (e: Exception) {
-                        logger.error("Failed to build SUCCESS response: $e")
-                    } as ResponseEntity<*>
-                }
-
-                // HTTP 3.x.x - redirects
-                statusCode.value() >= HTTPStatusCodeRange.REDIRECT.code && statusCode.value() < HTTPStatusCodeRange.CLIENT_ERROR.code -> {
-                    logger.debug("Setting up REDIRECT response")
-
-                    try {
-                        if (objectBody == null) {
-                            buildSuccessResponse(statusCode, statusCode.name)
-                        } else {
-                            buildSuccessResponse(statusCode, objectBody)
-                        }
-                    } catch (e: Exception) {
-                        logger.error("Failed to build REDIRECT response: $e")
-                    } as ResponseEntity<*>
-                }
-
-                // HTTP 4.x.x - client errors
-                statusCode.value() >= HTTPStatusCodeRange.CLIENT_ERROR.code && statusCode.value() < HTTPStatusCodeRange.SERVER_ERROR.code -> {
-                    logger.debug("Setting up CLIENT ERROR response")
-
-                    try {
-                        if (objectBody == null) {
-                            buildErrorResponse(statusCode, statusCode.name)
-                        } else {
-                            buildErrorResponse(statusCode, objectBody as String)
-                        }
-
-                    } catch (e: Exception) {
-                        logger.error("Failed to build CLIENT ERROR response: $e")
-                    } as ResponseEntity<*>
-                }
-
-                // HTTP 5.x.x - server errors
-                statusCode.value() >= HTTPStatusCodeRange.SERVER_ERROR.code && statusCode.value() < HTTPStatusCodeRange.CUSTOM.code -> {
-                    logger.debug("Setting up SERVER ERROR response")
-
-                    try {
-                        if (objectBody == null) {
-                            buildErrorResponse(statusCode, statusCode.name)
-                        } else {
-                            buildErrorResponse(statusCode, objectBody as String)
-                        }
-                    } catch (e: Exception) {
-                        logger.error("Failed to build SERVER ERROR response: $e")
-                    } as ResponseEntity<*>
-                }
-
-                //HTTP 6.x.x - customs
-                statusCode.value() >= HTTPStatusCodeRange.CUSTOM.code -> {
-                    logger.debug("Setting up CUSTOM response")
-
-                    try {
-                        if (objectBody == null) {
-                            buildSuccessResponse(statusCode, statusCode.name)
-                        } else {
-                            buildSuccessResponse(statusCode, objectBody)
-                        }
-                    } catch (e: Exception) {
-                        logger.error("Failed to build CUSTOM response: $e")
-                    } as ResponseEntity<*>
+                        else -> buildErrorResponse(statusCode = statusCode, errorMessage = error, rawResponse = rawResponse)
+                    }
                 }
 
                 /**
                  * See {@link io.sheep.enumerator.HTTPStatusRange} for supported HTTP status codes
                  */
                 else -> {
-                    throw Exception(
-                        "Not a supported HTTP status code: $statusCode, either use supported HTTP Status Codes " +
-                                "or setup a custom HTTP Status code in 6.x.x range and register it in the HTTPStatusCode enum"
-                    )
+                    throw Exception("Not a supported HTTP status code: $statusCode, either use supported HTTP Status Codes")
                 }
             }
         }
 
-
         /**
-         * CurrentRMS API returns 200 OK when a resource is not found / a result set is empty
-         * Proper API response code would be 404 NOT FOUND, therefore overriding a request that
-         * responds with 200 OK but has not result.
-         */
-        private fun isResultEmpty(objectBody: Map<*, *>): Boolean {
-
-            val metaKey = "meta"
-            val rowCountKey = "row_count"
-
-            if (objectBody.containsKey(metaKey)) {
-                val meta = objectBody[metaKey] as Map<*, *>
-
-                if (meta.containsKey(rowCountKey)) {
-                    return when (meta[rowCountKey] as Double) {
-                        0.0 -> {
-                            true
-                        }
-                        else -> {
-                            false
-                        }
-                    }
-                }
-            }
-
-            return false
-        }
-
-        /**
-         * Build a response for 1.x.x, 2.x.x, 3.x.x and 6.x.x range.
+         * Build a response for Informationals: 1xx, OK's: 2xx and Redirects: 3xx
+         *
+         * See @link: https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
          */
         @Throws(RuntimeException::class)
         private fun buildSuccessResponse(
-            statusCode: HttpStatus,
-            objectBody: Any?
+            rawResponse: Response<Any>?,
+            dtoMapper: CurrentRmsBaseDtoMapper
         ): ResponseEntity<Any> {
-            var body: Map<String, Any>? = null
+            val statusCode = dtoMapper.httpStatus
+            val wrappedBody = WrappedResponse(code = dtoMapper.httpStatus.value(), data = rawResponse, meta = dtoMapper.meta)
 
-            when {
-                rawBody != null -> body = rawBody
-
-                objectBody != null ->
-                    body = mapOf("statusCode" to  statusCode.value(), "data" to objectBody)
+            if (dtoMapper.data != null ) {
+                wrappedBody.data = dtoMapper.data
             }
 
-            return ResponseEntity(body as Any, statusCode)
+            return ResponseEntity(wrappedBody, statusCode)
         }
 
         /**
-         * Build a response for 4.xx and 5.x.x range.
+         * Build a response for Client errors: 4xx and Server errors: 5xx.
+         *
+         * See @link: https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
          */
         @Throws(RuntimeException::class)
         private fun buildErrorResponse(
             statusCode: HttpStatus,
-            objectBody: String?
-        ): ResponseEntity<Any> {
-            val body = mapOf("statusCode" to  statusCode.value(), "errorMessage" to objectBody)
-            return ResponseEntity(body as Any, statusCode)
+            rawResponse: Response<Any>?,
+            errorMessage: String?
+            ): ResponseEntity<Any> {
+
+            val wrappedBody = when {
+                errorMessage != null -> {
+                    WrappedResponse(code = statusCode.value(), error = ErrorMessage(statusCode.value(), errorMessage))
+                }
+
+                rawResponse?.message() != null -> {
+                    var customErrorMessage = rawResponse.message()
+
+                    /**
+                     * Overrides a 200 OK with empty result set because current rms returns a 200 OK,
+                     * for empty result sets ;(
+                     */
+                    if (rawResponse.message() == "OK") {
+                        customErrorMessage = statusCode.reasonPhrase
+                    }
+
+                    WrappedResponse(code = statusCode.value(), error = ErrorMessage(statusCode.value(), customErrorMessage))
+                }
+
+                else ->  {
+                    WrappedResponse(
+                        code = statusCode.value(),
+                        error = ErrorMessage(
+                            statusCode.value(),
+                            message = "Something went wrong, please try again."
+                        )
+                    )
+                }
+            }
+
+            return ResponseEntity(wrappedBody, statusCode)
         }
     }
 }
