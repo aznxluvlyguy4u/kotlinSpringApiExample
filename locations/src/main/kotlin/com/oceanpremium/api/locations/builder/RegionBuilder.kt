@@ -882,13 +882,7 @@ class RegionBuilderImpl: RegionBuilder {
         allRegions.addAll(buildCaribbean())
         allRegions.addAll(buildFloridaAndBahamas())
         allRegions.addAll(buildMaldives())
-
-//        var i = 1
-//        allRegions.forEach {
-//            it.id = i
-//            i++
-//        }
-
+        
         return allRegions
     }
 }
