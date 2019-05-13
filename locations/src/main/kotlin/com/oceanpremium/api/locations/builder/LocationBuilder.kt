@@ -2,14 +2,11 @@ package com.oceanpremium.api.locations.builder
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.util.*
 
-class Location(var name: String? = null, var id: Int = 0,  var regionId: Int = 0, var stores: MutableList<Store> = mutableListOf()) {
-    fun addStore(store: Store) {
-        stores.add(store)
-    }
-}
+class Location(var name: String? = null, var id: Int = 0,  var regionId: Int = 0, var storeIds: SortedSet<Int> = sortedSetOf())
 
-class Region(private val name: String, var id: Int = 0, val locations: MutableList<Location> = mutableListOf(), var stores: MutableList<Store> = mutableListOf()) {
+class Region(private val name: String, var id: Int = 0, val locations: MutableList<Location> = mutableListOf(), var storeIds: SortedSet<Int> = sortedSetOf()) {
 
     fun addLocation(location: Location) {
         location.regionId = id
@@ -22,11 +19,11 @@ class Region(private val name: String, var id: Int = 0, val locations: MutableLi
     }
 
     fun addStore(store: Store) {
-        stores.add(store)
+        storeIds.add(store.id)
     }
 }
 
-class Store(val name: String, var id: Int = 0, private val regions: MutableList<Region> = mutableListOf()) {
+class Store(private val name: String, var id: Int = 0, private val regions: MutableList<Region> = mutableListOf()) {
 
     fun addRegion(region: List<Region>) {
         regions.addAll(region)
@@ -54,7 +51,7 @@ class LocationBuilderImpl(
             region.locations.forEach { location ->
                 location.id = j
                 location.regionId = region.id
-                location.stores = region.stores
+                location.storeIds = region.storeIds
                 j++
             }
 
