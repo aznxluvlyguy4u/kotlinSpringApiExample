@@ -35,7 +35,7 @@ class LocationsController(
     }
 
     /**
-     * Endpoint to retrieve locations know to the platform.
+     * Endpoint to retrieve locations known to the platform.
      */
     @RequestMapping
     @ResponseBody
