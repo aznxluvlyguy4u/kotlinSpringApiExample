@@ -132,10 +132,6 @@ functions:
           # The default headers mandatory for this endpoint
           headers:
             - Content-Type
-          request:
-            parameters:
-              paths:
-                productId: true
           allowCredentials: false
     environment:
       SENTRY_DSN: ${file(properties.json):products.sentry_dsn}
