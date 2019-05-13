@@ -44,6 +44,8 @@ class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
         private val logger = LoggerFactory.getLogger(this::class.java)
         private const val ACTIVE_PRODUCT_QUERY = "q[active_eq]"
         private const val FILTER_MODE_QUERY = "filtermode[]"
+        private const val DEFAULT_STORE_ID_QUERY = "store_id"
+
     }
 
     fun getProductById(productId: Int): Response<Any>? {
@@ -107,12 +109,23 @@ class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
     }
 
     fun getProductsInventory(map: MutableMap<String, String>): Response<Any>? {
+
+        // Set default query parameters if these are not present, for propery product querying on current rms.
+        val validatedMap = map.toMutableMap()
+
         when {
-            !map.containsKey(ACTIVE_PRODUCT_QUERY) -> map[ACTIVE_PRODUCT_QUERY] = "true"
-            !map.containsKey(FILTER_MODE_QUERY) -> map[FILTER_MODE_QUERY] = CurrentRmsSaleType.RENTAL.type
+            !map.containsKey(ACTIVE_PRODUCT_QUERY) -> validatedMap[ACTIVE_PRODUCT_QUERY] = "true"
         }
 
-        val retrofitCall = productsApi.getProductsInventory(map = map)
+        when {
+            !map.containsKey(FILTER_MODE_QUERY) -> validatedMap[FILTER_MODE_QUERY] = "rental"
+        }
+
+        when {
+            !map.containsKey(DEFAULT_STORE_ID_QUERY) -> validatedMap[DEFAULT_STORE_ID_QUERY] = "5"
+        }
+
+        val retrofitCall = productsApi.getProductsInventory(map = validatedMap)
         val response = retrofitCall.execute()
 
         logger.debug("Current RMS API call - HTTP status: ${response.code()}")
