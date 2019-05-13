@@ -882,7 +882,7 @@ class RegionBuilderImpl: RegionBuilder {
         allRegions.addAll(buildCaribbean())
         allRegions.addAll(buildFloridaAndBahamas())
         allRegions.addAll(buildMaldives())
-        
+
         return allRegions
     }
 }

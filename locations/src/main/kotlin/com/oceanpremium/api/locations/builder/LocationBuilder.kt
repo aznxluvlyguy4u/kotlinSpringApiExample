@@ -36,8 +36,7 @@ interface LocationBuilder {
 
 @Service
 class LocationBuilderImpl(
-    @Autowired private val regionBuilder: RegionBuilder,
-    @Autowired private val storeBuilder: StoreBuilder
+    @Autowired private val regionBuilder: RegionBuilder
 ): LocationBuilder {
 
     override fun getAllLocations(): List<Location> {
