@@ -147,6 +147,33 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             itemBody.containsKey("icon_thumb_url") && itemBody.containsKey("icon_url") -> {
                 imageSources.add(ImageSource(itemBody["icon_url"] as String?, itemBody["icon_thumb_url"] as String?))
             }
+
+            itemBody.containsKey("icon")  -> {
+                val icon = itemBody["icon"] as Map<*,*>
+                var imageUrl: String? = null
+                var thumbUrl: String? = null
+
+                try {
+                    if (icon.containsKey("url")) {
+                        imageUrl = icon["url"] as String?
+                    }
+
+                    if (icon.containsKey("thumb_url")) {
+                        thumbUrl = icon["thumb_url"] as String?
+                    }
+
+                    if (imageUrl != null && thumbUrl != null) {
+                        imageSources.add(ImageSource(imageUrl, thumbUrl))
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+
+                    val message = "Failed to map product response to Dto: ${e.message}"
+                    logger.error(message)
+
+                    throw ServerErrorException(e.message)
+                }
+            }
             else -> if (!customFieldsDto?.publicIconUrl.isNullOrEmpty()) {
                 val imageUrl = customFieldsDto!!.publicIconUrl
                 var imageThumbUrl: String? = imageUrl
