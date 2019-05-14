@@ -64,7 +64,7 @@ class ProductsController(
                 dtoMapper = dto
             }
         } catch (exc: NotFoundException) {
-            throw  ResponseStatusException(HttpStatus.NOT_FOUND, "Not Found", exc);
+            throw  ResponseStatusException(HttpStatus.NOT_FOUND, "Not Found", exc)
         }
 
     }
