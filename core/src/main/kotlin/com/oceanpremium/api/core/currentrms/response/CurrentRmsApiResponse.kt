@@ -2,6 +2,7 @@ package com.oceanpremium.api.core.currentrms.response
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.CurrentRmsBaseDtoMapper
+import com.oceanpremium.api.core.currentrms.response.dto.product.MetaDto
 import com.oceanpremium.api.core.enum.HTTPStatusCodeRange
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.exception.throwable.UnauthorizedException
@@ -64,6 +65,7 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
         private val logger = LoggerFactory.getLogger(this::class.java)
         var rawResponse: Response<Any>? = null
         var dtoMapper: CurrentRmsBaseDtoMapper? = null
+        var queryParameters: Map<*,*>? = null
         var error: String? = null
 
         fun build(): ResponseEntity<*> {
@@ -84,9 +86,28 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
                 // HTTP 2xx - success's
                 statusCode.value() >= HTTPStatusCodeRange.SUCCESS.code
                         && statusCode.value() < HTTPStatusCodeRange.REDIRECT.code -> {
-                    logger.debug("Setting up SUCCESS response")
 
-                     buildSuccessResponse(rawResponse, dtoMapper)
+                    when {
+                        /**
+                         * CurrentRms returns a 200 OK for empty result sets. As a best practice for REST API,
+                         * the response should be a 404 NOT FOUND when an empty result set is returned.
+                         *
+                         * See @link: https://stackoverflow.com/questions/11746894/what-is-the-proper-rest-response-code-for-a-valid-request-but-an-empty-data
+                         *
+                         * Therefore, override the 200 OK response code and return a 404 NOT FOUND response code and error message instead.
+                         */
+                        (dtoMapper.meta as MetaDto).rowCount == 0 -> {
+                            logger.debug("Result set is empty. Setting up OVERRIDDEN 404 NOT FOUND ERROR response")
+                            buildErrorResponse(statusCode = HttpStatus.NOT_FOUND, errorMessage = error, rawResponse = rawResponse)
+                        }
+
+                        else -> {
+                            logger.debug("Setting up SUCCESS response")
+
+                            buildSuccessResponse(rawResponse, dtoMapper)
+                        }
+                    }
+
                 }
 
                 // HTTP 4xx - client errors and 5xx server errors

@@ -51,21 +51,18 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                  * Therefore, override the 200 OK response code and return a 404 NOT FOUND response code and error message instead.
                  */
                 val metaMapper = MetaDtoMapper(response)
+                meta = metaMapper.meta
 
-                when {
-                    metaMapper.overrideHttpStatus -> throw NotFoundException(
-                        "Could not find products for query: ${response.raw().request().url().encodedQuery()}"
-                    )
-                    else -> {
-                        meta = metaMapper.meta
-                        mapJsonArray(response)
-                    }
+                if (!metaMapper.overrideHttpStatus) {
+                   return null
                 }
 
+                mapJsonArray(response)
             }
             responseBody.containsKey("product") -> {
                 mapJsonObjectToDto(responseBody["product"] as Map<*, *>)
             }
+
             else -> null
         }
     }
