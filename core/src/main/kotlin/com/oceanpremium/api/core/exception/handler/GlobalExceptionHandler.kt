@@ -1,6 +1,7 @@
 package com.oceanpremium.api.core.exception.handler
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.oceanpremium.api.core.currentrms.response.dto.mapper.ErrorResponse
 import com.oceanpremium.api.core.enum.EnvironmentType
 import com.oceanpremium.api.core.exception.throwable.*
 import io.sentry.Sentry
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class ApiError(var code: Int? = null, var exception: Any? = null, var message: String? = null)
+data class ApiError(var code: Int? = null, var exception: Any? = null, var message: Any? = null)
 
 /**
  * Exception handler that provides handling for exceptions thrown throughout the API.
@@ -59,7 +60,7 @@ class GlobalExceptionHandler {
             )
             else -> ApiError(
                 code = status.value(),
-                message = status.reasonPhrase
+                message = ErrorResponse().errors.add(status.reasonPhrase)
             )
         }
 
@@ -81,7 +82,7 @@ class GlobalExceptionHandler {
             )
             else -> ApiError(
                 code = status.value(),
-                message = status.reasonPhrase
+                message = ErrorResponse().errors.add(status.reasonPhrase)
             )
         }
 
@@ -103,7 +104,7 @@ class GlobalExceptionHandler {
             )
             else -> ApiError(
                 code = status.value(),
-                message = status.reasonPhrase
+                message = ErrorResponse().errors.add(status.reasonPhrase)
             )
         }
 
@@ -125,7 +126,7 @@ class GlobalExceptionHandler {
             )
             else -> ApiError(
                 code = status.value(),
-                message = status.reasonPhrase
+                message = ErrorResponse().errors.add(status.reasonPhrase)
             )
         }
 
@@ -149,7 +150,7 @@ class GlobalExceptionHandler {
             )
             else -> ApiError(
                 code = status.value(),
-                message = status.reasonPhrase
+                message = ErrorResponse().errors.add(status.reasonPhrase)
             )
         }
 
@@ -175,7 +176,7 @@ class GlobalExceptionHandler {
             )
             else -> ApiError(
                 code = status.value(),
-                message = status.reasonPhrase
+                message = ErrorResponse().errors.add(status.reasonPhrase)
             )
         }
 

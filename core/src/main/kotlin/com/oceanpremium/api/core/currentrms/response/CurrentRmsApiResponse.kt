@@ -2,9 +2,11 @@ package com.oceanpremium.api.core.currentrms.response
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.CurrentRmsBaseDtoMapper
-import com.oceanpremium.api.core.currentrms.response.dto.product.MetaDto
+import com.oceanpremium.api.core.currentrms.response.dto.mapper.ErrorResponse
 import com.oceanpremium.api.core.enum.HTTPStatusCodeRange
+import com.oceanpremium.api.core.exception.handler.ApiError
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
+import com.oceanpremium.api.core.exception.throwable.NotFoundException
 import com.oceanpremium.api.core.exception.throwable.UnauthorizedException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -47,14 +49,10 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
     }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    internal class ErrorMessage(val code: Int, val message: String)
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     internal class WrappedResponse(
         val code: Int,
         var data: Any? = null,
-        var meta: Any? = null,
-        var error: ErrorMessage? = null
+        var meta: Any? = null
     )
 
     /**
@@ -65,8 +63,7 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
         private val logger = LoggerFactory.getLogger(this::class.java)
         var rawResponse: Response<Any>? = null
         var dtoMapper: CurrentRmsBaseDtoMapper? = null
-        var queryParameters: Map<*,*>? = null
-        var error: String? = null
+        var error: Any? = null
 
         fun build(): ResponseEntity<*> {
             return buildResponse(rawResponse, dtoMapper, error)
@@ -74,9 +71,9 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
 
         @Throws(Exception::class, UnauthorizedException::class, BadRequestException::class)
         private fun buildResponse(
-            rawResponse:  Response<Any>?,
+            rawResponse: Response<Any>?,
             dtoMapper: CurrentRmsBaseDtoMapper? = null,
-            error: String? = null
+            error: Any? = null
         ): ResponseEntity<*> {
 
             val statusCode = dtoMapper?.httpStatus!!
@@ -87,27 +84,16 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
                 statusCode.value() >= HTTPStatusCodeRange.SUCCESS.code
                         && statusCode.value() < HTTPStatusCodeRange.REDIRECT.code -> {
 
-                    when {
-                        /**
-                         * CurrentRms returns a 200 OK for empty result sets. As a best practice for REST API,
-                         * the response should be a 404 NOT FOUND when an empty result set is returned.
-                         *
-                         * See @link: https://stackoverflow.com/questions/11746894/what-is-the-proper-rest-response-code-for-a-valid-request-but-an-empty-data
-                         *
-                         * Therefore, override the 200 OK response code and return a 404 NOT FOUND response code and error message instead.
-                         */
-                        (dtoMapper.meta as MetaDto).rowCount == 0 -> {
-                            logger.debug("Result set is empty. Setting up OVERRIDDEN 404 NOT FOUND ERROR response")
-                            buildErrorResponse(statusCode = HttpStatus.NOT_FOUND, errorMessage = error, rawResponse = rawResponse)
-                        }
-
-                        else -> {
-                            logger.debug("Setting up SUCCESS response")
-
-                            buildSuccessResponse(rawResponse, dtoMapper)
-                        }
+                    if (dtoMapper.httpStatus == HttpStatus.NOT_FOUND) {
+                        buildErrorResponse(
+                            statusCode = dtoMapper.httpStatus,
+                            errorMessage = error,
+                            rawResponse = rawResponse
+                        )
                     }
 
+                    logger.debug("Setting up SUCCESS response")
+                    buildSuccessResponse(rawResponse, dtoMapper)
                 }
 
                 // HTTP 4xx - client errors and 5xx server errors
@@ -115,16 +101,25 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
                         && statusCode.value() < HTTPStatusCodeRange.SERVER_ERROR.code ||
                         statusCode.value() >= HTTPStatusCodeRange.SERVER_ERROR.code
                         && statusCode.value() < HTTPStatusCodeRange.CUSTOM.code -> {
+
                     logger.debug("Setting up ERROR response")
 
-                     when (rawResponse) {
+                    when (rawResponse) {
                         null ->
                             if (error != null) {
                                 buildErrorResponse(statusCode = statusCode, errorMessage = error, rawResponse = null)
                             } else {
-                                buildErrorResponse(statusCode = statusCode, errorMessage = statusCode.reasonPhrase, rawResponse = null)
+                                buildErrorResponse(
+                                    statusCode = statusCode,
+                                    errorMessage = statusCode.reasonPhrase,
+                                    rawResponse = null
+                                )
                             }
-                        else -> buildErrorResponse(statusCode = statusCode, errorMessage = error, rawResponse = rawResponse)
+                        else -> buildErrorResponse(
+                            statusCode = statusCode,
+                            errorMessage = error,
+                            rawResponse = rawResponse
+                        )
                     }
                 }
 
@@ -148,9 +143,10 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
             dtoMapper: CurrentRmsBaseDtoMapper
         ): ResponseEntity<Any> {
             val statusCode = dtoMapper.httpStatus
-            val wrappedBody = WrappedResponse(code = dtoMapper.httpStatus.value(), data = rawResponse, meta = dtoMapper.meta)
+            val wrappedBody =
+                WrappedResponse(code = dtoMapper.httpStatus.value(), data = rawResponse, meta = dtoMapper.meta)
 
-            if (dtoMapper.data != null ) {
+            if (dtoMapper.data != null) {
                 wrappedBody.data = dtoMapper.data
             }
 
@@ -166,40 +162,49 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
         private fun buildErrorResponse(
             statusCode: HttpStatus,
             rawResponse: Response<Any>?,
-            errorMessage: String?
-            ): ResponseEntity<Any> {
-
+            errorMessage: Any?
+        ): ResponseEntity<Any> {
             val wrappedBody = when {
+
                 errorMessage != null -> {
-                    WrappedResponse(code = statusCode.value(), error = ErrorMessage(statusCode.value(), errorMessage))
+                    ApiError(code = statusCode.value(), message = errorMessage)
+                }
+
+                rawResponse?.errorBody() != null -> {
+                    val errorResponse = ErrorResponse()
+                    errorResponse.errors.add(rawResponse.message())
+
+                    ApiError(code = statusCode.value(), message = errorResponse)
                 }
 
                 rawResponse?.message() != null -> {
-                    var customErrorMessage = rawResponse.message()
+                    val errorResponse = ErrorResponse()
 
                     /**
                      * Overrides a 200 OK with empty result set because current rms returns a 200 OK,
                      * for empty result sets ;(
                      */
                     if (rawResponse.message() == "OK") {
-                        customErrorMessage = statusCode.reasonPhrase
+                        errorResponse.errors.add(HttpStatus.NOT_FOUND.reasonPhrase)
                     }
 
-                    WrappedResponse(code = statusCode.value(), error = ErrorMessage(statusCode.value(), customErrorMessage))
+                    ApiError(code = statusCode.value(), exception = NotFoundException(), message = errorResponse)
                 }
 
-                else ->  {
-                    WrappedResponse(
+                else -> {
+                    val errorResponse = ErrorResponse()
+                    errorResponse.errors.add("Error ${HttpStatus.valueOf(rawResponse?.code()!!).reasonPhrase}")
+
+                    ApiError(
                         code = statusCode.value(),
-                        error = ErrorMessage(
-                            statusCode.value(),
-                            message = "Something went wrong, please try again."
-                        )
+                        exception = NotFoundException(),
+                        message = errorResponse
                     )
                 }
             }
 
             return ResponseEntity(wrappedBody, statusCode)
         }
+
     }
 }

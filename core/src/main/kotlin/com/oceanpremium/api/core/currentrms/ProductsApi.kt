@@ -9,6 +9,7 @@ import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.QueryMap
+import java.net.UnknownHostException
 
 interface ProductsApi {
     @GET("products")
@@ -66,19 +67,34 @@ class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
 
     fun getProducts(map: Map<String, String>): Response<Any>? {
         val retrofitCall = productsApi.getProducts(map = map)
-        val response = retrofitCall.execute()
+        lateinit var response: Response<Any>
 
-        logger.debug("Current RMS API call - HTTP status: ${response.code()}")
+        try {
+            response = retrofitCall.execute()
 
-        when {
-            response.isSuccessful -> {
-                logger.debug("Current RMS API response body: ${response.body()}")
+            logger.debug("Current RMS API call - HTTP status: ${response.code()}")
+
+            when {
+                response != null && response.isSuccessful -> {
+                    logger.debug("Current RMS API response body: ${response.body()}")
+                }
+
+                response != null && !response.isSuccessful -> {
+                    logger.debug("Request to Current RMS API failed: ${response.message()}")
+
+                    handleException(response)
+                }
+
+                else ->  {
+                    logger.debug("Request to Current RMS API failed")
+                    throw ServerErrorException()
+                }
             }
-            else ->  {
-                logger.debug("Request to Current RMS API failed: ${response.message()}")
+        } catch (e: UnknownHostException) {
+            e.printStackTrace()
+            logger.error("Request to Current RMS API failed")
 
-                handleException(response)
-            }
+            throw ServerErrorException(e.message)
         }
 
         return response
@@ -129,7 +145,6 @@ class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
         when {
             response.isSuccessful -> {
                 logger.debug("Current RMS API response body: ${response.body()}")
-                handleException(response)
             }
             else ->  {
                 logger.debug("Request to Current RMS API failed: ${response.message()}")

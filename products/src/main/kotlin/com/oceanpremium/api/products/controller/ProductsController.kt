@@ -16,7 +16,6 @@ import org.springframework.core.io.ResourceLoader
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.server.ServerErrorException
 
 @RestController
@@ -58,15 +57,10 @@ class ProductsController(
         val response = productsApi.getProducts(fields)
         val dto = ProductDtoMapper(response?.code()!!, response)
 
-        try {
-            return CurrentRmsApiResponse.build {
-                rawResponse = response
-                dtoMapper = dto
-            }
-        } catch (exc: NotFoundException) {
-            throw  ResponseStatusException(HttpStatus.NOT_FOUND, "Not Found", exc)
+        return CurrentRmsApiResponse.build {
+            rawResponse = response
+            dtoMapper = dto
         }
-
     }
 
     /**
