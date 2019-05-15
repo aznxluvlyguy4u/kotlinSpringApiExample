@@ -2,10 +2,7 @@ package com.oceanpremium.api.core.exception.handler
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.oceanpremium.api.core.enum.EnvironmentType
-import com.oceanpremium.api.core.exception.throwable.BadRequestException
-import com.oceanpremium.api.core.exception.throwable.NotFoundException
-import com.oceanpremium.api.core.exception.throwable.ServerErrorException
-import com.oceanpremium.api.core.exception.throwable.UnauthorizedException
+import com.oceanpremium.api.core.exception.throwable.*
 import io.sentry.Sentry
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -19,6 +16,9 @@ data class ApiError(var code: Int? = null, var exception: Any? = null, var messa
 
 /**
  * Exception handler that provides handling for exceptions thrown throughout the API.
+ *
+ * Register a subclassed Exception for any exception handler newly added
+ * @see com.oceanpremium.api.core.currentrms.ProductsApi#handleException.
  */
 @ControllerAdvice
 class GlobalExceptionHandler {
@@ -45,12 +45,12 @@ class GlobalExceptionHandler {
     }
 
     /**
-     * 404 Catch not found exception, and return a custom error response.
+     * 400 Catch bad request exception, and return a custom error response.
      */
-    @ExceptionHandler(NotFoundException::class)
-    fun handleNotFoundException(ex: Exception, request: WebRequest): ResponseEntity<ApiError> {
-        logger.debug("Build 404 NOT FOUND response")
-        val status = HttpStatus.NOT_FOUND
+    @ExceptionHandler(BadRequestException::class)
+    fun handleBadRequestException(ex: BadRequestException, request: WebRequest): ResponseEntity<ApiError> {
+        logger.debug("Build 400 BAD REQUEST response")
+        val status = HttpStatus.BAD_REQUEST
         val apiError = when {
             showStacktrace -> ApiError(
                 status.value(),
@@ -89,12 +89,12 @@ class GlobalExceptionHandler {
     }
 
     /**
-     * 400 Catch bad request exception, and return a custom error response.
+     * 404 Catch not found exception, and return a custom error response.
      */
-    @ExceptionHandler(BadRequestException::class)
-    fun handleBadRequestException(ex: BadRequestException, request: WebRequest): ResponseEntity<ApiError> {
-        logger.debug("Build 400 BAD REQUEST response")
-        val status = HttpStatus.BAD_REQUEST
+    @ExceptionHandler(NotFoundException::class)
+    fun handleNotFoundException(ex: Exception, request: WebRequest): ResponseEntity<ApiError> {
+        logger.debug("Build 404 NOT FOUND response")
+        val status = HttpStatus.NOT_FOUND
         val apiError = when {
             showStacktrace -> ApiError(
                 status.value(),
@@ -106,7 +106,31 @@ class GlobalExceptionHandler {
                 message = status.reasonPhrase
             )
         }
-        
+
+        return ResponseEntity(apiError, status)
+    }
+
+    /**
+     * 429 Catch Too many requests exception, and return a custom error response.
+     */
+    @ExceptionHandler(TooManyRequestsException::class)
+    fun handleInternalTooManyRequestsException(ex: TooManyRequestsException, request: WebRequest): ResponseEntity<ApiError> {
+        logger.debug("Build 429 TOO MANY REQUESTS error response")
+        val status = HttpStatus.TOO_MANY_REQUESTS
+        val apiError = when {
+            showStacktrace -> ApiError(
+                status.value(),
+                ex,
+                status.reasonPhrase
+            )
+            else -> ApiError(
+                code = status.value(),
+                message = status.reasonPhrase
+            )
+        }
+
+        Sentry.capture(ex)
+
         return ResponseEntity(apiError, status)
     }
 

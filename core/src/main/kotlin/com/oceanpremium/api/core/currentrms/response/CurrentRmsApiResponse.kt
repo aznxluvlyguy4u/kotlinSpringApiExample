@@ -2,7 +2,6 @@ package com.oceanpremium.api.core.currentrms.response
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.CurrentRmsBaseDtoMapper
-import com.oceanpremium.api.core.enum.AuthorizationType
 import com.oceanpremium.api.core.enum.HTTPStatusCodeRange
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.exception.throwable.UnauthorizedException
@@ -35,6 +34,10 @@ import retrofit2.Response
  *
  * - 422 Unprocessable Entity
  * The request was well-formed but was unable to be followed due to semantic errors.
+ *
+ * - 429 Too many requests
+ *  Rate limit has been reached, and requests are discarded, check the 'X-RateLimit-Reset' header for
+ *  when the limit expires and retrying requests can be done.
  */
 class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any>(body, status) {
 
@@ -93,17 +96,6 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
                         && statusCode.value() < HTTPStatusCodeRange.CUSTOM.code -> {
                     logger.debug("Setting up ERROR response")
 
-                    if (HttpStatus.valueOf(statusCode.value()) == HttpStatus.UNAUTHORIZED) {
-                        throw UnauthorizedException(
-                            "Could not authenticate with current rms",
-                            AuthorizationType.THIRD_PARTY
-                        )
-                    }
-
-                    if (HttpStatus.valueOf(statusCode.value()) == HttpStatus.BAD_REQUEST) {
-                        throw BadRequestException("")
-                    }
-
                      when (rawResponse) {
                         null ->
                             if (error != null) {
@@ -116,7 +108,7 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
                 }
 
                 /**
-                 * See {@link io.sheep.enumerator.HTTPStatusRange} for supported HTTP status codes
+                 * See {@link HTTPStatusRange} for supported HTTP status codes
                  */
                 else -> {
                     throw Exception("Not a supported HTTP status code: $statusCode, either use supported HTTP Status Codes")

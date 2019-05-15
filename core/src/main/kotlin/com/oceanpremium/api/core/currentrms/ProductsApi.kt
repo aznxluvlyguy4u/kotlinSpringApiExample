@@ -1,11 +1,7 @@
 package com.oceanpremium.api.core.currentrms
 
 import com.oceanpremium.api.core.enum.AuthorizationType
-import com.oceanpremium.api.core.enum.CurrentRmsSaleType
-import com.oceanpremium.api.core.exception.throwable.BadRequestException
-import com.oceanpremium.api.core.exception.throwable.NotFoundException
-import com.oceanpremium.api.core.exception.throwable.ServerErrorException
-import com.oceanpremium.api.core.exception.throwable.UnauthorizedException
+import com.oceanpremium.api.core.exception.throwable.*
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import retrofit2.Call
@@ -45,7 +41,7 @@ class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
         private const val ACTIVE_PRODUCT_QUERY = "q[active_eq]"
         private const val FILTER_MODE_QUERY = "filtermode[]"
         private const val DEFAULT_STORE_ID_QUERY = "store_id"
-
+        private const val RATE_LIMIT_EXPIRATION_HEADER = "X-RateLimit-Reset"
     }
 
     fun getProductById(productId: Int): Response<Any>? {
@@ -133,6 +129,7 @@ class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
         when {
             response.isSuccessful -> {
                 logger.debug("Current RMS API response body: ${response.body()}")
+                handleException(response)
             }
             else ->  {
                 logger.debug("Request to Current RMS API failed: ${response.message()}")
@@ -146,21 +143,49 @@ class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
     /**
      * Based on returned HTTP Status Code, throw appropriate exception so that a corresponding (wrapped) error response
      * payload can be build and returned.
+     *
+     * Register a handler for any exception newly added and thrown to the GlobalException handler
+     * @see com.oceanpremium.api.core.exception.handler.GlobalExceptionHandler#handleExceptionType.
      */
-    @Throws(UnauthorizedException::class, NotFoundException::class, BadRequestException::class, ServerErrorException::class)
+    @Throws(
+        UnauthorizedException::class,
+        NotFoundException::class,
+        BadRequestException::class,
+        ServerErrorException::class,
+        TooManyRequestsException::class
+    )
     private fun handleException(response: Response<Any>) {
-        if (response.code() == HttpStatus.UNAUTHORIZED.value()) {
-            throw UnauthorizedException(type = AuthorizationType.THIRD_PARTY)
-        }
 
-        if (response.code() == HttpStatus.NOT_FOUND.value()) {
-            throw NotFoundException()
-        }
-
+        // HTTP 400
         if (response.code() == HttpStatus.BAD_REQUEST.value()) {
             throw BadRequestException()
         }
 
+        // HTTP 401
+        if (response.code() == HttpStatus.UNAUTHORIZED.value()) {
+            throw UnauthorizedException(type = AuthorizationType.THIRD_PARTY)
+        }
+
+        // HTTP 429
+        if (response.code() == HttpStatus.TOO_MANY_REQUESTS.value()) {
+            val headers = response.headers()
+
+            val message = "Current RMS requests has been rate limited"
+            logger.error(message)
+
+            when {
+                headers.get(RATE_LIMIT_EXPIRATION_HEADER) != null -> {
+                    logger.debug("$RATE_LIMIT_EXPIRATION_HEADER = ${headers.get(RATE_LIMIT_EXPIRATION_HEADER)}")
+                    throw TooManyRequestsException("$message. Limit expires on: ${headers.get(RATE_LIMIT_EXPIRATION_HEADER)}")
+                }
+                else -> {
+                    logger.debug("No $RATE_LIMIT_EXPIRATION_HEADER header was provided")
+                    throw TooManyRequestsException(message)
+                }
+            }
+        }
+
+        // HTTP 500
         if (response.code() == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
             throw ServerErrorException()
         }
