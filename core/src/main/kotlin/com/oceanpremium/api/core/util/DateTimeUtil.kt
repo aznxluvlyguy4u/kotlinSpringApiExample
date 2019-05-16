@@ -7,19 +7,19 @@ import java.util.*
 object DateTimeUtil {
 
     private const val UTC_TIMEZONE = "UTC"
-    private const val ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm'Z'"
+    const val DEFAULT_API_DATE_FORMATE = "yyyy-MM-dd"
 
-    fun toISO8601UTC(date: Date): String {
+    fun toISO8601UTC(date: Date, format: String = "yyyy-MM-dd'T'HH:mm'Z'"): String {
         val tz = TimeZone.getTimeZone(UTC_TIMEZONE)
-        val df = SimpleDateFormat(ISO_8601_FORMAT)
+        val df = SimpleDateFormat(format)
         df.timeZone = tz
 
         return df.format(date)
     }
 
-    fun fromISO8601UTC(dateStr: String): Date? {
+    fun fromISO8601UTC(dateStr: String, format: String = "yyyy-MM-dd'T'HH:mm'Z'"): Date? {
         val tz = TimeZone.getTimeZone(UTC_TIMEZONE)
-        val df = SimpleDateFormat(ISO_8601_FORMAT)
+        val df = SimpleDateFormat(format)
         df.timeZone = tz
 
         try {
