@@ -2,6 +2,7 @@ package com.oceanpremium.api.core.currentrms
 
 import com.oceanpremium.api.core.enum.AuthorizationType
 import com.oceanpremium.api.core.exception.throwable.*
+import com.oceanpremium.api.core.util.DateTimeUtil
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import retrofit2.Call
@@ -10,6 +11,7 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.QueryMap
 import java.net.UnknownHostException
+import java.util.*
 
 interface ProductsApi {
     @GET("products")
@@ -43,34 +45,68 @@ class QueryParametersResolverImpl : QueryParametersResolver {
         private const val ACTIVE_PRODUCT_QUERY = "q[active_eq]"
         private const val FILTER_MODE_QUERY = "filtermode[]"
         private const val DEFAULT_STORE_ID_QUERY = "store_id"
+        private const val START_DATE_QUERY = "start_date"
+        private const val END_DATE_QUERY = "end_date"
     }
 
     /**
-     * Append default query parameters if these are not present, for properly product querying.
+     * Append default query parameters if the defaults are not present, for proper / valid product querying.
      *
      * see @link https://bitbucket.org/oceanpremium/ocean-premium-api/wiki/Current%20RMS%20API%20request%20examples#markdown-header-products-inventory
      * see @link https://dudesoftechnology.atlassian.net/browse/OPP-184
+     * see @link https://api.current-rms.com/doc#header-searching-with-the-query-engine
      *
      * - q[active_eq]=true
      * - filtermode[]=all
      * - store_id=5
+     * - start_date=yyy-mm-dd
+     * - end_date=yyy-mm-dd
      *
      */
     override fun resolveGetProductsInventory(map: Map<String, String>): Map<String, String> {
         val validatedMap = map.toMutableMap()
 
+        // ------------------------------------------------------------------------------------------ Static parameters
 
+        // Only query active products
         when {
             !map.containsKey(ACTIVE_PRODUCT_QUERY) -> validatedMap[ACTIVE_PRODUCT_QUERY] = "true"
         }
 
+        // Only query products of rental type
         when {
             !map.containsKey(FILTER_MODE_QUERY) -> validatedMap[FILTER_MODE_QUERY] = "rental"
         }
 
+        // Only query products on a specific store (for now)
         when {
             !map.containsKey(DEFAULT_STORE_ID_QUERY) -> validatedMap[DEFAULT_STORE_ID_QUERY] = "5"
         }
+
+        // ----------------------------------------------------------------------------------------- Dynamic parameters
+
+        // Check if date interval boundaries (start & end) are given, otherwise set query date interval to ONE day
+        when {
+            // If a startDate is given but no endDate, set endDate equal to startDate
+
+            // No time interval boundaries supplied
+            !map.containsKey(START_DATE_QUERY) && !map.containsKey(END_DATE_QUERY) -> {
+                val now = DateTimeUtil.toISO8601UTC(Date())
+                validatedMap[START_DATE_QUERY] = now
+                validatedMap[END_DATE_QUERY] = now
+            }
+
+            // Only a startDate is supplied
+            map.containsKey(START_DATE_QUERY) && !map.containsKey(END_DATE_QUERY) -> {
+                validatedMap[END_DATE_QUERY] = validatedMap[START_DATE_QUERY] as String
+            }
+
+            // Only an endDate is supplied
+            !map.containsKey(START_DATE_QUERY) && map.containsKey(END_DATE_QUERY) -> {
+                validatedMap[START_DATE_QUERY] = validatedMap[END_DATE_QUERY] as String
+            }
+        }
+
 
         return validatedMap
     }
