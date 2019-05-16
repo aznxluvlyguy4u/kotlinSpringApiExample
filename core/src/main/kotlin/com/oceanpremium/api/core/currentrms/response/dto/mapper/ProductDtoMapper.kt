@@ -1,12 +1,20 @@
 package com.oceanpremium.api.core.currentrms.response.dto.mapper
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
 import com.oceanpremium.api.core.currentrms.response.dto.product.*
+import com.oceanpremium.api.core.exception.handler.ApiError
 import com.oceanpremium.api.core.exception.throwable.NotFoundException
 import com.oceanpremium.api.core.exception.throwable.ServerErrorException
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import retrofit2.Response
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+class ErrorResponse {
+    val errors: MutableList<String> = mutableListOf()
+}
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoMapper(code) {
@@ -30,44 +38,62 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
     private fun mapToDto(response: Response<Any>?): Any? {
 
         when {
-            response != null -> if (!response.isSuccessful) {
-                data = CurrentRmsApiResponse.ErrorMessage(response.code(), response.message())
+            response != null && !response.isSuccessful -> {
+                val errorBody = response.errorBody()
 
-                return data
-            }
-        }
+                data = when {
+                    errorBody != null  -> {
+                        val type = object : TypeToken<ErrorResponse>() {}.type
+                        val errorResponse: ErrorResponse? = Gson().fromJson(response.errorBody()!!.charStream(), type)
 
-        val responseBody = response?.body() as Map<*, *>
+                        ApiError(code = response.code(), message = errorResponse)
+                    }
 
-        return when {
-            responseBody.containsKey("products") -> {
-
-                /**
-                 * CurrentRms returns a 200 OK for empty result sets. As a best practice for REST API,
-                 * the response should be a 404 NOT FOUND when an empty result set is returned.
-                 *
-                 * See @link: https://stackoverflow.com/questions/11746894/what-is-the-proper-rest-response-code-for-a-valid-request-but-an-empty-data
-                 *
-                 * Therefore, override the 200 OK response code and return a 404 NOT FOUND response code and error message instead.
-                 */
-                val metaMapper = MetaDtoMapper(response)
-
-                when {
-                    metaMapper.overrideHttpStatus -> throw NotFoundException(
-                        "Could not find products for query: ${response.raw().request().url().encodedQuery()}"
-                    )
                     else -> {
-                        meta = metaMapper.meta
-                        mapJsonArray(response)
+                        ApiError(code = response.code(), message = response.message())
                     }
                 }
 
+                return data
             }
-            responseBody.containsKey("product") -> {
-                mapJsonObjectToDto(responseBody["product"] as Map<*, *>)
+
+            response != null && response.isSuccessful -> {
+                val responseBody = response.body() as Map<*, *>
+
+                data = when {
+                    responseBody.containsKey("products") -> {
+
+                        /**
+                         * CurrentRms returns a 200 OK for empty result sets. As a best practice for REST API,
+                         * the response should be a 404 NOT FOUND when an empty result set is returned.
+                         *
+                         * See @link: https://stackoverflow.com/questions/11746894/what-is-the-proper-rest-response-code-for-a-valid-request-but-an-empty-data
+                         *
+                         * Therefore, override the 200 OK response code and return a 404 NOT FOUND response code and error message instead.
+                         */
+                        val metaMapper = MetaDtoMapper(response)
+
+                        if (metaMapper.overrideHttpStatus) {
+                            httpStatus = HttpStatus.NOT_FOUND
+                            data = ApiError(code = response.code(), message = response.message())
+
+                            return data
+                        }
+
+                        meta = metaMapper.meta
+                        mapJsonArray(response)
+                    }
+
+                    responseBody.containsKey("product") -> {
+                         mapJsonObjectToDto(responseBody["product"] as Map<*, *>)
+                    }
+
+                    else -> null
+                }
             }
-            else -> null
         }
+
+        return data
     }
 
     /**
@@ -149,21 +175,23 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             }
 
             itemBody.containsKey("icon")  -> {
-                val icon = itemBody["icon"] as Map<*,*>
+                val icon = itemBody["icon"] as Map<*,*>?
                 var imageUrl: String? = null
                 var thumbUrl: String? = null
 
                 try {
-                    if (icon.containsKey("url")) {
-                        imageUrl = icon["url"] as String?
-                    }
+                    if (icon != null) {
+                        if (icon.containsKey("url")) {
+                            imageUrl = icon["url"] as String?
+                        }
 
-                    if (icon.containsKey("thumb_url")) {
-                        thumbUrl = icon["thumb_url"] as String?
-                    }
+                        if (icon.containsKey("thumb_url")) {
+                            thumbUrl = icon["thumb_url"] as String?
+                        }
 
-                    if (imageUrl != null && thumbUrl != null) {
-                        imageSources.add(ImageSource(imageUrl, thumbUrl))
+                        if (imageUrl != null && thumbUrl != null) {
+                            imageSources.add(ImageSource(imageUrl, thumbUrl))
+                        }
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()

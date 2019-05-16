@@ -2,6 +2,8 @@ package com.oceanpremium.api.core.currentrms.response.dto.mapper
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.oceanpremium.api.core.currentrms.response.dto.product.MetaDto
+import com.oceanpremium.api.core.exception.throwable.ServerErrorException
+import org.slf4j.LoggerFactory
 import retrofit2.Response
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -9,6 +11,10 @@ class MetaDtoMapper(response: Response<Any>?) {
 
     var meta: Any? = null
     var overrideHttpStatus: Boolean = false
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(this::class.java)
+    }
 
     init {
         /**
@@ -19,33 +25,42 @@ class MetaDtoMapper(response: Response<Any>?) {
 
     private fun mapToDto(response: Response<Any>?): Any {
         val responseBody = response?.body() as Map<*, *>
-        var totalRowCount: Int = 0
-        var rowCount: Int = 0
-        var page: Int = 0
-        var perPage: Int = 0
+        var totalRowCount = 0
+        var rowCount = 0
+        var page = 0
+        var perPage = 0
 
         when {
             response.body() != null -> {
-                when {
-                    responseBody.containsKey("meta") -> {
-                        val metaBody = responseBody["meta"] as Map<*, *>
-                        when {
-                            metaBody.containsKey("total_row_count") -> totalRowCount = (metaBody["total_row_count"] as Double).toInt()
-                        }
+                try {
+                    when {
+                        responseBody.containsKey("meta") -> {
+                            val metaBody = responseBody["meta"] as Map<*, *>
+                            when {
+                                metaBody.containsKey("total_row_count") -> totalRowCount = (metaBody["total_row_count"] as Double).toInt()
+                            }
 
-                        when {
-                            metaBody.containsKey("row_count") -> rowCount = (metaBody["row_count"] as Double).toInt()
-                        }
+                            when {
+                                metaBody.containsKey("row_count") -> rowCount = (metaBody["row_count"] as Double).toInt()
+                            }
 
-                        when {
-                            metaBody.containsKey("page") -> page = (metaBody["page"] as Double).toInt()
-                        }
+                            when {
+                                metaBody.containsKey("page") -> page = (metaBody["page"] as Double).toInt()
+                            }
 
-                        when {
-                            metaBody.containsKey("per_page") -> perPage = (metaBody["per_page"] as Double).toInt()
-                        }
+                            when {
+                                metaBody.containsKey("per_page") -> perPage = (metaBody["per_page"] as Double).toInt()
+                            }
 
+                        }
                     }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+
+                    val message = "Failed to map product META response to Dto: ${e.message}"
+                    logger.error(message)
+
+                    throw ServerErrorException(e.message)
                 }
             }
         }

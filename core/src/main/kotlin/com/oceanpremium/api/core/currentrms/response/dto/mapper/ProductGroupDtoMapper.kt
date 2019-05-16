@@ -1,9 +1,9 @@
 package com.oceanpremium.api.core.currentrms.response.dto.mapper
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductGroupCustomFieldsDto
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductGroupDto
+import com.oceanpremium.api.core.exception.handler.ApiError
 import com.oceanpremium.api.core.exception.throwable.ServerErrorException
 import org.slf4j.LoggerFactory
 import retrofit2.Response
@@ -30,7 +30,7 @@ class ProductGroupDtoMapper(var code: Int, response: Response<Any>?) : CurrentRm
 
         when {
             response != null -> if(!response.isSuccessful) {
-                data = CurrentRmsApiResponse.ErrorMessage(response.code(), response.message())
+                data = ApiError(code = response.code(), message = response.message())
 
                 return data
             }
