@@ -35,20 +35,20 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductsByQueryParameters() {
-        val params = "?q[name_or_product_group_name_or_product_tags_name_cont]=seabob"
-        val response = restTemplate?.getForEntity("$endpoint$params", Response::class.java)
+        val params = "q[name_or_product_group_name_or_product_tags_name_cont]=seabob"
+        val response = restTemplate?.getForEntity("$endpoint?$params", Response::class.java)
 
         // Assert that the HTTP response code is OK
         assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.OK.value())
     }
 
     /**
-     * Find products by query parameters.
+     * Find products by query parameters that are not found.
      */
     @Test
     fun testGetProductsByQueryParametersNotFound() {
-        val params = "?q[name_or_product_group_name_or_product_tags_name_cont]=test"
-        val response = restTemplate?.getForEntity("$endpoint$params", Response::class.java)
+        val params = "q[name_or_product_group_name_or_product_tags_name_cont]=continousintegration"
+        val response = restTemplate?.getForEntity("$endpoint?$params", Response::class.java)
 
         // Assert that the HTTP response code is OK
         assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.NOT_FOUND.value())
@@ -95,8 +95,8 @@ class ProductsControllerTest {
     @Test
     fun testGetProductsInventory() {
 
-        val params = "?q[product_group_name_matches]=functionalintegrationtest&q[product_tags_name_con]=jvt"
-        val response = restTemplate?.getForEntity("$endpoint/inventory$params", Response::class.java)
+        val params = "q[product_group_name_matches]=functionalintegrationtest&q[product_tags_name_cont]=jvt"
+        val response = restTemplate?.getForEntity("$endpoint/inventory?$params", Response::class.java)
 
         // Assert that the HTTP response code is OK
         assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.OK.value())
@@ -108,8 +108,8 @@ class ProductsControllerTest {
     @Test
     fun testGetProductsInventoryNotFound() {
 
-        val params = "?q[product_group_name_matches]=functionalintegrationtest&q[product_tags_name_con]=test"
-        val response = restTemplate?.getForEntity("$endpoint/inventory$params", Response::class.java)
+        val params = "q[product_tags_name_cont]=continousintegration"
+        val response = restTemplate?.getForEntity("$endpoint/inventory?$params", Response::class.java)
 
         // Assert that the HTTP response code NOT FOUND
         assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.NOT_FOUND.value())
