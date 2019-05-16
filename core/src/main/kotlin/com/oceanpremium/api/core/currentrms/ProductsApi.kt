@@ -33,15 +33,59 @@ interface ProductsApi {
     ): Call<Any>
 }
 
-class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
+interface QueryParametersResolver {
+    fun resolveGetProductsInventory(map: Map<String, String>): Map<String, String>
+}
+
+class QueryParametersResolverImpl : QueryParametersResolver {
+
+    companion object {
+        private const val ACTIVE_PRODUCT_QUERY = "q[active_eq]"
+        private const val FILTER_MODE_QUERY = "filtermode[]"
+        private const val DEFAULT_STORE_ID_QUERY = "store_id"
+    }
+
+    /**
+     * Append default query parameters if these are not present, for properly product querying.
+     *
+     * see @link https://bitbucket.org/oceanpremium/ocean-premium-api/wiki/Current%20RMS%20API%20request%20examples#markdown-header-products-inventory
+     * see @link https://dudesoftechnology.atlassian.net/browse/OPP-184
+     *
+     * - q[active_eq]=true
+     * - filtermode[]=all
+     * - store_id=5
+     *
+     */
+    override fun resolveGetProductsInventory(map: Map<String, String>): Map<String, String> {
+        val validatedMap = map.toMutableMap()
+
+
+        when {
+            !map.containsKey(ACTIVE_PRODUCT_QUERY) -> validatedMap[ACTIVE_PRODUCT_QUERY] = "true"
+        }
+
+        when {
+            !map.containsKey(FILTER_MODE_QUERY) -> validatedMap[FILTER_MODE_QUERY] = "rental"
+        }
+
+        when {
+            !map.containsKey(DEFAULT_STORE_ID_QUERY) -> validatedMap[DEFAULT_STORE_ID_QUERY] = "5"
+        }
+
+        return validatedMap
+    }
+
+}
+
+class ProductsApiImpl(
+    currentRmsClient: CurrentRmsClient = CurrentRmsClient(),
+    private  val queryParametersResolver: QueryParametersResolver = QueryParametersResolverImpl()
+)  {
 
     private val productsApi = currentRmsClient.getRetrofitClient().create(ProductsApi::class.java)
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
-        private const val ACTIVE_PRODUCT_QUERY = "q[active_eq]"
-        private const val FILTER_MODE_QUERY = "filtermode[]"
-        private const val DEFAULT_STORE_ID_QUERY = "store_id"
         private const val RATE_LIMIT_EXPIRATION_HEADER = "X-RateLimit-Reset"
     }
 
@@ -122,20 +166,7 @@ class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
 
     fun getProductsInventory(map: MutableMap<String, String>): Response<Any>? {
 
-        // Set default query parameters if these are not present, for propery product querying on current rms.
-        val validatedMap = map.toMutableMap()
-
-        when {
-            !map.containsKey(ACTIVE_PRODUCT_QUERY) -> validatedMap[ACTIVE_PRODUCT_QUERY] = "true"
-        }
-
-        when {
-            !map.containsKey(FILTER_MODE_QUERY) -> validatedMap[FILTER_MODE_QUERY] = "rental"
-        }
-
-        when {
-            !map.containsKey(DEFAULT_STORE_ID_QUERY) -> validatedMap[DEFAULT_STORE_ID_QUERY] = "5"
-        }
+        val validatedMap = queryParametersResolver.resolveGetProductsInventory(map)
 
         val retrofitCall = productsApi.getProductsInventory(map = validatedMap)
         val response = retrofitCall.execute()
