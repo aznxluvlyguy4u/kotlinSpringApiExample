@@ -35,7 +35,7 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductsByQueryParameters() {
-        val params = "?page=1&per_page=2&q[name_or_product_group_name_or_product_tags_name_cont]=seabob"
+        val params = "?q[name_or_product_group_name_or_product_tags_name_cont]=seabob"
         val response = restTemplate?.getForEntity("$endpoint$params", Response::class.java)
 
         // Assert that the HTTP response code is OK
@@ -47,7 +47,7 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductsByQueryParametersNotFound() {
-        val params = "?page=1&per_page=2&q[name_or_product_group_name_or_product_tags_name_cont]=testci"
+        val params = "?q[name_or_product_group_name_or_product_tags_name_cont]=test"
         val response = restTemplate?.getForEntity("$endpoint$params", Response::class.java)
 
         // Assert that the HTTP response code is OK
@@ -59,7 +59,7 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductById() {
-        val productId = 19
+        val productId = 247
         val response = restTemplate?.getForEntity("$endpoint/$productId", Response::class.java)
 
         // Assert that the HTTP response code is OK
@@ -95,7 +95,7 @@ class ProductsControllerTest {
     @Test
     fun testGetProductsInventory() {
 
-        val params = "?q[product_id_eq]=43&store_id=5&starts_at=2019-05-08&ends_at=2019-05-10"
+        val params = "?q[product_group_name_matches]=functionalintegrationtest&q[product_tags_name_con]=jvt"
         val response = restTemplate?.getForEntity("$endpoint/inventory$params", Response::class.java)
 
         // Assert that the HTTP response code is OK
@@ -108,7 +108,7 @@ class ProductsControllerTest {
     @Test
     fun testGetProductsInventoryNotFound() {
 
-        val params = "?q[product_name_cont]=testci&store_id=5&starts_at=2019-05-08&ends_at=2019-05-10"
+        val params = "?q[product_group_name_matches]=functionalintegrationtest&q[product_tags_name_con]=test"
         val response = restTemplate?.getForEntity("$endpoint/inventory$params", Response::class.java)
 
         // Assert that the HTTP response code NOT FOUND

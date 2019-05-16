@@ -50,6 +50,8 @@ class QueryParametersResolverImpl : QueryParametersResolver {
         private const val START_DATE_QUERY = "starts_at"
         private const val END_DATE_QUERY = "ends_at"
         private const val ACCESSORY_ONLY_QUERY = "q[product_accessory_only_eq]"
+        private const val FUNCTIONAL_INTEGRATION_GROUP_QUERY = "q[product_group_name_neq]"
+        private const val FUNCTIONAL_INTEGRATION_GROUP_NAME = "functionalintegrationtest"
     }
 
     /**
@@ -79,6 +81,13 @@ class QueryParametersResolverImpl : QueryParametersResolver {
      */
     override fun resolveGetProductsInventory(map: Map<String, String>): Map<String, String> {
         val validatedMap = map.toMutableMap()
+
+        /**
+         * WARNING - DO NOT DELETE OR CHANGE THIS
+         * THIS EXCLUDES MOCKED DATA IN CURRENT RMS (FOR CI INTEGRATION TESTS) FROM THE PUBLIC SEARCH RESULTS
+         */
+        validatedMap[FUNCTIONAL_INTEGRATION_GROUP_QUERY] = FUNCTIONAL_INTEGRATION_GROUP_NAME
+
 
         /**
          * Static parameters, check if the default mandatory query parameters are given, otherwise append it.
