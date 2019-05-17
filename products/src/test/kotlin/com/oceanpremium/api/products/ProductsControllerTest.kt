@@ -10,24 +10,6 @@ import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit4.SpringRunner
 
-/**
- * {
-"code": 404,
-"exception": {
-"message": "The requested resource does not exist",
-"cause": null,
-"stackTrace": [],
-"localizedMessage": "The requested resource does not exist",
-"suppressed": []
-},
-"message": {
-"errors": [
-"Not Found"
-]
-}
-}
- */
-
 class Errors(var errors: List<String>? = null)
 class ErrorResponse(var code: Int? = null, var message: Errors? = null)
 class ProductsResponse(var code: Int? = null, var data: List<Products>? = null)
