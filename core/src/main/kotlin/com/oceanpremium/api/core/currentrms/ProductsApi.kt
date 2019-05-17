@@ -53,6 +53,9 @@ class QueryParametersResolverImpl : QueryParametersResolver {
         private const val ACCESSORY_ONLY_QUERY = "q[product_accessory_only_eq]"
         private const val FUNCTIONAL_INTEGRATION_GROUP_QUERY = "q[product_product_group_name_not_eq]"
         private const val FUNCTIONAL_INTEGRATION_GROUP_NAME = "functionalintegrationtest"
+        private const val COLLECTION_LOCATION_KEY = "collection_location_id"
+        private const val DELIVERY_LOCATION_KEY = "delivery_location_id"
+
     }
 
     /**
@@ -69,6 +72,8 @@ class QueryParametersResolverImpl : QueryParametersResolver {
      * - start_date=yyyy-mm-dd or yyyy-MM-dd'T'HH:mm'Z'
      * - end_date=yyyy-mm-dd or yyyy-MM-dd'T'HH:mm'Z'
      * - q[product_product_group_name_not_eq]=PRODUCT_GROUP_SETUP_FOR_TESTING
+     * - delivery_location_id=3
+     * - collection_location_id=5
      *
      * Final result query outgoing to currentRMS NEEDS TO BE of the following MINIMAL form:
      *
@@ -97,7 +102,6 @@ class QueryParametersResolverImpl : QueryParametersResolver {
         validatedMap[FUNCTIONAL_INTEGRATION_GROUP_QUERY] = FUNCTIONAL_INTEGRATION_GROUP_NAME
 
 
-
         /**
          * Static parameters, check if the default mandatory query parameters are given, otherwise append it.
          */
@@ -110,11 +114,6 @@ class QueryParametersResolverImpl : QueryParametersResolver {
         // Only query products of rental type
         if (!validatedMap.containsKey(FILTER_MODE_QUERY)) {
             validatedMap[FILTER_MODE_QUERY] = "rental"
-        }
-
-        // Only query products on a specific store (for now)
-        if (!validatedMap.containsKey(DEFAULT_STORE_ID_QUERY)) {
-            validatedMap[DEFAULT_STORE_ID_QUERY] = "5"
         }
 
         // Only query products and accessories that are rentable on it self (exclude non-rentable accessories)
@@ -143,6 +142,22 @@ class QueryParametersResolverImpl : QueryParametersResolver {
         // Only an end date is supplied
         if (!map.containsKey(START_DATE_QUERY) && map.containsKey(END_DATE_QUERY)) {
             validatedMap[START_DATE_QUERY] = validatedMap[END_DATE_QUERY] as String
+        }
+
+        // If a location/collection id is given, grab it, resolve it to store id and append it to the map,
+        // and remove the location/collection id from the map as current rms does not recognize those fields
+        if (validatedMap.containsKey(COLLECTION_LOCATION_KEY)) {
+            validatedMap.remove(COLLECTION_LOCATION_KEY)
+        }
+
+        if (validatedMap.containsKey(DELIVERY_LOCATION_KEY)) {
+            validatedMap.remove(DELIVERY_LOCATION_KEY)
+        }
+
+        // Use to location/collection id's to resolve to a store id
+        // Only query products on a specific store (for now)
+        if (!validatedMap.containsKey(DEFAULT_STORE_ID_QUERY)) {
+            validatedMap[DEFAULT_STORE_ID_QUERY] = "5"
         }
 
         return validatedMap
