@@ -51,6 +51,7 @@ class GlobalExceptionHandler {
     @ExceptionHandler(BadRequestException::class)
     fun handleBadRequestException(ex: BadRequestException, request: WebRequest): ResponseEntity<ApiError> {
         logger.debug("Build 400 BAD REQUEST response")
+
         val status = HttpStatus.BAD_REQUEST
         val apiError = when {
             showStacktrace -> ApiError(
@@ -58,10 +59,15 @@ class GlobalExceptionHandler {
                 ex,
                 status.reasonPhrase
             )
-            else -> ApiError(
-                code = status.value(),
-                message = ErrorResponse().errors.add(status.reasonPhrase)
-            )
+            else -> {
+                val errorMessage = ErrorResponse()
+                errorMessage.errors.add(status.reasonPhrase)
+
+                ApiError(
+                    code = status.value(),
+                    message = errorMessage
+                )
+            }
         }
 
         return ResponseEntity(apiError, status)
@@ -80,10 +86,15 @@ class GlobalExceptionHandler {
                 ex,
                 status.reasonPhrase
             )
-            else -> ApiError(
-                code = status.value(),
-                message = ErrorResponse().errors.add(status.reasonPhrase)
-            )
+            else -> {
+                val errorMessage = ErrorResponse()
+                errorMessage.errors.add(status.reasonPhrase)
+
+                ApiError(
+                    code = status.value(),
+                    message = errorMessage
+                )
+            }
         }
 
         return ResponseEntity(apiError, status)
@@ -102,10 +113,15 @@ class GlobalExceptionHandler {
                 ex,
                 status.reasonPhrase
             )
-            else -> ApiError(
-                code = status.value(),
-                message = ErrorResponse().errors.add(status.reasonPhrase)
-            )
+            else -> {
+                val errorMessage = ErrorResponse()
+                errorMessage.errors.add(status.reasonPhrase)
+
+                ApiError(
+                    code = status.value(),
+                    message = errorMessage
+                )
+            }
         }
 
         return ResponseEntity(apiError, status)
@@ -124,10 +140,15 @@ class GlobalExceptionHandler {
                 ex,
                 status.reasonPhrase
             )
-            else -> ApiError(
-                code = status.value(),
-                message = ErrorResponse().errors.add(status.reasonPhrase)
-            )
+            else ->  {
+                val errorMessage = ErrorResponse()
+                errorMessage.errors.add(status.reasonPhrase)
+
+                ApiError(
+                    code = status.value(),
+                    message = errorMessage
+                )
+            }
         }
 
         Sentry.capture(ex)
@@ -148,10 +169,15 @@ class GlobalExceptionHandler {
                 ex,
                 status.reasonPhrase
             )
-            else -> ApiError(
-                code = status.value(),
-                message = ErrorResponse().errors.add(status.reasonPhrase)
-            )
+            else -> {
+                val errorMessage = ErrorResponse()
+                errorMessage.errors.add(status.reasonPhrase)
+
+                ApiError(
+                    code = status.value(),
+                    message = errorMessage
+                )
+            }
         }
 
         Sentry.capture(ex)
@@ -174,10 +200,15 @@ class GlobalExceptionHandler {
                 exception,
                 status.reasonPhrase
             )
-            else -> ApiError(
-                code = status.value(),
-                message = ErrorResponse().errors.add(status.reasonPhrase)
-            )
+            else -> {
+                val errorMessage = ErrorResponse()
+                errorMessage.errors.add(status.reasonPhrase)
+
+                ApiError(
+                    code = status.value(),
+                    message = errorMessage
+                )
+            }
         }
 
         Sentry.capture(ex)
