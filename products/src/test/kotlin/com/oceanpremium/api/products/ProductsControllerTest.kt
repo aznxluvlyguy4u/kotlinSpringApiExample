@@ -10,6 +10,26 @@ import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit4.SpringRunner
 
+/**
+ * {
+"code": 404,
+"exception": {
+"message": "The requested resource does not exist",
+"cause": null,
+"stackTrace": [],
+"localizedMessage": "The requested resource does not exist",
+"suppressed": []
+},
+"message": {
+"errors": [
+"Not Found"
+]
+}
+}
+ */
+
+class Errors(var errors: List<String>? = null)
+class ErrorResponse(var code: Int? = null, var message: Errors? = null)
 class ProductsResponse(var code: Int? = null, var data: List<Products>? = null)
 class ProductGroups(var id: Int? = null, var name: String? = null)
 class RateItem(var price: String? = null, var quantityAvailable: String? = null, var chargePeriod: String? = null)
@@ -59,11 +79,8 @@ class ProductsControllerTest {
     fun testGetProductsByQueryParameters() {
         val searchKey = "seabob"
         val params = "q[name_or_product_group_name_or_product_tags_name_cont]=$searchKey"
-        val response = restTemplate?.getForEntity("$endpoint?$params", Response::class.java)
-
         val productsResponse = restTemplate?.getForObject("$endpoint?$params", ProductsResponse::class.java)
 
-        assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.OK.value())
         assertThat(productsResponse).isNotNull
         assertThat(productsResponse?.code).isEqualTo(HttpStatus.OK.value())
         assertThat(productsResponse?.data).isNotNull
@@ -81,11 +98,20 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductsByQueryParametersNotFound() {
-        val params = "q[name_or_product_group_name_or_product_tags_name_cont]=continousintegration"
-        val response = restTemplate?.getForEntity("$endpoint?$params", Response::class.java)
+        val searchKey = "continousintegration"
+        val params = "q[name_or_product_group_name_or_product_tags_name_cont]=$searchKey"
+        val productsErrorResponse = restTemplate?.getForObject("$endpoint?$params", ErrorResponse::class.java)
 
-        // Assert that the HTTP response code is OK
-        assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.NOT_FOUND.value())
+        assertThat(productsErrorResponse).isNotNull
+        assertThat(productsErrorResponse?.code).isEqualTo(HttpStatus.NOT_FOUND.value())
+        assertThat(productsErrorResponse?.message).isNotNull
+
+        val errorMessage = productsErrorResponse?.message
+        assertThat(errorMessage?.errors).isNotEmpty
+
+        errorMessage?.errors?.forEach {
+            assertThat(it.toLowerCase()).contains("not found")
+        }
     }
 
     /**
