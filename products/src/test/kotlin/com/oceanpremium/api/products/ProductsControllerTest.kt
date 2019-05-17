@@ -181,10 +181,18 @@ class ProductsControllerTest {
     @Test
     fun testGetProductsInventoryNotFound() {
         val params = "q[product_tags_name_cont]=${testProduct.name}"
-        val response = restTemplate?.getForEntity("$endpoint/inventory?$params", Response::class.java)
+        val productsErrorResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ErrorResponse::class.java)
 
-        // Assert that the HTTP response code NOT FOUND
-        assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.NOT_FOUND.value())
+        assertThat(productsErrorResponse).isNotNull
+        assertThat(productsErrorResponse?.code).isEqualTo(HttpStatus.NOT_FOUND.value())
+        assertThat(productsErrorResponse?.message).isNotNull
+
+        val errorMessage = productsErrorResponse?.message
+        assertThat(errorMessage?.errors).isNotEmpty
+
+        errorMessage?.errors?.forEach {
+            assertThat(it.toLowerCase()).contains("not found")
+        }
     }
 
     /**
@@ -193,9 +201,17 @@ class ProductsControllerTest {
     @Test
     fun testGetProductsInventoryNotFoundOnTestProductGroup() {
         val params = "q[product_tags_name_cont]=${testProduct.name}"
-        val response = restTemplate?.getForEntity("$endpoint/inventory?$params", Response::class.java)
+        val productsErrorResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ErrorResponse::class.java)
 
-        // Assert that the HTTP response code NOT FOUND
-        assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.NOT_FOUND.value())
+        assertThat(productsErrorResponse).isNotNull
+        assertThat(productsErrorResponse?.code).isEqualTo(HttpStatus.NOT_FOUND.value())
+        assertThat(productsErrorResponse?.message).isNotNull
+
+        val errorMessage = productsErrorResponse?.message
+        assertThat(errorMessage?.errors).isNotEmpty
+
+        errorMessage?.errors?.forEach {
+            assertThat(it.toLowerCase()).contains("not found")
+        }
     }
 }
