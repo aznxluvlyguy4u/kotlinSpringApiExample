@@ -39,6 +39,7 @@ interface ProductsApi {
 
 interface QueryParametersResolver {
     fun resolveGetProductsInventory(map: Map<String, String>): Map<String, String>
+    fun resolveGetProductGroups(map: Map<String, String>): Map<String, String>
 }
 
 @Suppress("KDocUnresolvedReference")
@@ -55,7 +56,6 @@ class QueryParametersResolverImpl : QueryParametersResolver {
         private const val FUNCTIONAL_INTEGRATION_GROUP_NAME = "functionalintegrationtest"
         private const val COLLECTION_LOCATION_KEY = "collection_location_id"
         private const val DELIVERY_LOCATION_KEY = "delivery_location_id"
-
     }
 
     /**
@@ -162,6 +162,23 @@ class QueryParametersResolverImpl : QueryParametersResolver {
 
         return validatedMap
     }
+
+    override fun resolveGetProductGroups(map: Map<String, String>): Map<String, String> {
+        val validatedMap = map.toMutableMap()
+
+        /**
+         * WARNING - DO NOT DELETE OR CHANGE THE FUNCTIONAL_INTEGRATION_GROUP_QUERY key / value
+         *
+         * THIS EXCLUDES TEST DATA IN CURRENT RMS (FOR CI INTEGRATION TESTS PURPOSE) FROM THE PUBLIC SEARCH RESULTS
+         *
+         * CONSULT THE WIKI FIRST, IF YOU NEED TO EDIT THIS
+         *
+         * see @link https://bitbucket.org/oceanpremium/ocean-premium-api/wiki/Setting%20up%20test%20data
+         */
+        validatedMap["q[name_not_eq]"] = "FunctionalIntegrationTest"
+
+        return validatedMap
+    }
 }
 
 class ProductsApiImpl(
@@ -237,7 +254,8 @@ class ProductsApiImpl(
     }
 
     fun getProductGroups(map: Map<String, String>): Response<Any>? {
-        val retrofitCall = productsApi.getProductGroups(map = map)
+        val validatedMap = queryParametersResolver.resolveGetProductGroups(map)
+        val retrofitCall = productsApi.getProductGroups(map = validatedMap)
         val response = retrofitCall.execute()
 
         logger.debug("Current RMS API call - HTTP status: ${response.code()}")
@@ -257,9 +275,7 @@ class ProductsApiImpl(
     }
 
     fun getProductsInventory(map: MutableMap<String, String>): Response<Any>? {
-
         val validatedMap = queryParametersResolver.resolveGetProductsInventory(map)
-
         val retrofitCall = productsApi.getProductsInventory(map = validatedMap)
         val response = retrofitCall.execute()
 
