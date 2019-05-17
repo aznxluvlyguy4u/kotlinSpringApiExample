@@ -2,6 +2,9 @@ package com.oceanpremium.api.core.currentrms
 
 import com.oceanpremium.api.core.enum.AuthorizationType
 import com.oceanpremium.api.core.exception.throwable.*
+import com.oceanpremium.api.core.util.DateTimeUtil
+import com.oceanpremium.api.core.util.DateTimeUtil.DEFAULT_API_DATE_FORMATE
+import io.sentry.Sentry
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import retrofit2.Call
@@ -10,6 +13,7 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.QueryMap
 import java.net.UnknownHostException
+import java.util.*
 
 interface ProductsApi {
     @GET("products")
@@ -33,15 +37,127 @@ interface ProductsApi {
     ): Call<Any>
 }
 
-class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
+interface QueryParametersResolver {
+    fun resolveGetProductsInventory(map: Map<String, String>): Map<String, String>
+}
+
+@Suppress("KDocUnresolvedReference")
+class QueryParametersResolverImpl : QueryParametersResolver {
+
+    companion object {
+        private const val ACTIVE_PRODUCT_QUERY = "q[active_eq]"
+        private const val FILTER_MODE_QUERY = "filtermode[]"
+        private const val DEFAULT_STORE_ID_QUERY = "store_id"
+        private const val START_DATE_QUERY = "starts_at"
+        private const val END_DATE_QUERY = "ends_at"
+        private const val ACCESSORY_ONLY_QUERY = "q[product_accessory_only_eq]"
+        private const val FUNCTIONAL_INTEGRATION_GROUP_QUERY = "q[product_product_group_name_not_eq]"
+        private const val FUNCTIONAL_INTEGRATION_GROUP_NAME = "functionalintegrationtest"
+    }
+
+    /**
+     * Append default query parameters if the defaults are not present, for proper / valid product querying.
+     *
+     * see @link https://bitbucket.org/oceanpremium/ocean-premium-api/wiki/Current%20RMS%20API%20request%20examples#markdown-header-products-inventory
+     * see @link https://dudesoftechnology.atlassian.net/browse/OPP-184
+     * see @link https://api.current-rms.com/doc#header-searching-with-the-query-engine
+     *
+     * - q[product_accessory_only_eq]=false
+     * - q[active_eq]=true
+     * - filtermode[]=rental
+     * - store_id=5
+     * - start_date=yyyy-mm-dd or yyyy-MM-dd'T'HH:mm'Z'
+     * - end_date=yyyy-mm-dd or yyyy-MM-dd'T'HH:mm'Z'
+     * - q[product_product_group_name_not_eq]=PRODUCT_GROUP_SETUP_FOR_TESTING
+     *
+     * Final result query outgoing to currentRMS NEEDS TO BE of the following MINIMAL form:
+     *
+     * 1  q[product_tags_name_cont]=SEARCH_KEY_STRING
+     * 2  q[active_eq]=true
+     * 3  filtermode[]=rental
+     * 4  store_id=STORE_ID_INT
+     * 5  q[product_accessory_only_eq]=false
+     * 6  starts_at=YYYY-MM-DD
+     * 7  ends_at=YYYY-MM-DD
+     * 8  q[product_product_group_name_not_eq]=functionalintegrationtest
+     *
+     */
+    override fun resolveGetProductsInventory(map: Map<String, String>): Map<String, String> {
+        val validatedMap = map.toMutableMap()
+
+        /**
+         * WARNING - DO NOT DELETE OR CHANGE THE FUNCTIONAL_INTEGRATION_GROUP_QUERY key / value
+         *
+         * THIS EXCLUDES TEST DATA IN CURRENT RMS (FOR CI INTEGRATION TESTS PURPOSE) FROM THE PUBLIC SEARCH RESULTS
+         *
+         * CONSULT THE WIKI FIRST, IF YOU NEED TO EDIT THIS
+         *
+         * see @link https://bitbucket.org/oceanpremium/ocean-premium-api/wiki/Setting%20up%20test%20data
+         */
+        validatedMap[FUNCTIONAL_INTEGRATION_GROUP_QUERY] = FUNCTIONAL_INTEGRATION_GROUP_NAME
+
+
+
+        /**
+         * Static parameters, check if the default mandatory query parameters are given, otherwise append it.
+         */
+
+        // Only query active products
+        if (!validatedMap.containsKey(ACTIVE_PRODUCT_QUERY)) {
+            validatedMap[ACTIVE_PRODUCT_QUERY] = "true"
+        }
+
+        // Only query products of rental type
+        if (!validatedMap.containsKey(FILTER_MODE_QUERY)) {
+            validatedMap[FILTER_MODE_QUERY] = "rental"
+        }
+
+        // Only query products on a specific store (for now)
+        if (!validatedMap.containsKey(DEFAULT_STORE_ID_QUERY)) {
+            validatedMap[DEFAULT_STORE_ID_QUERY] = "5"
+        }
+
+        // Only query products and accessories that are rentable on it self (exclude non-rentable accessories)
+        if (!validatedMap.containsKey(ACCESSORY_ONLY_QUERY)) {
+            validatedMap[ACCESSORY_ONLY_QUERY] = "false"
+        }
+
+        /**
+         * Dynamic parameters, check if date interval boundaries (start- & end date) are given,
+         * otherwise set query date interval to ONE day. If a start date is given but no end date,
+         * set end date equal to start date.
+         */
+
+        // No time interval boundaries supplied, create an interval of ONE day
+        if (!validatedMap.containsKey(START_DATE_QUERY) && !validatedMap.containsKey(END_DATE_QUERY) ) {
+            val now = DateTimeUtil.toISO8601UTC(Date(), format = DEFAULT_API_DATE_FORMATE)
+            validatedMap[START_DATE_QUERY] = now
+            validatedMap[END_DATE_QUERY] = now
+        }
+
+        // Only a start date is supplied
+        if (map.containsKey(START_DATE_QUERY) && !map.containsKey(END_DATE_QUERY)) {
+            validatedMap[END_DATE_QUERY] = validatedMap[START_DATE_QUERY] as String
+        }
+
+        // Only an end date is supplied
+        if (!map.containsKey(START_DATE_QUERY) && map.containsKey(END_DATE_QUERY)) {
+            validatedMap[START_DATE_QUERY] = validatedMap[END_DATE_QUERY] as String
+        }
+
+        return validatedMap
+    }
+}
+
+class ProductsApiImpl(
+    currentRmsClient: CurrentRmsClient = CurrentRmsClient(),
+    private  val queryParametersResolver: QueryParametersResolver = QueryParametersResolverImpl()
+)  {
 
     private val productsApi = currentRmsClient.getRetrofitClient().create(ProductsApi::class.java)
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
-        private const val ACTIVE_PRODUCT_QUERY = "q[active_eq]"
-        private const val FILTER_MODE_QUERY = "filtermode[]"
-        private const val DEFAULT_STORE_ID_QUERY = "store_id"
         private const val RATE_LIMIT_EXPIRATION_HEADER = "X-RateLimit-Reset"
     }
 
@@ -86,13 +202,18 @@ class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
                 }
 
                 else ->  {
-                    logger.debug("Request to Current RMS API failed")
-                    throw ServerErrorException()
+                    val message = "Request to Current RMS API failed, response returned null"
+                    logger.error(message)
+
+                    val exception = ServerErrorException(message)
+                    Sentry.capture(exception)
+                    throw exception
                 }
             }
         } catch (e: UnknownHostException) {
             e.printStackTrace()
             logger.error("Request to Current RMS API failed")
+            Sentry.capture(e)
 
             throw ServerErrorException(e.message)
         }
@@ -122,20 +243,7 @@ class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
 
     fun getProductsInventory(map: MutableMap<String, String>): Response<Any>? {
 
-        // Set default query parameters if these are not present, for propery product querying on current rms.
-        val validatedMap = map.toMutableMap()
-
-        when {
-            !map.containsKey(ACTIVE_PRODUCT_QUERY) -> validatedMap[ACTIVE_PRODUCT_QUERY] = "true"
-        }
-
-        when {
-            !map.containsKey(FILTER_MODE_QUERY) -> validatedMap[FILTER_MODE_QUERY] = "rental"
-        }
-
-        when {
-            !map.containsKey(DEFAULT_STORE_ID_QUERY) -> validatedMap[DEFAULT_STORE_ID_QUERY] = "5"
-        }
+        val validatedMap = queryParametersResolver.resolveGetProductsInventory(map)
 
         val retrofitCall = productsApi.getProductsInventory(map = validatedMap)
         val response = retrofitCall.execute()
@@ -173,12 +281,20 @@ class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
 
         // HTTP 400
         if (response.code() == HttpStatus.BAD_REQUEST.value()) {
-            throw BadRequestException()
+            logger.warn(response.message())
+            val exception = BadRequestException(response.message())
+            Sentry.capture(exception)
+
+            throw exception
         }
 
         // HTTP 401
         if (response.code() == HttpStatus.UNAUTHORIZED.value()) {
-            throw UnauthorizedException(type = AuthorizationType.THIRD_PARTY)
+            logger.warn(response.message())
+            val exception = UnauthorizedException(type = AuthorizationType.THIRD_PARTY, message = response.message())
+            Sentry.capture(exception)
+
+            throw exception
         }
 
         // HTTP 429
@@ -191,18 +307,29 @@ class ProductsApiImpl(currentRmsClient: CurrentRmsClient = CurrentRmsClient()) {
             when {
                 headers.get(RATE_LIMIT_EXPIRATION_HEADER) != null -> {
                     logger.debug("$RATE_LIMIT_EXPIRATION_HEADER = ${headers.get(RATE_LIMIT_EXPIRATION_HEADER)}")
-                    throw TooManyRequestsException("$message. Limit expires on: ${headers.get(RATE_LIMIT_EXPIRATION_HEADER)}")
+                    val errorMessage = "$message. Limit expires on: ${headers.get(RATE_LIMIT_EXPIRATION_HEADER)}"
+                    logger.error(errorMessage)
+                    val exception = TooManyRequestsException(errorMessage)
+                    Sentry.capture(exception)
+                    
+                    throw exception
                 }
                 else -> {
                     logger.debug("No $RATE_LIMIT_EXPIRATION_HEADER header was provided")
-                    throw TooManyRequestsException(message)
+                    val exception = TooManyRequestsException(message)
+                    Sentry.capture(exception)
+
+                    throw exception
                 }
             }
         }
 
         // HTTP 500
         if (response.code() == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
-            throw ServerErrorException()
+            val exception = ServerErrorException(response.message())
+            Sentry.capture(exception)
+
+            throw exception
         }
     }
 }

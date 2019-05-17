@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "f49928e4-2cd6-4db8-a7cb-a72c0e4c6115",
+		"_postman_id": "b8a9e8f3-17a8-4c7d-b60d-512c6e0d5771",
 		"name": "Ocean Premum - API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -24,10 +24,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "https://api.current-rms.com/api/v1/products/19",
 							"protocol": "https",
@@ -63,10 +59,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "https://api.current-rms.com/api/v1/product_groups",
 							"protocol": "https",
@@ -101,10 +93,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "https://api.current-rms.com/api/v1/products?product_group_id_eq=22&tags=[\"Fins\"]",
 							"protocol": "https",
@@ -149,10 +137,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "https://api.current-rms.com/api/v1/products?q[product_group_name_cont]=Fun_Activities",
 							"protocol": "https",
@@ -192,10 +176,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "https://api.current-rms.com/api/v1/products?q[product_group_id_eq]=19",
 							"protocol": "https",
@@ -235,10 +215,6 @@
 								"value": "{{op-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "https://api.current-rms.com/api/v1/products?tags=[\"sierra\"]",
 							"protocol": "https",
@@ -279,10 +255,6 @@
 								"value": "{{op-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "https://api.current-rms.com/api/v1/products?page=1&per_page=2&q[name_or_product_group_name_or_product_tags_name_cont]=seabob",
 							"protocol": "https",
@@ -331,10 +303,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "https://api.current-rms.com/api/v1/stores",
 							"protocol": "https",
@@ -368,10 +336,6 @@
 								"value": "{{op-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "https://api.current-rms.com/api/v1/products?q[tag]=highlighted",
 							"protocol": "https",
@@ -411,10 +375,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "https://api.current-rms.com/api/v1/products/inventory?starts_at=2018-09-04&ends_at=2018-09-15&filtermode[]=rental&store_id=1&q[name_or_product_group_name_or_product_tags_name_cont]=seabob",
 							"protocol": "https",
@@ -449,6 +409,118 @@
 								{
 									"key": "q[name_or_product_group_name_or_product_tags_name_cont]",
 									"value": "seabob"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find product by inventory by [TAGS ONLY] with dates and store id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-SUBDOMAIN",
+								"value": "{{op-domain}}",
+								"type": "text"
+							},
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{op-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.current-rms.com/api/v1/products/inventory?starts_at=2018-09-04&ends_at=2018-09-15&filtermode[]=rental&store_id=1&q[product_tags_name_cont]=tiwal%20sail",
+							"protocol": "https",
+							"host": [
+								"api",
+								"current-rms",
+								"com"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"inventory"
+							],
+							"query": [
+								{
+									"key": "starts_at",
+									"value": "2018-09-04"
+								},
+								{
+									"key": "ends_at",
+									"value": "2018-09-15"
+								},
+								{
+									"key": "filtermode[]",
+									"value": "rental"
+								},
+								{
+									"key": "store_id",
+									"value": "1"
+								},
+								{
+									"key": "q[product_tags_name_cont]",
+									"value": "tiwal%20sail"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find product by inventory EXCLUDE those of product group Accessories",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-SUBDOMAIN",
+								"value": "{{op-domain}}",
+								"type": "text"
+							},
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{op-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.current-rms.com/api/v1/products/inventory?store_id=13&q[product_tags_name_matches]=F5&starts_at=2019-06-04&ends_at=2019-06-15&q[product_accessory_only_eq]=false",
+							"protocol": "https",
+							"host": [
+								"api",
+								"current-rms",
+								"com"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"inventory"
+							],
+							"query": [
+								{
+									"key": "store_id",
+									"value": "13"
+								},
+								{
+									"key": "q[product_tags_name_matches]",
+									"value": "F5"
+								},
+								{
+									"key": "starts_at",
+									"value": "2019-06-04"
+								},
+								{
+									"key": "ends_at",
+									"value": "2019-06-15"
+								},
+								{
+									"key": "q[product_accessory_only_eq]",
+									"value": "false"
 								}
 							]
 						}
@@ -548,10 +620,6 @@
 												"value": "application/json"
 											}
 										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "http://localhost:8080/api/v1/auth/docs",
 											"protocol": "http",
@@ -616,10 +684,6 @@
 									"request": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://lbaoy0bpmf.execute-api.eu-west-1.amazonaws.com/dev/api/v1/auth/docs",
 											"protocol": "https",
@@ -695,10 +759,6 @@
 										"type": "text"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "http://localhost:8080/api/v1/users/docs",
 									"protocol": "http",
@@ -763,10 +823,6 @@
 												"type": "text"
 											}
 										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products/19",
 											"protocol": "https",
@@ -827,10 +883,6 @@
 												"type": "text"
 											}
 										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products/groups",
 											"protocol": "https",
@@ -865,10 +917,6 @@
 												"value": "application/json"
 											}
 										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products",
 											"protocol": "https",
@@ -927,10 +975,6 @@
 												"type": "text"
 											}
 										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products?product_group_id_eq=22&tags=[\"Fins\"]",
 											"protocol": "https",
@@ -1000,10 +1044,6 @@
 												"type": "text"
 											}
 										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products?q[product_group_name_cont]=Fun_Activities",
 											"protocol": "https",
@@ -1068,10 +1108,6 @@
 												"type": "text"
 											}
 										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products?q[product_group_id_eq]=19",
 											"protocol": "https",
@@ -1136,10 +1172,6 @@
 												"value": "{{op-token}}"
 											}
 										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products?tags=[\"sierra\"]",
 											"protocol": "https",
@@ -1205,10 +1237,6 @@
 												"value": "{{op-token}}"
 											}
 										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products?page=1&per_page=2&q[name_or_product_group_name_or_product_tags_name_cont]=seabob",
 											"protocol": "https",
@@ -1268,10 +1296,6 @@
 									"request": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products/docs",
 											"protocol": "https",
@@ -1331,10 +1355,6 @@
 												"value": "{{op-token}}"
 											}
 										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products/inventory?starts_at=2018-09-04&ends_at=2018-09-15&filtermode[]=rental&store_id=1&q[name_or_product_group_name_or_product_tags_name_cont]=seabob",
 											"protocol": "https",
@@ -1377,6 +1397,152 @@
 										}
 									},
 									"response": []
+								},
+								{
+									"name": "Find product by inventory by [TAGS ONLY] with dates and store id",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "366d5527-092b-48dd-aed7-2102333daaee",
+												"exec": [
+													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
+													"    pm.response.to.have.status(200);",
+													"})",
+													"",
+													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
+													"    pm.response.to.have.jsonBody('code');",
+													"    pm.response.to.have.jsonBody('data');",
+													"    pm.response.to.have.jsonBody('meta');",
+													"    ",
+													"    pm.response.to.not.have.jsonBody('error');",
+													"})"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "X-SUBDOMAIN",
+												"type": "text",
+												"value": "{{op-domain}}"
+											},
+											{
+												"key": "X-AUTH-TOKEN",
+												"type": "text",
+												"value": "{{op-token}}"
+											}
+										],
+										"url": {
+											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products/inventory?starts_at=2018-09-04&ends_at=2018-09-15&filtermode[]=rental&store_id=1&q[product_tags_name_cont]=tiwal%20sail",
+											"protocol": "https",
+											"host": [
+												"1qie0vagy1",
+												"execute-api",
+												"eu-west-1",
+												"amazonaws",
+												"com"
+											],
+											"path": [
+												"dev",
+												"api",
+												"v1",
+												"products",
+												"inventory"
+											],
+											"query": [
+												{
+													"key": "starts_at",
+													"value": "2018-09-04"
+												},
+												{
+													"key": "ends_at",
+													"value": "2018-09-15"
+												},
+												{
+													"key": "filtermode[]",
+													"value": "rental"
+												},
+												{
+													"key": "store_id",
+													"value": "1"
+												},
+												{
+													"key": "q[product_tags_name_cont]",
+													"value": "tiwal%20sail"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Find product by inventory EXCLUDE those of product group Accessories Copy",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "9a7b77b2-74e0-4219-b5d7-aae49ce8de9c",
+												"exec": [
+													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
+													"    pm.response.to.have.status(200);",
+													"})",
+													"",
+													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
+													"    pm.response.to.have.jsonBody('code');",
+													"    pm.response.to.have.jsonBody('data');",
+													"    pm.response.to.have.jsonBody('meta');",
+													"    ",
+													"    pm.response.to.not.have.jsonBody('error');",
+													"})"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "X-SUBDOMAIN",
+												"type": "text",
+												"value": "{{op-domain}}"
+											},
+											{
+												"key": "X-AUTH-TOKEN",
+												"type": "text",
+												"value": "{{op-token}}"
+											}
+										],
+										"url": {
+											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products/inventory?q[product_tags_name_matches]=tiwal%20sail",
+											"protocol": "https",
+											"host": [
+												"1qie0vagy1",
+												"execute-api",
+												"eu-west-1",
+												"amazonaws",
+												"com"
+											],
+											"path": [
+												"dev",
+												"api",
+												"v1",
+												"products",
+												"inventory"
+											],
+											"query": [
+												{
+													"key": "q[product_tags_name_matches]",
+													"value": "tiwal%20sail"
+												}
+											]
+										}
+									},
+									"response": []
 								}
 							],
 							"_postman_isSubFolder": true
@@ -1411,10 +1577,6 @@
 									"request": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products/19",
 											"protocol": "https",
@@ -1464,10 +1626,6 @@
 									"request": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products/groups",
 											"protocol": "https",
@@ -1517,10 +1675,6 @@
 									"request": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products?product_group_id_eq=22&tags=[\"Fins\"]",
 											"protocol": "https",
@@ -1579,10 +1733,6 @@
 									"request": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products?q[product_group_name_cont]=Fun_Activities",
 											"protocol": "https",
@@ -1636,10 +1786,6 @@
 									"request": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products?q[name_cont]=wakeboard",
 											"protocol": "https",
@@ -1693,10 +1839,6 @@
 									"request": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products?tags=[\"sierra\"]",
 											"protocol": "https",
@@ -1751,10 +1893,6 @@
 									"request": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products?page=1&per_page=2&q[name_or_product_group_name_or_product_tags_name_cont]=seabob",
 											"protocol": "https",
@@ -1814,10 +1952,6 @@
 									"request": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products/docs",
 											"protocol": "https",
@@ -1873,10 +2007,6 @@
 												"value": "application/json"
 											}
 										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products",
 											"protocol": "https",
@@ -1937,10 +2067,6 @@
 												"disabled": true
 											}
 										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products/inventory?starts_at=2018-09-04&ends_at=2018-09-15&filtermode[]=rental&store_id=1&q[name_or_product_group_name_or_product_tags_name_cont]=seabob",
 											"protocol": "https",
@@ -1983,6 +2109,154 @@
 										}
 									},
 									"response": []
+								},
+								{
+									"name": "Find product by inventory by [TAGS ONLY] with dates and store id",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "eff305f1-f2f0-4ef2-b6e0-78925a000360",
+												"exec": [
+													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
+													"    pm.response.to.have.status(200);",
+													"})",
+													"",
+													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
+													"    pm.response.to.have.jsonBody('code');",
+													"    pm.response.to.have.jsonBody('data');",
+													"    pm.response.to.have.jsonBody('meta');",
+													"    ",
+													"    pm.response.to.not.have.jsonBody('error');",
+													"})"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "X-SUBDOMAIN",
+												"type": "text",
+												"value": "{{op-domain}}",
+												"disabled": true
+											},
+											{
+												"key": "X-AUTH-TOKEN",
+												"type": "text",
+												"value": "{{op-token}}",
+												"disabled": true
+											}
+										],
+										"url": {
+											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products/inventory?starts_at=2018-09-04&ends_at=2018-09-15&filtermode[]=rental&store_id=1&q[product_tags_name_cont]=tiwal%20sail",
+											"protocol": "https",
+											"host": [
+												"zu6wjlgc49",
+												"execute-api",
+												"eu-west-1",
+												"amazonaws",
+												"com"
+											],
+											"path": [
+												"staging",
+												"api",
+												"v1",
+												"products",
+												"inventory"
+											],
+											"query": [
+												{
+													"key": "starts_at",
+													"value": "2018-09-04"
+												},
+												{
+													"key": "ends_at",
+													"value": "2018-09-15"
+												},
+												{
+													"key": "filtermode[]",
+													"value": "rental"
+												},
+												{
+													"key": "store_id",
+													"value": "1"
+												},
+												{
+													"key": "q[product_tags_name_cont]",
+													"value": "tiwal%20sail"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Find product by inventory EXCLUDE those of product group Accessories Copy Copy",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "9a7b77b2-74e0-4219-b5d7-aae49ce8de9c",
+												"exec": [
+													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
+													"    pm.response.to.have.status(200);",
+													"})",
+													"",
+													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
+													"    pm.response.to.have.jsonBody('code');",
+													"    pm.response.to.have.jsonBody('data');",
+													"    pm.response.to.have.jsonBody('meta');",
+													"    ",
+													"    pm.response.to.not.have.jsonBody('error');",
+													"})"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "X-SUBDOMAIN",
+												"type": "text",
+												"value": "{{op-domain}}"
+											},
+											{
+												"key": "X-AUTH-TOKEN",
+												"type": "text",
+												"value": "{{op-token}}"
+											}
+										],
+										"url": {
+											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products/inventory?q[product_tags_name_matches]=tiwal%20sail",
+											"protocol": "https",
+											"host": [
+												"zu6wjlgc49",
+												"execute-api",
+												"eu-west-1",
+												"amazonaws",
+												"com"
+											],
+											"path": [
+												"dev",
+												"api",
+												"v1",
+												"products",
+												"inventory"
+											],
+											"query": [
+												{
+													"key": "q[product_tags_name_matches]",
+													"value": "tiwal%20sail"
+												}
+											]
+										}
+									},
+									"response": []
 								}
 							],
 							"_postman_isSubFolder": true
@@ -2017,10 +2291,6 @@
 									"request": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "http://localhost:8080/api/v1/products/19",
 											"protocol": "http",
@@ -2066,10 +2336,6 @@
 									"request": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "http://localhost:8080/api/v1/products/groups",
 											"protocol": "http",
@@ -2115,10 +2381,6 @@
 									"request": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "http://localhost:8080/api/v1/products?product_group_id_eq=22&tags=[\"Fins\"]",
 											"protocol": "http",
@@ -2173,10 +2435,6 @@
 									"request": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "http://localhost:8080/api/v1/products?q[product_group_name_cont]=Fun_Activities",
 											"protocol": "http",
@@ -2239,10 +2497,6 @@
 												"disabled": true
 											}
 										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "http://localhost:8080/api/v1/products?q[name_cont]=wakeboard",
 											"protocol": "http",
@@ -2292,10 +2546,6 @@
 									"request": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "http://localhost:8080/api/v1/products?tags=[\"sierra\"]",
 											"protocol": "http",
@@ -2346,10 +2596,6 @@
 									"request": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "http://localhost:8080/api/v1/products?page=1&per_page=2&q[name_or_product_group_name_or_product_tags_name_cont]=seabob",
 											"protocol": "http",
@@ -2405,10 +2651,6 @@
 									"request": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "http://localhost:8080/api/v1/products/docs",
 											"protocol": "http",
@@ -2460,10 +2702,6 @@
 												"value": "application/json"
 											}
 										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "http://localhost:8080/api/v1/products",
 											"protocol": "http",
@@ -2520,10 +2758,6 @@
 												"disabled": true
 											}
 										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "http://localhost:8080/api/v1/products/inventory?starts_at=2018-09-04&ends_at=2018-09-15&filtermode[]=rental&store_id=1&q[name_or_product_group_name_or_product_tags_name_cont]=seabob",
 											"protocol": "http",
@@ -2557,6 +2791,124 @@
 												{
 													"key": "q[name_or_product_group_name_or_product_tags_name_cont]",
 													"value": "seabob"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Find product by Inventory by [TAGS ONLY] with dates and store id",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "22cb913e-206e-4f62-903b-10d76071ba4b",
+												"exec": [
+													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
+													"    pm.response.to.have.status(200);",
+													"})",
+													"",
+													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
+													"    pm.response.to.have.jsonBody('code');",
+													"    pm.response.to.have.jsonBody('data');",
+													"    pm.response.to.have.jsonBody('meta');",
+													"    ",
+													"    pm.response.to.not.have.jsonBody('error');",
+													"})"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "X-SUBDOMAIN",
+												"type": "text",
+												"value": "{{op-domain}}",
+												"disabled": true
+											},
+											{
+												"key": "X-AUTH-TOKEN",
+												"type": "text",
+												"value": "{{op-token}}",
+												"disabled": true
+											}
+										],
+										"url": {
+											"raw": "http://localhost:8080/api/v1/products/inventory?starts_at=2018-09-04&ends_at=2018-09-15&filtermode[]=rental&store_id=1&q[product_tags_name_cont]=tiwal%20sail",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"api",
+												"v1",
+												"products",
+												"inventory"
+											],
+											"query": [
+												{
+													"key": "starts_at",
+													"value": "2018-09-04"
+												},
+												{
+													"key": "ends_at",
+													"value": "2018-09-15"
+												},
+												{
+													"key": "filtermode[]",
+													"value": "rental"
+												},
+												{
+													"key": "store_id",
+													"value": "1"
+												},
+												{
+													"key": "q[product_tags_name_cont]",
+													"value": "tiwal%20sail"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Find product by inventory EXCLUDE those of product group Accessories",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "X-SUBDOMAIN",
+												"type": "text",
+												"value": "{{op-domain}}"
+											},
+											{
+												"key": "X-AUTH-TOKEN",
+												"type": "text",
+												"value": "{{op-token}}"
+											}
+										],
+										"url": {
+											"raw": "http://localhost:8080/api/v1/products/inventory?q[product_tags_name_matches]=tiwal%20sail",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"api",
+												"v1",
+												"products",
+												"inventory"
+											],
+											"query": [
+												{
+													"key": "q[product_tags_name_matches]",
+													"value": "tiwal%20sail"
 												}
 											]
 										}
@@ -2610,10 +2962,6 @@
 												"value": "{{op-token}}"
 											}
 										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://3rk3xtficb.execute-api.eu-west-1.amazonaws.com/dev/api/v1/locations",
 											"protocol": "https",
@@ -2659,10 +3007,6 @@
 									"request": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://3rk3xtficb.execute-api.eu-west-1.amazonaws.com/dev/api/v1/locations/docs",
 											"protocol": "https",
@@ -2725,10 +3069,6 @@
 												"value": "{{op-token}}"
 											}
 										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://7s2c5akwy2.execute-api.eu-west-1.amazonaws.com/staging/api/v1/locations",
 											"protocol": "https",
@@ -2774,10 +3114,6 @@
 									"request": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "https://7s2c5akwy2.execute-api.eu-west-1.amazonaws.com/staging/api/v1/locations/docs",
 											"protocol": "https",
@@ -2840,10 +3176,6 @@
 												"value": "{{op-token}}"
 											}
 										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "http://localhost:8080/api/v1/locations",
 											"protocol": "http",
@@ -2885,10 +3217,6 @@
 									"request": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "http://localhost:8080/api/v1/locations/docs",
 											"protocol": "http",
