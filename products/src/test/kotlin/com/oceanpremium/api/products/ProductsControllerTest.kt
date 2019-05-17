@@ -73,7 +73,7 @@ class ProductsControllerTest {
     }
 
     /**
-     * Get product by id.
+     * Get product by id that is not found.
      */
     @Test
     fun testGetProductByIdNotFound() {
@@ -107,7 +107,7 @@ class ProductsControllerTest {
     }
 
     /**
-     * Get products inventory not found.
+     * Get products inventory that is not found.
      */
     @Test
     fun testGetProductsInventoryNotFound() {

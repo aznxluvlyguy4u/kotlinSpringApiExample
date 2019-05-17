@@ -50,7 +50,7 @@ class QueryParametersResolverImpl : QueryParametersResolver {
         private const val START_DATE_QUERY = "starts_at"
         private const val END_DATE_QUERY = "ends_at"
         private const val ACCESSORY_ONLY_QUERY = "q[product_accessory_only_eq]"
-        private const val FUNCTIONAL_INTEGRATION_GROUP_QUERY = "q[product_group_name_neq]"
+        private const val FUNCTIONAL_INTEGRATION_GROUP_QUERY = "q[product_product_group_name_not_eq]"
         private const val FUNCTIONAL_INTEGRATION_GROUP_NAME = "functionalintegrationtest"
     }
 
@@ -77,16 +77,23 @@ class QueryParametersResolverImpl : QueryParametersResolver {
      * 5  q[product_accessory_only_eq]=false
      * 6  starts_at=YYYY-MM-DD
      * 7  ends_at=YYYY-MM-DD
+     * 8  q[product_product_group_name_not_eq]=functionalintegrationtest
      *
      */
     override fun resolveGetProductsInventory(map: Map<String, String>): Map<String, String> {
         val validatedMap = map.toMutableMap()
 
         /**
-         * WARNING - DO NOT DELETE OR CHANGE THIS
-         * THIS EXCLUDES MOCKED DATA IN CURRENT RMS (FOR CI INTEGRATION TESTS) FROM THE PUBLIC SEARCH RESULTS
+         * WARNING - DO NOT DELETE OR CHANGE THE FUNCTIONAL_INTEGRATION_GROUP_QUERY key / value
+         *
+         * THIS EXCLUDES TEST DATA IN CURRENT RMS (FOR CI INTEGRATION TESTS PURPOSE) FROM THE PUBLIC SEARCH RESULTS
+         *
+         * CONSULT THE WIKI FIRST, IF YOU NEED TO EDIT THIS
+         *
+         * see @link https://bitbucket.org/oceanpremium/ocean-premium-api/wiki/Setting%20up%20test%20data
          */
         validatedMap[FUNCTIONAL_INTEGRATION_GROUP_QUERY] = FUNCTIONAL_INTEGRATION_GROUP_NAME
+
 
 
         /**
