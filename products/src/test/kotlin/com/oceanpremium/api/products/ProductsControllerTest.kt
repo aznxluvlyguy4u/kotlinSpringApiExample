@@ -24,7 +24,7 @@ class ProductsControllerTest {
     )
 
     companion object {
-        private val endpoint = "/api/v1/products"
+        private const val endpoint = "/api/v1/products"
         private val testProduct = TestProduct()
     }
 
@@ -34,6 +34,7 @@ class ProductsControllerTest {
     @Test
     fun testGetProductApiDocs() {
         val response = restTemplate?.getForEntity("$endpoint/docs", Response::class.java)
+        
         assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.OK.value())
     }
 
@@ -107,11 +108,22 @@ class ProductsControllerTest {
     }
 
     /**
-     * Get products inventory that is not found.
+     * Get products inventory that is not found on the FunctionalIntegrationTest product group.
      */
     @Test
     fun testGetProductsInventoryNotFound() {
+        val params = "q[product_tags_name_cont]=${testProduct.name}"
+        val response = restTemplate?.getForEntity("$endpoint/inventory?$params", Response::class.java)
 
+        // Assert that the HTTP response code NOT FOUND
+        assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.NOT_FOUND.value())
+    }
+
+    /**
+     * Get products inventory that is not found on the FunctionalIntegrationTest product group.
+     */
+    @Test
+    fun testGetProductsInventoryNotFoundOnTestProductGroup() {
         val params = "q[product_tags_name_cont]=${testProduct.name}"
         val response = restTemplate?.getForEntity("$endpoint/inventory?$params", Response::class.java)
 
