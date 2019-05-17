@@ -14,16 +14,17 @@ class Errors(var errors: List<String>? = null)
 class ErrorResponse(var code: Int? = null, var message: Errors? = null)
 class ProductResponse(var code: Int? = null, var data: Products? = null)
 class ProductsResponse(var code: Int? = null, var data: List<Products>? = null)
-class ProductGroups(var id: Int? = null, var name: String? = null)
+class ProductGroupsResponse(var code: Int?, var data: List<ProductGroup>? = null)
 class RateItem(var price: String? = null, var quantityAvailable: String? = null, var chargePeriod: String? = null)
 class Image(var fullImageUrl: String? = null, var thumbnailUrl: String? = null)
 class CustomFields(var publicIconUrl: String? = null, var publicIconThumbUrl: String? = null)
+class ProductGroup(var id: Int? = null, var name: String, var description: String?)
 
 class Products (
     var id : Int? = null,
     var name : String? = null,
     var description : String? = null,
-    var productGroup: ProductGroups? = null,
+    var productGroup: ProductGroup? = null,
     var rates: List<RateItem>? = null,
     var images: List<Image>? = null,
     var customFields: CustomFields? = null
@@ -120,10 +121,18 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductByIdNotFound() {
-        val response = restTemplate?.getForEntity("$endpoint/99999999", Response::class.java)
+        val productErrorResponse = restTemplate?.getForObject("$endpoint/${testProduct.id}", ErrorResponse::class.java)
 
-        // Assert that the HTTP response code NOT FOUND
-        assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.NOT_FOUND.value())
+        assertThat(productErrorResponse).isNotNull
+        assertThat(productErrorResponse?.code).isEqualTo(HttpStatus.NOT_FOUND.value())
+        assertThat(productErrorResponse?.message).isNotNull
+
+        val errorMessage = productErrorResponse?.message
+        assertThat(errorMessage?.errors).isNotEmpty
+
+        errorMessage?.errors?.forEach {
+            assertThat(it.toLowerCase()).contains("not found")
+        }
     }
 
     /**
@@ -131,10 +140,19 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductGroups() {
-        val response = restTemplate?.getForEntity("$endpoint/groups", Response::class.java)
+        val productGroupsResponse = restTemplate?.getForObject("$endpoint/groups", ProductGroupsResponse::class.java)
 
-        // Assert that the HTTP response code is OK
-        assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.OK.value())
+        assertThat(productGroupsResponse).isNotNull
+        assertThat(productGroupsResponse?.code).isEqualTo(HttpStatus.OK.value())
+        assertThat(productGroupsResponse?.data).isNotNull
+
+        val productGroupItem = productGroupsResponse?.data
+        assertThat(productGroupItem).isNotNull
+
+        val filteredGroups  = productGroupItem?.filter { item -> item.name.toLowerCase().contains(testProduct.group)}
+
+        assertThat(filteredGroups).isNotNull
+        assertThat(filteredGroups?.size).isEqualTo(1)
     }
 
     /**
