@@ -12,10 +12,12 @@ import org.springframework.test.context.junit4.SpringRunner
 
 class Errors(var errors: List<String>? = null)
 class ErrorResponse(var code: Int? = null, var message: Errors? = null)
+class ProductResponse(var code: Int? = null, var data: Products? = null)
 class ProductsResponse(var code: Int? = null, var data: List<Products>? = null)
 class ProductGroups(var id: Int? = null, var name: String? = null)
 class RateItem(var price: String? = null, var quantityAvailable: String? = null, var chargePeriod: String? = null)
 class Image(var fullImageUrl: String? = null, var thumbnailUrl: String? = null)
+class CustomFields(var publicIconUrl: String? = null, var publicIconThumbUrl: String? = null)
 
 class Products (
     var id : Int? = null,
@@ -23,7 +25,8 @@ class Products (
     var description : String? = null,
     var productGroup: ProductGroups? = null,
     var rates: List<RateItem>? = null,
-    var images: List<Image>? = null
+    var images: List<Image>? = null,
+    var customFields: CustomFields? = null
 )
 
 @RunWith(SpringRunner::class)
@@ -101,10 +104,15 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductById() {
-        val response = restTemplate?.getForEntity("$endpoint/${testProduct.id}", Response::class.java)
+        val productsResponse = restTemplate?.getForObject("$endpoint/${testProduct.id}", ProductResponse::class.java)
 
-        // Assert that the HTTP response code is OK
-        assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.OK.value())
+        assertThat(productsResponse).isNotNull
+        assertThat(productsResponse?.code).isEqualTo(HttpStatus.OK.value())
+        assertThat(productsResponse?.data).isNotNull
+
+        val productItem = productsResponse?.data
+        assertThat(productItem).isNotNull
+        assertThat(productItem?.id).isEqualTo(testProduct.id)
     }
 
     /**
