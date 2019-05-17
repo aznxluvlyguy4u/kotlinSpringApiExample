@@ -152,7 +152,7 @@ class ProductsControllerTest {
         val filteredGroups  = productGroupItem?.filter { item -> item.name.toLowerCase().contains(testProduct.group)}
 
         assertThat(filteredGroups).isNotNull
-        assertThat(filteredGroups?.size).isEqualTo(1)
+        assertThat(filteredGroups?.size).isEqualTo(0)
     }
 
     /**
