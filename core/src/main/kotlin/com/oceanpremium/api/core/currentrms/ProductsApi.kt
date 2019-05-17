@@ -4,6 +4,7 @@ import com.oceanpremium.api.core.enum.AuthorizationType
 import com.oceanpremium.api.core.exception.throwable.*
 import com.oceanpremium.api.core.util.DateTimeUtil
 import com.oceanpremium.api.core.util.DateTimeUtil.DEFAULT_API_DATE_FORMATE
+import io.sentry.Sentry
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import retrofit2.Call
@@ -203,12 +204,16 @@ class ProductsApiImpl(
                 else ->  {
                     val message = "Request to Current RMS API failed, response returned null"
                     logger.error(message)
-                    throw ServerErrorException(message)
+
+                    val exception = ServerErrorException(message)
+                    Sentry.capture(exception)
+                    throw exception
                 }
             }
         } catch (e: UnknownHostException) {
             e.printStackTrace()
             logger.error("Request to Current RMS API failed")
+            Sentry.capture(e)
 
             throw ServerErrorException(e.message)
         }
@@ -276,12 +281,20 @@ class ProductsApiImpl(
 
         // HTTP 400
         if (response.code() == HttpStatus.BAD_REQUEST.value()) {
-            throw BadRequestException()
+            logger.warn(response.message())
+            val exception = BadRequestException(response.message())
+            Sentry.capture(exception)
+
+            throw exception
         }
 
         // HTTP 401
         if (response.code() == HttpStatus.UNAUTHORIZED.value()) {
-            throw UnauthorizedException(type = AuthorizationType.THIRD_PARTY)
+            logger.warn(response.message())
+            val exception = UnauthorizedException(type = AuthorizationType.THIRD_PARTY, message = response.message())
+            Sentry.capture(exception)
+
+            throw exception
         }
 
         // HTTP 429
@@ -294,18 +307,29 @@ class ProductsApiImpl(
             when {
                 headers.get(RATE_LIMIT_EXPIRATION_HEADER) != null -> {
                     logger.debug("$RATE_LIMIT_EXPIRATION_HEADER = ${headers.get(RATE_LIMIT_EXPIRATION_HEADER)}")
-                    throw TooManyRequestsException("$message. Limit expires on: ${headers.get(RATE_LIMIT_EXPIRATION_HEADER)}")
+                    val errorMessage = "$message. Limit expires on: ${headers.get(RATE_LIMIT_EXPIRATION_HEADER)}"
+                    logger.error(errorMessage)
+                    val exception = TooManyRequestsException(errorMessage)
+                    Sentry.capture(exception)
+                    
+                    throw exception
                 }
                 else -> {
                     logger.debug("No $RATE_LIMIT_EXPIRATION_HEADER header was provided")
-                    throw TooManyRequestsException(message)
+                    val exception = TooManyRequestsException(message)
+                    Sentry.capture(exception)
+
+                    throw exception
                 }
             }
         }
 
         // HTTP 500
         if (response.code() == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
-            throw ServerErrorException(response.message())
+            val exception = ServerErrorException(response.message())
+            Sentry.capture(exception)
+
+            throw exception
         }
     }
 }
