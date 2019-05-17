@@ -10,6 +10,20 @@ import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit4.SpringRunner
 
+class ProductsResponse(var code: Int? = null, var data: List<Products>? = null)
+class ProductGroups(var id: Int? = null, var name: String? = null)
+class RateItem(var price: String? = null, var quantityAvailable: String? = null, var chargePeriod: String? = null)
+class Image(var fullImageUrl: String? = null, var thumbnailUrl: String? = null)
+
+class Products (
+    var id : Int? = null,
+    var name : String? = null,
+    var description : String? = null,
+    var productGroup: ProductGroups? = null,
+    var rates: List<RateItem>? = null,
+    var images: List<Image>? = null
+)
+
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ProductsControllerTest {
@@ -45,6 +59,8 @@ class ProductsControllerTest {
     fun testGetProductsByQueryParameters() {
         val params = "q[name_or_product_group_name_or_product_tags_name_cont]=seabob"
         val response = restTemplate?.getForEntity("$endpoint?$params", Response::class.java)
+
+        val productsResponse = restTemplate?.getForObject("$endpoint?$params", ProductsResponse::class.java)
 
         // Assert that the HTTP response code is OK
         assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.OK.value())
@@ -108,7 +124,7 @@ class ProductsControllerTest {
     }
 
     /**
-     * Get products inventory that is not found on the FunctionalIntegrationTest product group.
+     * Get products inventory that is not found.
      */
     @Test
     fun testGetProductsInventoryNotFound() {
