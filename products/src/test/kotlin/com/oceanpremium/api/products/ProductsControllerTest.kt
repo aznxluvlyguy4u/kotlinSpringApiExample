@@ -57,13 +57,23 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductsByQueryParameters() {
-        val params = "q[name_or_product_group_name_or_product_tags_name_cont]=seabob"
+        val searchKey = "seabob"
+        val params = "q[name_or_product_group_name_or_product_tags_name_cont]=$searchKey"
         val response = restTemplate?.getForEntity("$endpoint?$params", Response::class.java)
 
         val productsResponse = restTemplate?.getForObject("$endpoint?$params", ProductsResponse::class.java)
 
-        // Assert that the HTTP response code is OK
         assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.OK.value())
+        assertThat(productsResponse).isNotNull
+        assertThat(productsResponse?.code).isEqualTo(HttpStatus.OK.value())
+        assertThat(productsResponse?.data).isNotNull
+
+        val productItems = productsResponse?.data
+        assertThat(productItems).isNotEmpty
+
+        productItems?.forEach {
+            assertThat(it.name?.toLowerCase()).contains(searchKey)
+        }
     }
 
     /**
