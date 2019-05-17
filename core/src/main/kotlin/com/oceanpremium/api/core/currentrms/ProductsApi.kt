@@ -67,6 +67,7 @@ class QueryParametersResolverImpl : QueryParametersResolver {
      * - store_id=5
      * - start_date=yyyy-mm-dd or yyyy-MM-dd'T'HH:mm'Z'
      * - end_date=yyyy-mm-dd or yyyy-MM-dd'T'HH:mm'Z'
+     * - q[product_product_group_name_not_eq]=PRODUCT_GROUP_SETUP_FOR_TESTING
      *
      * Final result query outgoing to currentRMS NEEDS TO BE of the following MINIMAL form:
      *
