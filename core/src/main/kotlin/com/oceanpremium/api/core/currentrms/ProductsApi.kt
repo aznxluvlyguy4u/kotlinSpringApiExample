@@ -201,8 +201,9 @@ class ProductsApiImpl(
                 }
 
                 else ->  {
-                    logger.debug("Request to Current RMS API failed")
-                    throw ServerErrorException()
+                    val message = "Request to Current RMS API failed, response returned null"
+                    logger.error(message)
+                    throw ServerErrorException(message)
                 }
             }
         } catch (e: UnknownHostException) {
@@ -304,7 +305,7 @@ class ProductsApiImpl(
 
         // HTTP 500
         if (response.code() == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
-            throw ServerErrorException()
+            throw ServerErrorException(response.message())
         }
     }
 }
