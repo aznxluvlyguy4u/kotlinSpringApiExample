@@ -7,7 +7,7 @@ import java.util.*
 object DateTimeUtil {
 
     private const val UTC_TIMEZONE = "UTC"
-    const val DEFAULT_API_DATE_FORMATE = "yyyy-MM-dd"
+    const val DEFAULT_API_DATE_FORMAT = "yyyy-MM-dd"
 
     fun toISO8601UTC(date: Date, format: String = "yyyy-MM-dd'T'HH:mm'Z'"): String {
         val tz = TimeZone.getTimeZone(UTC_TIMEZONE)
@@ -26,6 +26,7 @@ object DateTimeUtil {
             return df.parse(dateStr)
         } catch (e: ParseException) {
             e.printStackTrace()
+
         }
 
         return null
