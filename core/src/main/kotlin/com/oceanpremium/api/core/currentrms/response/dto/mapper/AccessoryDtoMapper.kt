@@ -6,10 +6,11 @@ import org.slf4j.LoggerFactory
 
 class AccessoryDtoMapper(itemBody: Map<*, *>) {
 
-    var data: List<ProductAccessoryDto>? = null
+    var data: List<ProductAccessoryDto> = listOf()
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
+        private const val ACCESSORIES_KEY = "accessories"
     }
 
     init {
@@ -22,10 +23,13 @@ class AccessoryDtoMapper(itemBody: Map<*, *>) {
     private fun mapJsonArray(itemBody: Map<*, *>): List<ProductAccessoryDto> {
         val products: MutableList<ProductAccessoryDto> = mutableListOf()
         @Suppress("UNCHECKED_CAST")
-        val productsItemsBody = itemBody["accessories"] as List<Map<*, *>>
 
-        productsItemsBody.forEach {
-            products.add(mapJsonObjectToDto(it))
+        if (itemBody.containsKey(ACCESSORIES_KEY)) {
+            val productsItemsBody = itemBody[ACCESSORIES_KEY] as List<Map<*, *>>
+
+            productsItemsBody.forEach {
+                products.add(mapJsonObjectToDto(it))
+            }
         }
 
         return products
