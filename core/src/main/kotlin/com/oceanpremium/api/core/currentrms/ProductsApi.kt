@@ -1,5 +1,7 @@
 package com.oceanpremium.api.core.currentrms
 
+import com.oceanpremium.api.core.currentrms.response.dto.parameter.LocationStoreResolver
+import com.oceanpremium.api.core.currentrms.response.dto.parameter.LocationStoreResolverImpl
 import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolver
 import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolverImpl
 import com.oceanpremium.api.core.enum.AuthorizationType
@@ -38,7 +40,8 @@ interface ProductsApi {
 
 class ProductsApiImpl(
     currentRmsClient: CurrentRmsClient = CurrentRmsClient(),
-    private  val queryParametersResolver: QueryParametersResolver = QueryParametersResolverImpl()
+    private val queryParametersResolver: QueryParametersResolver = QueryParametersResolverImpl(),
+    private val locationStoreResolver: LocationStoreResolver = LocationStoreResolverImpl()
 )  {
 
     private val productsApi = currentRmsClient.getRetrofitClient().create(ProductsApi::class.java)
@@ -150,34 +153,44 @@ class ProductsApiImpl(
         return response
     }
 
-    fun getProductsInventory(queryParameters: MutableMap<String, String>, headers: HttpHeaders): Response<Any>? {
-        val validatedMap = queryParametersResolver.resolveGetProductsInventory(queryParameters, headers)
-        val retrofitCall = productsApi.getProductsInventory(map = validatedMap)
-        lateinit var response: Response<Any>
+    fun getProductsInventory(queryParameters: MutableMap<String, String>, headers: HttpHeaders): List<Response<Any>>? {
+        val stores = locationStoreResolver.resolveStoreByLocation(queryParameters)
 
-        try {
-            response = retrofitCall.execute()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            logger.error("Request to Current RMS API failed: ${e.message}")
-            Sentry.capture(e)
+        val calls: MutableList<Call<Any>> = mutableListOf()
+        val responses: MutableList<Response<Any>> = mutableListOf()
 
-            throw CurrentRmsAPIException(e.message)
+        stores.forEach {
+            val validatedMap = queryParametersResolver.resolveGetProductsInventory(queryParameters, headers, it)
+            val retrofitCall = productsApi.getProductsInventory(map = validatedMap)
+            calls.add(retrofitCall)
         }
 
-        logger.debug("Current RMS API call - HTTP status: ${response.code()}")
+        calls.forEach {
+            try {
+                val response = it.execute()
 
-        when {
-            response.isSuccessful -> {
-                logger.debug("Current RMS API response body: ${response.body()}")
-            }
-            else ->  {
-                logger.debug("Request to Current RMS API failed: ${response.message()}")
-                handleException(response)
+                logger.debug("Current RMS API call - HTTP status: ${response.code()}")
+
+                when {
+                    response.isSuccessful -> {
+                        logger.debug("Current RMS API response body: ${response.body()}")
+                        responses.add(response)
+                    }
+                    else ->  {
+                        logger.debug("Request to Current RMS API failed: ${response.message()}")
+                        handleException(response)
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                logger.error("Request to Current RMS API failed: ${e.message}")
+                Sentry.capture(e)
+
+                throw CurrentRmsAPIException(e.message)
             }
         }
 
-        return response
+        return responses
     }
 
     /**
@@ -227,7 +240,7 @@ class ProductsApiImpl(
                     logger.error(errorMessage)
                     val exception = TooManyRequestsException(errorMessage)
                     Sentry.capture(exception)
-                    
+
                     throw exception
                 }
                 else -> {

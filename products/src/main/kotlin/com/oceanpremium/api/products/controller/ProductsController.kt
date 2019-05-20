@@ -2,6 +2,7 @@ package com.oceanpremium.api.products.controller
 
 import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
+import com.oceanpremium.api.core.currentrms.response.dto.mapper.CurrentRmsBaseDtoMapper
 import com.oceanpremium.api.core.exception.throwable.NotFoundException
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductGroupDtoMapper
@@ -114,12 +115,17 @@ class ProductsController(
         logger.debug(logMessageSales)
         Slogger.send(messageBody = logMessage, salesLog = true, inDebugMode = true)
 
-        val response = productsApi.getProductsInventory(queryParameters, headers)
-        val dto = ProductDtoMapper(response?.code()!!, response)
+        val responses = productsApi.getProductsInventory(queryParameters, headers)
+
+        val dtos: MutableList<CurrentRmsBaseDtoMapper> = mutableListOf()
+
+        responses?.forEach {
+            dtos.add(ProductDtoMapper(it.code(), it))
+        }
 
         return CurrentRmsApiResponse.build {
-            rawResponse = response
-            dtoMapper = dto
+            rawResponse = responses?.first()
+            dtoMapper = dtos.first()
         }
     }
 }

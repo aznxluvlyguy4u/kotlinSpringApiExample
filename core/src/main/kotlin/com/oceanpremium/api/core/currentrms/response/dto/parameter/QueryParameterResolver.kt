@@ -10,7 +10,7 @@ interface QueryParametersResolver {
 
     fun resolveGetProducts(map: Map<String, String>, headers: HttpHeaders): Map<String, String>
 
-    fun resolveGetProductsInventory(map: Map<String, String>, headers: HttpHeaders): Map<String, String>
+    fun resolveGetProductsInventory(map: Map<String, String>, headers: HttpHeaders, storeId: Int): Map<String, String>
 
     fun resolveGetProductGroups(map: Map<String, String>, headers: HttpHeaders): Map<String, String>
 
@@ -48,8 +48,8 @@ class QueryParametersResolverImpl : QueryParametersResolver {
         private const val ACCESSORY_ONLY_QUERY = "q[product_accessory_only_eq]"
         private const val FUNCTIONAL_INTEGRATION_GROUP_QUERY = "q[product_product_group_name_not_eq]"
         const val FUNCTIONAL_INTEGRATION_GROUP_NAME = "FunctionalIntegrationTest"
-        private const val COLLECTION_LOCATION_KEY = "collection_location_id"
-        private const val DELIVERY_LOCATION_KEY = "delivery_location_id"
+        const val COLLECTION_LOCATION_KEY = "collection_location_id"
+        const val DELIVERY_LOCATION_KEY = "delivery_location_id"
         private const val PRODUCT_TAGS_SEARCH_QUERY = "q[product_tags_name_cont]"
         private const val PRODUCT_GROUPS_ID_SEARCH_QUERY = "q[product_group_id_eq]"
         private const val NAME_NOT_EQ_QUERY = "q[name_not_eq]"
@@ -85,7 +85,7 @@ class QueryParametersResolverImpl : QueryParametersResolver {
      * 7  ends_at=YYYY-MM-DD
      * 8  q[product_product_group_name_not_eq]=FunctionalIntegrationTest
      */
-    override fun resolveGetProductsInventory(map: Map<String, String>, headers: HttpHeaders): Map<String, String> {
+    override fun resolveGetProductsInventory(map: Map<String, String>, headers: HttpHeaders, storeId: Int): Map<String, String> {
         val validatedMap = mutableMapOf<String, String>()
         val host = getHost(headers)
 
@@ -204,7 +204,7 @@ class QueryParametersResolverImpl : QueryParametersResolver {
             // Use to location/collection id's to resolve to a store id
             // Only query products on a specific store (for now)
             if (!map.containsKey(DEFAULT_STORE_ID_QUERY)) {
-                validatedMap[DEFAULT_STORE_ID_QUERY] = "5"
+                validatedMap[DEFAULT_STORE_ID_QUERY] = "$storeId"
             }
 
         } catch (e: Exception) {
