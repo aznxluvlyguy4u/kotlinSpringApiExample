@@ -55,6 +55,8 @@ class QueryParametersResolverImpl : QueryParametersResolver {
         private const val NAME_NOT_EQ_QUERY = "q[name_not_eq]"
         private const val LOCALHOST = "localhost"
         private const val PRODUCTS_TAG_SEARCH_QUERY = "tags"
+        private const val PAGE_KEY = "page"
+        private const val PER_PAGE_KEY = "per_page"
     }
 
     /**
@@ -207,6 +209,15 @@ class QueryParametersResolverImpl : QueryParametersResolver {
                 validatedMap[DEFAULT_STORE_ID_QUERY] = "5"
             }
 
+            // Explicit pagination parameters are given, map them
+            if (map.containsKey(PAGE_KEY)) {
+                validatedMap[PAGE_KEY] = map[PAGE_KEY] as String
+            }
+
+            if (map.containsKey(PER_PAGE_KEY)) {
+                validatedMap[PER_PAGE_KEY] = map[PER_PAGE_KEY] as String
+            }
+
         } catch (e: Exception) {
             e.printStackTrace()
             val message = "Failed to parse query parameters: ${e.message}"
@@ -254,6 +265,15 @@ class QueryParametersResolverImpl : QueryParametersResolver {
 
             // Only query products and accessories that are rentable on it self (exclude non-rentable accessories)
             validatedMap[ACCESSORY_ONLY_QUERY] = "false"
+
+            // Explicit pagination parameters are given, map them
+            if (map.containsKey(PAGE_KEY)) {
+                validatedMap[PAGE_KEY] = map[PAGE_KEY] as String
+            }
+
+            if (map.containsKey(PER_PAGE_KEY)) {
+                validatedMap[PER_PAGE_KEY] = map[PER_PAGE_KEY] as String
+            }
 
             /**
              * WARNING - DO NOT DELETE OR CHANGE THE FUNCTIONAL_INTEGRATION_GROUP_QUERY KEY / VALUE
@@ -303,6 +323,15 @@ class QueryParametersResolverImpl : QueryParametersResolver {
             when {
                 !map.containsKey(NAME_NOT_EQ_QUERY) -> validatedMap[NAME_NOT_EQ_QUERY] = FUNCTIONAL_INTEGRATION_GROUP_NAME
             }
+        }
+
+        // Explicit pagination parameters are given, map them
+        if (map.containsKey(PAGE_KEY)) {
+            validatedMap[PAGE_KEY] = map[PAGE_KEY] as String
+        }
+
+        if (map.containsKey(PER_PAGE_KEY)) {
+            validatedMap[PER_PAGE_KEY] = map[PER_PAGE_KEY] as String
         }
 
         return validatedMap
