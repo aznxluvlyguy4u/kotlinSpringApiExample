@@ -79,6 +79,7 @@ class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedException::class)
     fun handleUnauthorizedException(ex: Exception, request: WebRequest): ResponseEntity<ApiError> {
         logger.debug("Build 401 Unauthorized response")
+
         val status = HttpStatus.UNAUTHORIZED
         val apiError = when {
             showStacktrace -> ApiError(
@@ -106,6 +107,7 @@ class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException::class)
     fun handleNotFoundException(ex: Exception, request: WebRequest): ResponseEntity<ApiError> {
         logger.debug("Build 404 NOT FOUND response")
+
         val status = HttpStatus.NOT_FOUND
         val apiError = when {
             showStacktrace -> ApiError(
@@ -133,6 +135,7 @@ class GlobalExceptionHandler {
     @ExceptionHandler(TooManyRequestsException::class)
     fun handleInternalTooManyRequestsException(ex: TooManyRequestsException, request: WebRequest): ResponseEntity<ApiError> {
         logger.debug("Build 429 TOO MANY REQUESTS error response")
+
         val status = HttpStatus.TOO_MANY_REQUESTS
         val apiError = when {
             showStacktrace -> ApiError(
@@ -157,11 +160,42 @@ class GlobalExceptionHandler {
     }
 
     /**
+     * 500 Catch current rms api exception, and return a custom error response.
+     */
+    @ExceptionHandler(CurrentRmsAPIException::class)
+    fun handleCurrentRmsApiException(ex: CurrentRmsAPIException, request: WebRequest): ResponseEntity<ApiError> {
+        logger.debug("Build 500 CURRENT RMS API ERROR response")
+
+        val status = HttpStatus.INTERNAL_SERVER_ERROR
+        val apiError = when {
+            showStacktrace -> ApiError(
+                status.value(),
+                ex,
+                status.reasonPhrase
+            )
+            else -> {
+                val errorMessage = ErrorResponse()
+                errorMessage.errors.add(status.reasonPhrase)
+
+                ApiError(
+                    code = status.value(),
+                    message = errorMessage
+                )
+            }
+        }
+
+        Sentry.capture(ex)
+
+        return ResponseEntity(apiError, status)
+    }
+
+    /**
      * 500 Catch internal server exception, and return a custom error response.
      */
     @ExceptionHandler(ServerErrorException::class)
     fun handleInternalServerErrorException(ex: ServerErrorException, request: WebRequest): ResponseEntity<ApiError> {
         logger.debug("Build 500 INTERNAL SERVER ERROR response")
+
         val status = HttpStatus.INTERNAL_SERVER_ERROR
         val apiError = when {
             showStacktrace -> ApiError(

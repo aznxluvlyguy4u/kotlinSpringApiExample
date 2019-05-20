@@ -2,7 +2,7 @@ package com.oceanpremium.api.core.currentrms.response.dto.mapper
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.oceanpremium.api.core.currentrms.response.dto.product.MetaDto
-import com.oceanpremium.api.core.exception.throwable.ServerErrorException
+import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import org.slf4j.LoggerFactory
 import retrofit2.Response
 
@@ -60,7 +60,7 @@ class MetaDtoMapper(response: Response<Any>?) {
                     val message = "Failed to map product META response to Dto: ${e.message}"
                     logger.error(message)
 
-                    throw ServerErrorException(e.message)
+                    throw BadRequestException(e.message)
                 }
             }
         }

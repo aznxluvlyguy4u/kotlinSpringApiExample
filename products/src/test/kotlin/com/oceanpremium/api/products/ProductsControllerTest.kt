@@ -1,5 +1,6 @@
 package com.oceanpremium.api.products
 
+import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolverImpl.Companion.FUNCTIONAL_INTEGRATION_GROUP_NAME
 import com.oceanpremium.api.core.model.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -39,8 +40,8 @@ class ProductsControllerTest {
 
     internal class TestProduct(
         val id: Int = 247,
-        val name: String = "jvtrubberduck",
-        val group: String = "functionalintegrationtest"
+        val name: String = "JVTRubberDuck",
+        val group: String = FUNCTIONAL_INTEGRATION_GROUP_NAME
     )
 
     companion object {
@@ -63,8 +64,7 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductsByQueryParameters() {
-        val searchKey = "seabob"
-        val params = "q[name_or_product_group_name_or_product_tags_name_cont]=$searchKey"
+        val params = "tags=[\"ci\"]"
         val productsResponse = restTemplate?.getForObject("$endpoint?$params", ProductsResponse::class.java)
 
         assertThat(productsResponse).isNotNull
@@ -75,7 +75,7 @@ class ProductsControllerTest {
         assertThat(productItems).isNotEmpty
 
         productItems?.forEach {
-            assertThat(it.name?.toLowerCase()).contains(searchKey)
+            assertThat(it.name).startsWith("JVT")
         }
     }
 
@@ -84,8 +84,7 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductsByQueryParametersNotFound() {
-        val searchKey = "continousintegration"
-        val params = "q[name_or_product_group_name_or_product_tags_name_cont]=$searchKey"
+        val params = "tags=[\"notfound\"]"
         val productsErrorResponse = restTemplate?.getForObject("$endpoint?$params", ErrorResponse::class.java)
 
         assertThat(productsErrorResponse).isNotNull
@@ -137,10 +136,11 @@ class ProductsControllerTest {
 
     /**
      * Get products groups.
+     * Note that this test does not yet account for paginated results, so it could actually miss a hit.
      */
     @Test
     fun testGetProductGroups() {
-        val productGroupsResponse = restTemplate?.getForObject("$endpoint/groups", ProductGroupsResponse::class.java)
+        val productGroupsResponse = restTemplate?.getForObject("$endpoint/groups?page=1&per_page=100", ProductGroupsResponse::class.java)
 
         assertThat(productGroupsResponse).isNotNull
         assertThat(productGroupsResponse?.code).isEqualTo(HttpStatus.OK.value())
@@ -149,10 +149,10 @@ class ProductsControllerTest {
         val productGroupItem = productGroupsResponse?.data
         assertThat(productGroupItem).isNotNull
 
-        val filteredGroups  = productGroupItem?.filter { item -> item.name.toLowerCase().contains(testProduct.group)}
+        val filteredGroups  = productGroupItem?.filter { item -> item.name.contains(testProduct.group)}
 
         assertThat(filteredGroups).isNotNull
-        assertThat(filteredGroups?.size).isEqualTo(0)
+        assertThat(filteredGroups?.size).isEqualTo(1)
     }
 
     /**
@@ -160,7 +160,7 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductsInventory() {
-        val params = "q[product_group_name_matches]=${testProduct.group}&q[product_name_cont]=${testProduct.name}"
+        val params = "q[product_tags_name_cont]=jvt"
         val productsResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ProductsResponse::class.java)
 
         assertThat(productsResponse).isNotNull
@@ -171,7 +171,7 @@ class ProductsControllerTest {
         assertThat(productItems).isNotEmpty
 
         productItems?.forEach {
-            assertThat(it.name?.toLowerCase()).contains(testProduct.name)
+            assertThat(it.name).contains(testProduct.name)
         }
     }
 

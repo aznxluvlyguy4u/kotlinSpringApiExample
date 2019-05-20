@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.oceanpremium.api.core.currentrms.response.dto.product.*
 import com.oceanpremium.api.core.exception.handler.ApiError
 import com.oceanpremium.api.core.exception.throwable.NotFoundException
-import com.oceanpremium.api.core.exception.throwable.ServerErrorException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import retrofit2.Response
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.oceanpremium.api.core.exception.throwable.BadRequestException
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class ErrorResponse {
@@ -115,7 +115,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
     /**
      * Map a single item to dtoMapper
      */
-    @Throws(ServerErrorException::class)
+    @Throws(BadRequestException::class)
     private fun mapJsonObjectToDto(itemBody: Map<*, *>): ProductDto {
         var id: Int? = null
         var name: String? = null
@@ -147,7 +147,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             val message = "Failed to map product response to Dto: ${e.message}"
             logger.error(message)
 
-            throw ServerErrorException(e.message)
+            throw BadRequestException(e.message)
         }
 
         return ProductDto(
@@ -165,7 +165,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
      * image urls are setup as both primary fields and custom fields in current rms.
      * Per default get the primary image fields, if custom fields are set, check if public image icon url is set
      */
-    @Throws(ServerErrorException::class)
+    @Throws(BadRequestException::class)
     private fun mapImageSourcesToDto(itemBody: Map<*, *>, customFieldsDto: ProductCustomFieldsDto?): ImageDto {
         val imageSources: MutableList<ImageSource> = mutableListOf()
 
@@ -199,7 +199,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                     val message = "Failed to map product response to Dto: ${e.message}"
                     logger.error(message)
 
-                    throw ServerErrorException(e.message)
+                    throw BadRequestException(e.message)
                 }
             }
             else -> if (!customFieldsDto?.publicIconUrl.isNullOrEmpty()) {
@@ -219,7 +219,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         return ImageDto(imageSources)
     }
 
-    @Throws(ServerErrorException::class)
+    @Throws(BadRequestException::class)
     private fun mapProductRatesToDto(itemBody: Map<*, *>): RateDto {
         val rates: MutableList<PricingDto> = mutableListOf()
         try {
@@ -253,7 +253,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             val message = "Failed to map product response to Dto: ${e.message}"
             logger.error(message)
 
-            throw ServerErrorException(e.message)
+            throw BadRequestException(e.message)
         }
 
         return RateDto(rates)
@@ -288,7 +288,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             val message = "Failed to map product response to Dto: ${e.message}"
             logger.error(message)
 
-            throw ServerErrorException(e.message)
+            throw BadRequestException(e.message)
         }
 
         if (productGroupId == null && productGroupName == null) {
@@ -339,7 +339,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             val message = "Failed to map product response to Dto: ${e.message}"
             logger.error(message)
 
-            throw ServerErrorException(e.message)
+            throw BadRequestException(e.message)
         }
 
         return ProductCustomFieldsDto(

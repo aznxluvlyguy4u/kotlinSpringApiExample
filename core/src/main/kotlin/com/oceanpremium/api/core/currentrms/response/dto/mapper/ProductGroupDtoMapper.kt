@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductGroupCustomFieldsDto
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductGroupDto
 import com.oceanpremium.api.core.exception.handler.ApiError
-import com.oceanpremium.api.core.exception.throwable.ServerErrorException
+import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import org.slf4j.LoggerFactory
 import retrofit2.Response
 
@@ -97,7 +97,7 @@ class ProductGroupDtoMapper(var code: Int, response: Response<Any>?) : CurrentRm
             val message = "Failed to map product response to Dto: ${e.message}"
             logger.error(message)
 
-            throw ServerErrorException(message)
+            throw BadRequestException(message)
         }
 
         return ProductGroupDto(

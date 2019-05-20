@@ -13,6 +13,7 @@ import com.oceanpremium.api.core.util.ObjectMapperConfig
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ResourceLoader
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -46,15 +47,15 @@ class ProductsController(
      */
     @RequestMapping
     @ResponseBody
-    fun getProducts(@RequestParam fields: Map<String, String>): ResponseEntity<*> {
-        val logMessage = "[API] - GET products with request parameters: $fields"
+    fun getProducts(@RequestHeader headers: HttpHeaders, @RequestParam queryParameters: Map<String, String>): ResponseEntity<*> {
+        val logMessage = "[API] - GET products with request parameters: $queryParameters"
         logger.debug(logMessage)
 
-        val logMessageSales = "[Sales analytics] GET products - sales analytics: $fields"
+        val logMessageSales = "[Sales analytics] GET products - sales analytics: $queryParameters"
         logger.debug(logMessageSales)
         Slogger.send(messageBody = logMessage, salesLog = true, inDebugMode = true)
 
-        val response = productsApi.getProducts(fields)
+        val response = productsApi.getProducts(queryParameters, headers)
         val dto = ProductDtoMapper(response?.code()!!, response)
 
         return CurrentRmsApiResponse.build {
@@ -87,11 +88,11 @@ class ProductsController(
      */
     @RequestMapping("groups")
     @ResponseBody
-    fun getProductGroups(@RequestParam fields: Map<String, String>): ResponseEntity<*> {
+    fun getProductGroups(@RequestHeader headers: HttpHeaders, @RequestParam queryParameters: Map<String, String>): ResponseEntity<*> {
         val logMessage = "[API] - GET products groups"
         logger.debug(logMessage)
 
-        val response = productsApi.getProductGroups(fields)
+        val response = productsApi.getProductGroups(queryParameters, headers)
         val dto = ProductGroupDtoMapper(response?.code()!!, response)
 
         return CurrentRmsApiResponse.build {
@@ -105,15 +106,15 @@ class ProductsController(
      */
     @RequestMapping("inventory")
     @ResponseBody
-    fun getProductsInventory(@RequestParam fields: MutableMap<String, String>): ResponseEntity<*> {
-        val logMessage = "[API] - GET products inventories with request parameters: $fields"
+    fun getProductsInventory(@RequestHeader headers: HttpHeaders, @RequestParam queryParameters: MutableMap<String, String>): ResponseEntity<*> {
+        val logMessage = "[API] - GET products inventories with request headers: $headers, parameters: $queryParameters"
         logger.debug(logMessage)
 
-        val logMessageSales = "[Sales analytics] GET products inventories - sales analytics: $fields"
+        val logMessageSales = "[Sales analytics] GET products inventories - sales analytics: $queryParameters"
         logger.debug(logMessageSales)
         Slogger.send(messageBody = logMessage, salesLog = true, inDebugMode = true)
 
-        val response = productsApi.getProductsInventory(fields)
+        val response = productsApi.getProductsInventory(queryParameters, headers)
         val dto = ProductDtoMapper(response?.code()!!, response)
 
         return CurrentRmsApiResponse.build {
