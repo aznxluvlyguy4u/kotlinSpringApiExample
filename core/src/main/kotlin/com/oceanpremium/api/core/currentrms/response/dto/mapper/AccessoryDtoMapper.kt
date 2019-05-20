@@ -1,111 +1,28 @@
 package com.oceanpremium.api.core.currentrms.response.dto.mapper
 
-import com.fasterxml.jackson.annotation.JsonInclude
 import com.oceanpremium.api.core.currentrms.response.dto.product.*
-import com.oceanpremium.api.core.exception.handler.ApiError
-import com.oceanpremium.api.core.exception.throwable.NotFoundException
-import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
-import retrofit2.Response
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
-import org.springframework.beans.factory.annotation.Autowired
+import org.slf4j.LoggerFactory
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-class ErrorResponse {
-    val errors: MutableList<String> = mutableListOf()
-}
+class AccessoryDtoMapper(itemBody: Map<*, *>) {
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoMapper(code) {
-    private val accessoryDtoMapper: AccessoryDtoMapper? = null
+    var data: List<ProductAccessoryDto>? = null
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
     }
 
     init {
-        /**
-         * The root node of the response payload that will contain the response result for data key
-         */
-        data = mapToDto(response)
-    }
-
-    /**
-     * Determine if response contains either a JSON object response or a JSON array response,
-     * and parse accordingly.
-     */
-    @Throws(NotFoundException::class)
-    private fun mapToDto(response: Response<Any>?): Any? {
-
-        when {
-            response != null && !response.isSuccessful -> {
-                val errorBody = response.errorBody()
-
-                data = when {
-                    errorBody != null  -> {
-                        val type = object : TypeToken<ErrorResponse>() {}.type
-                        val errorResponse: ErrorResponse? = Gson().fromJson(response.errorBody()!!.charStream(), type)
-
-                        ApiError(code = response.code(), message = errorResponse)
-                    }
-
-                    else -> {
-                        ApiError(code = response.code(), message = response.message())
-                    }
-                }
-
-                return data
-            }
-
-            response != null && response.isSuccessful -> {
-                val responseBody = response.body() as Map<*, *>
-
-                data = when {
-                    responseBody.containsKey("products") -> {
-
-                        /**
-                         * CurrentRms returns a 200 OK for empty result sets. As a best practice for REST API,
-                         * the response should be a 404 NOT FOUND when an empty result set is returned.
-                         *
-                         * See @link: https://stackoverflow.com/questions/11746894/what-is-the-proper-rest-response-code-for-a-valid-request-but-an-empty-data
-                         *
-                         * Therefore, override the 200 OK response code and return a 404 NOT FOUND response code and error message instead.
-                         */
-                        val metaMapper = MetaDtoMapper(response)
-
-                        if (metaMapper.overrideHttpStatus) {
-                            httpStatus = HttpStatus.NOT_FOUND
-                            data = ApiError(code = response.code(), message = response.message())
-
-                            return data
-                        }
-
-                        meta = metaMapper.meta
-                        mapJsonArray(response)
-                    }
-
-                    responseBody.containsKey("product") -> {
-                         mapJsonObjectToDto(responseBody["product"] as Map<*, *>)
-                    }
-
-                    else -> null
-                }
-            }
-        }
-
-        return data
+        data = mapJsonArray(itemBody)
     }
 
     /**
      * Map list of items to list of dtoMapper
      */
-    private fun mapJsonArray(response: Response<Any>?): List<ProductDto> {
-        val responseBody = response?.body() as Map<*, *>
-        val products: MutableList<ProductDto> = mutableListOf()
+    private fun mapJsonArray(itemBody: Map<*, *>): List<ProductAccessoryDto> {
+        val products: MutableList<ProductAccessoryDto> = mutableListOf()
         @Suppress("UNCHECKED_CAST")
-        val productsItemsBody = responseBody["products"] as List<Map<*, *>>
+        val productsItemsBody = itemBody["accessories"] as List<Map<*, *>>
 
         productsItemsBody.forEach {
             products.add(mapJsonObjectToDto(it))
@@ -118,15 +35,14 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
      * Map a single item to dtoMapper
      */
     @Throws(BadRequestException::class)
-    private fun mapJsonObjectToDto(itemBody: Map<*, *>): ProductDto {
+    private fun mapJsonObjectToDto(itemBody: Map<*, *>): ProductAccessoryDto {
         var id: Int? = null
         var name: String? = null
         var description: String? = null
-        val productGroup: ProductGroupDto? = mapProductGroupToDto(itemBody)
         var customFields: ProductCustomFieldsDto? = null
         val rates = mapProductRatesToDto(itemBody)
         val imageSources = mapImageSourcesToDto(itemBody, customFields)
-        val accessories = AccessoryDtoMapper(itemBody).data
+        var inclusionType : String? = null
 
         try {
             if (itemBody.containsKey("id")) {
@@ -144,6 +60,11 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             if (itemBody.containsKey("custom_fields")) {
                 customFields = mapCustomFieldsToDto(itemBody)
             }
+
+            if (itemBody.containsKey("inclusion_type_name")) {
+                inclusionType = itemBody["inclusion_type_name"] as String?
+            }
+
         } catch (e: Exception) {
             e.printStackTrace()
 
@@ -153,15 +74,14 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             throw BadRequestException(e.message)
         }
 
-        return ProductDto(
+        return ProductAccessoryDto(
             id,
             name,
             description,
-            productGroup,
+            inclusionType,
             rates.pricings,
             imageSources.sources,
-            customFields,
-            accessories
+            customFields
         )
     }
 
@@ -352,4 +272,5 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             publicIconThumbUrl
         )
     }
+
 }
