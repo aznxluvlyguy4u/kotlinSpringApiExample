@@ -20,7 +20,7 @@ class ProductAccessoryDto(
     val name: String?,
     val description: String?,
     val inclusionType: String?,
-    val rates: List<PricingDto>,
+    val quantity: String?,
     val images: List<ImageSource>,
     var customFields: ProductCustomFieldsDto? = null
 )

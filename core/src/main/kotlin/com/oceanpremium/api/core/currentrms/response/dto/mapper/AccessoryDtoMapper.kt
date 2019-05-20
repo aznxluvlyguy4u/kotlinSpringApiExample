@@ -18,7 +18,7 @@ class AccessoryDtoMapper(itemBody: Map<*, *>) {
     }
 
     /**
-     * Map list of items to list of dtoMapper
+     * Map list of items to list of dto's
      */
     private fun mapJsonArray(itemBody: Map<*, *>): List<ProductAccessoryDto> {
         val products: MutableList<ProductAccessoryDto> = mutableListOf()
@@ -36,7 +36,7 @@ class AccessoryDtoMapper(itemBody: Map<*, *>) {
     }
 
     /**
-     * Map a single item to dtoMapper
+     * Map a single item to dto
      */
     @Throws(BadRequestException::class)
     private fun mapJsonObjectToDto(itemBody: Map<*, *>): ProductAccessoryDto {
@@ -44,17 +44,17 @@ class AccessoryDtoMapper(itemBody: Map<*, *>) {
         var name: String? = null
         var description: String? = null
         var customFields: ProductCustomFieldsDto? = null
-        val rates = mapProductRatesToDto(itemBody)
+        var quantity: String? = null
         val imageSources = mapImageSourcesToDto(itemBody, customFields)
         var inclusionType : String? = null
 
         try {
-            if (itemBody.containsKey("id")) {
-                id = (itemBody["id"] as Double?)?.toInt()
+            if (itemBody.containsKey("related_id")) {
+                id = (itemBody["related_id"] as Double?)?.toInt()
             }
 
-            if (itemBody.containsKey("name")) {
-                name = itemBody["name"] as String?
+            if (itemBody.containsKey("related_name")) {
+                name = itemBody["related_name"] as String?
             }
 
             if (itemBody.containsKey("description")) {
@@ -69,10 +69,13 @@ class AccessoryDtoMapper(itemBody: Map<*, *>) {
                 inclusionType = itemBody["inclusion_type_name"] as String?
             }
 
+            if (itemBody.containsKey("quantity")) {
+                quantity = itemBody["quantity"] as String?
+            }
         } catch (e: Exception) {
             e.printStackTrace()
 
-            val message = "Failed to map product response to Dto: ${e.message}"
+            val message = "Failed to map product accessory response to Dto: ${e.message}"
             logger.error(message)
 
             throw BadRequestException(e.message)
@@ -83,7 +86,7 @@ class AccessoryDtoMapper(itemBody: Map<*, *>) {
             name,
             description,
             inclusionType,
-            rates.pricings,
+            quantity,
             imageSources.sources,
             customFields
         )
@@ -98,8 +101,8 @@ class AccessoryDtoMapper(itemBody: Map<*, *>) {
         val imageSources: MutableList<ImageSource> = mutableListOf()
 
         when {
-            itemBody.containsKey("icon_thumb_url") && itemBody.containsKey("icon_url") -> {
-                imageSources.add(ImageSource(itemBody["icon_url"] as String?, itemBody["icon_thumb_url"] as String?))
+            itemBody.containsKey("related_icon_url") && itemBody.containsKey("related_icon_thumb_url") -> {
+                imageSources.add(ImageSource(itemBody["related_icon_url"] as String?, itemBody["related_icon_thumb_url"] as String?))
             }
 
             itemBody.containsKey("icon")  -> {
@@ -145,85 +148,6 @@ class AccessoryDtoMapper(itemBody: Map<*, *>) {
         }
 
         return ImageDto(imageSources)
-    }
-
-    @Throws(BadRequestException::class)
-    private fun mapProductRatesToDto(itemBody: Map<*, *>): RateDto {
-        val rates: MutableList<PricingDto> = mutableListOf()
-        try {
-            if (itemBody.containsKey("rental_price")
-                && itemBody.containsKey("rental_quantity_available")
-                && itemBody.containsKey("rental_lead_charge_period_name")
-            ) {
-                val rentalPrice = itemBody["rental_price"] as String?
-                val rentalQuantityAvailable = itemBody["rental_quantity_available"] as String?
-                val rentalLeadChargePeriodName = itemBody["rental_lead_charge_period_name"] as String?
-
-                rates.add(PricingDto(rentalQuantityAvailable, rentalPrice, rentalLeadChargePeriodName))
-            } else {
-                if (itemBody.containsKey("rental_rates")) {
-                    @Suppress("UNCHECKED_CAST")
-                    val rentalRate = (itemBody["rental_rates"] as List<Map<*, *>>).first()
-
-                    val rentalPrice = rentalRate["price"] as String?
-                    val rentalLeadChargePeriodName = rentalRate["rate_definition_name"] as String?
-
-                    when {
-                        !rentalPrice.isNullOrEmpty() -> when {
-                            !rentalLeadChargePeriodName.isNullOrEmpty() -> rates.add(PricingDto(price = rentalPrice, chargePeriod = rentalLeadChargePeriodName))
-                        }
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-
-            val message = "Failed to map product response to Dto: ${e.message}"
-            logger.error(message)
-
-            throw BadRequestException(e.message)
-        }
-
-        return RateDto(rates)
-    }
-
-    private fun mapProductGroupToDto(itemBody: Map<*, *>): ProductGroupDto? {
-        var productGroupId: Int? = null
-        var productGroupName: String? = null
-
-        try {
-            if (itemBody.containsKey("product_group_id")
-                && itemBody.containsKey("product_group_name")
-            ) {
-                productGroupId = (itemBody["product_group_id"] as Double?)?.toInt()
-                productGroupName = itemBody["product_group_name"] as String?
-
-            } else {
-                if (itemBody.containsKey("product_group")) {
-                    val productGroup = itemBody["product_group"] as Map<*,*>
-
-                    when {
-                        productGroup.containsKey("id") && productGroup.containsKey("name") -> {
-                            productGroupId = (productGroup["id"] as Double?)?.toInt()
-                            productGroupName = productGroup["name"] as String?
-                        }
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-
-            val message = "Failed to map product response to Dto: ${e.message}"
-            logger.error(message)
-
-            throw BadRequestException(e.message)
-        }
-
-        if (productGroupId == null && productGroupName == null) {
-            return null
-        }
-
-        return ProductGroupDto(id = productGroupId, name = productGroupName)
     }
 
     /**

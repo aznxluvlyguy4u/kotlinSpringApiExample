@@ -10,7 +10,6 @@ import retrofit2.Response
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
-import org.springframework.beans.factory.annotation.Autowired
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class ErrorResponse {
@@ -19,7 +18,6 @@ class ErrorResponse {
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoMapper(code) {
-    private val accessoryDtoMapper: AccessoryDtoMapper? = null
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
