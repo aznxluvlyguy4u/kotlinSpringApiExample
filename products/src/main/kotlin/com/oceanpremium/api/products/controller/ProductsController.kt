@@ -4,6 +4,7 @@ import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductGroupDtoMapper
+import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.messenger.Slogger
 import com.oceanpremium.api.core.util.Constants
 import com.oceanpremium.api.core.util.ObjectMapperConfig
@@ -51,12 +52,12 @@ class ProductsController(
         logger.debug(logMessageSales)
         Slogger.send(messageBody = logMessage, salesLog = true, inDebugMode = true)
 
-        val response = productsApi.getProducts(queryParameters, headers)
-        val dto = ProductDtoMapper(response?.code()!!, response)
+        val productResponse = productsApi.getProducts(queryParameters, headers)
+        val productDto = ProductDtoMapper(productResponse?.code()!!, productResponse)
 
         return CurrentRmsApiResponse.build {
-            rawResponse = response
-            dtoMapper = dto
+            rawResponse = productResponse
+            dtoMapper = productDto
         }
     }
 
@@ -69,12 +70,22 @@ class ProductsController(
         val logMessage = "[API] - GET products with request parameters: $productId"
         logger.debug(logMessage)
 
-        val response = productsApi.getProductById(productId)
-        val dto = ProductDtoMapper(response?.code()!!, response)
+        val productResponse = productsApi.getProductById(productId)
+        val productDto = ProductDtoMapper(productResponse?.code()!!, productResponse)
+        val productData = productDto.data as ProductDto?
+
+        productData?.accesoryIds?.forEach {
+            val accessoryResponse = productsApi.getProductById(it)
+            val accessoryDto = ProductDtoMapper(accessoryResponse?.code()!!, accessoryResponse).data as ProductDto
+            accessoryDto.type = "Accessory"
+
+            logger.debug("Retrieved accessory for product with id: ${productData.id}: - $accessoryDto")
+            productData.accessories = mutableListOf(accessoryDto)
+        }
 
         return CurrentRmsApiResponse.build {
-            rawResponse = response
-            dtoMapper = dto
+            rawResponse = productResponse
+            dtoMapper = productDto
         }
     }
 
@@ -87,12 +98,12 @@ class ProductsController(
         val logMessage = "[API] - GET products groups"
         logger.debug(logMessage)
 
-        val response = productsApi.getProductGroups(queryParameters, headers)
-        val dto = ProductGroupDtoMapper(response?.code()!!, response)
+        val productGroupsResponse = productsApi.getProductGroups(queryParameters, headers)
+        val productGroupsDto = ProductGroupDtoMapper(productGroupsResponse?.code()!!, productGroupsResponse)
 
         return CurrentRmsApiResponse.build {
-            rawResponse = response
-            dtoMapper = dto
+            rawResponse = productGroupsResponse
+            dtoMapper = productGroupsDto
         }
     }
 
@@ -109,12 +120,12 @@ class ProductsController(
         logger.debug(logMessageSales)
         Slogger.send(messageBody = logMessage, salesLog = true, inDebugMode = true)
 
-        val response = productsApi.getProductsInventory(queryParameters, headers)
-        val dto = ProductDtoMapper(response?.code()!!, response)
+        val productsResponse = productsApi.getProductsInventory(queryParameters, headers)
+        val productsDto = ProductDtoMapper(productsResponse?.code()!!, productsResponse)
 
         return CurrentRmsApiResponse.build {
-            rawResponse = response
-            dtoMapper = dto
+            rawResponse = productsResponse
+            dtoMapper = productsDto
         }
     }
 }

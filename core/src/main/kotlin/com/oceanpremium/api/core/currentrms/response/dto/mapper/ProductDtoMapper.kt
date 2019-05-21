@@ -19,8 +19,10 @@ class ErrorResponse {
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoMapper(code) {
 
+
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
+        private const val ACCESSORIES_KEY = "accessories"
     }
 
     init {
@@ -41,7 +43,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             response != null && !response.isSuccessful -> {
                 val errorBody = response.errorBody()
 
-                data = when {
+                error = when {
                     errorBody != null  -> {
                         val type = object : TypeToken<ErrorResponse>() {}.type
                         val errorResponse: ErrorResponse? = Gson().fromJson(response.errorBody()!!.charStream(), type)
@@ -54,7 +56,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                     }
                 }
 
-                return data
+                return null
             }
 
             response != null && response.isSuccessful -> {
@@ -75,9 +77,9 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
 
                         if (metaMapper.overrideHttpStatus) {
                             httpStatus = HttpStatus.NOT_FOUND
-                            data = ApiError(code = response.code(), message = response.message())
+                            error = ApiError(code = response.code(), message = response.message())
 
-                            return data
+                            return null
                         }
 
                         meta = metaMapper.meta
@@ -120,11 +122,12 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         var id: Int? = null
         var name: String? = null
         var description: String? = null
+        var type: String? = null
         val productGroup: ProductGroupDto? = mapProductGroupToDto(itemBody)
         var customFields: ProductCustomFieldsDto? = null
         val rates = mapProductRatesToDto(itemBody)
-        val imageSources = mapImageSourcesToDto(itemBody, customFields)
-        val accessories = AccessoryDtoMapper(itemBody).data
+        val accessoryIds = mapAccessoryIds(itemBody)
+        val imageSources: ImageDto?
 
         try {
             if (itemBody.containsKey("id")) {
@@ -142,6 +145,13 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             if (itemBody.containsKey("custom_fields")) {
                 customFields = mapCustomFieldsToDto(itemBody)
             }
+
+            if (itemBody.containsKey("type")) {
+                type = itemBody["type"] as String?
+            }
+
+            imageSources = mapImageSourcesToDto(itemBody, customFields)
+
         } catch (e: Exception) {
             e.printStackTrace()
 
@@ -155,11 +165,12 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             id,
             name,
             description,
+            type,
             productGroup,
             rates.pricings,
             imageSources.sources,
             customFields,
-            accessories
+            accessoryIds
         )
     }
 
@@ -172,8 +183,20 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         val imageSources: MutableList<ImageSource> = mutableListOf()
 
         when {
-            itemBody.containsKey("icon_thumb_url") && itemBody.containsKey("icon_url") -> {
-                imageSources.add(ImageSource(itemBody["icon_url"] as String?, itemBody["icon_thumb_url"] as String?))
+            !customFieldsDto?.publicIconUrl.isNullOrEmpty() -> {
+                val imageUrl = customFieldsDto!!.publicIconUrl
+                var imageThumbUrl: String? = imageUrl
+
+                if (!customFieldsDto.publicIconThumbUrl.isNullOrEmpty()) {
+                    imageThumbUrl = customFieldsDto.publicIconThumbUrl
+
+                }
+
+                if (imageUrl != null && imageThumbUrl != null) {
+                    customFieldsDto.publicIconUrl = null
+                    customFieldsDto.publicIconThumbUrl = null
+                    imageSources.add(ImageSource(imageUrl, imageThumbUrl))
+                }
             }
 
             itemBody.containsKey("icon")  -> {
@@ -204,16 +227,9 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                     throw BadRequestException(e.message)
                 }
             }
-            else -> if (!customFieldsDto?.publicIconUrl.isNullOrEmpty()) {
-                val imageUrl = customFieldsDto!!.publicIconUrl
-                var imageThumbUrl: String? = imageUrl
-
-                if (!customFieldsDto.publicIconThumbUrl.isNullOrEmpty()) {
-                    imageThumbUrl = customFieldsDto.publicIconThumbUrl
-                }
-
-                if (imageUrl != null && imageThumbUrl != null) {
-                    imageSources.add(ImageSource(imageUrl, imageThumbUrl))
+            else -> {
+                if (itemBody.containsKey("icon_thumb_url") && itemBody.containsKey("icon_url")) {
+                    imageSources.add(ImageSource(itemBody["icon_url"] as String?, itemBody["icon_thumb_url"] as String?))
                 }
             }
         }
@@ -349,5 +365,30 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             publicIconUrl,
             publicIconThumbUrl
         )
+    }
+
+    /**
+     * Grab accessory ids to get the full accessories details in additional API calls.
+     */
+    private fun mapAccessoryIds(itemBody: Map<*, *>): List<Int> {
+        val ids: MutableList<Int> = mutableListOf()
+        val accessoryIdKey = "related_id"
+
+        if (itemBody.containsKey(ACCESSORIES_KEY)) {
+            @Suppress("UNCHECKED_CAST")
+            val productsItemsBody = itemBody[ACCESSORIES_KEY] as List<Map<*, *>>
+
+            productsItemsBody.forEach {
+
+                if (it.containsKey(accessoryIdKey) && it[accessoryIdKey] != null) {
+                    val id = (it[accessoryIdKey] as Double).toInt()
+                    ids.add(id)
+                    logger.debug("Found accessory with Id: $id")
+
+                }
+            }
+        }
+
+        return ids
     }
 }
