@@ -40,6 +40,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
     private fun mapToDto(response: Response<Any>?): Any? {
 
         when {
+            // Request failed, build error message
             response != null && !response.isSuccessful -> {
                 val errorBody = response.errorBody()
 
@@ -59,6 +60,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                 return null
             }
 
+            // Request succeeded, parse response payload
             response != null && response.isSuccessful -> {
                 val responseBody = response.body() as Map<*, *>
 
