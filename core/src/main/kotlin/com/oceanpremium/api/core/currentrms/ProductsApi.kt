@@ -14,22 +14,37 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.QueryMap
 
+/**
+ * Interface for Products API, used by Retrofit to create API call service.
+ */
 interface ProductsApi {
+    /**
+     * Endpoint to query products by given query parameters.
+     */
     @GET("products")
     fun getProducts(
         @QueryMap map: Map<String, String>
     ): Call<Any>
 
+    /**
+     * Endpoint to get a product by it's ID.
+     */
     @GET("products/{productId}")
     fun getProductById(
         @Path("productId") productId: Int
     ): Call<Any>
 
+    /**
+     * Endpoint to get all product groups.
+     */
     @GET("product_groups")
     fun getProductGroups(
         @QueryMap map: Map<String, String>
     ): Call<Any>
 
+    /**
+     * Endpoint to query products based on their availabitlity and given query paramters.
+     */
     @GET("products/inventory")
     fun getProductsInventory(
         @QueryMap map: Map<String, String>
@@ -48,6 +63,9 @@ class ProductsApiImpl(
         private const val RATE_LIMIT_EXPIRATION_HEADER = "X-RateLimit-Reset"
     }
 
+    /**
+     * @inherit
+     */
     fun getProductById(productId: Int): Response<Any>? {
         val retrofitCall = productsApi.getProductById(productId)
         lateinit var response: Response<Any>
@@ -78,6 +96,9 @@ class ProductsApiImpl(
         return response
     }
 
+    /**
+     * @inherit
+     */
     fun getProducts(queryParameters: Map<String, String>, headers: HttpHeaders): Response<Any>? {
         val validatedMap = queryParametersResolver.resolveGetProducts(queryParameters, headers)
         val retrofitCall = productsApi.getProducts(map = validatedMap)
@@ -119,6 +140,9 @@ class ProductsApiImpl(
         return response
     }
 
+    /**
+     * @inherit
+     */
     fun getProductGroups(queryParameters: Map<String, String>, headers: HttpHeaders): Response<Any>? {
         val validatedMap = queryParametersResolver.resolveGetProductGroups(queryParameters, headers)
         val retrofitCall = productsApi.getProductGroups(map = validatedMap)
@@ -150,6 +174,9 @@ class ProductsApiImpl(
         return response
     }
 
+    /**
+     * @inherit
+     */
     fun getProductsInventory(queryParameters: MutableMap<String, String>, headers: HttpHeaders): Response<Any>? {
         val validatedMap = queryParametersResolver.resolveGetProductsInventory(queryParameters, headers)
         val retrofitCall = productsApi.getProductsInventory(map = validatedMap)
@@ -227,7 +254,7 @@ class ProductsApiImpl(
                     logger.error(errorMessage)
                     val exception = TooManyRequestsException(errorMessage)
                     Sentry.capture(exception)
-                    
+
                     throw exception
                 }
                 else -> {
