@@ -10,5 +10,17 @@ class ProductDto(
     val productGroup: ProductGroupDto?,
     val rates: List<PricingDto>,
     val images: List<ImageSource>,
+    var customFields: ProductCustomFieldsDto? = null,
+    var accessories: List<ProductAccessoryDto>?
+)
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+class ProductAccessoryDto(
+    val id: Int?,
+    val name: String?,
+    val description: String?,
+    val inclusionType: String?,
+    val quantity: String?,
+    val images: List<ImageSource>,
     var customFields: ProductCustomFieldsDto? = null
 )

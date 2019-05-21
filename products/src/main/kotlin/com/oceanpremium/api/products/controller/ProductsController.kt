@@ -3,11 +3,8 @@ package com.oceanpremium.api.products.controller
 import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.CurrentRmsBaseDtoMapper
-import com.oceanpremium.api.core.exception.throwable.NotFoundException
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductGroupDtoMapper
-import com.oceanpremium.api.core.exception.throwable.BadRequestException
-import com.oceanpremium.api.core.exception.throwable.UnauthorizedException
 import com.oceanpremium.api.core.messenger.Slogger
 import com.oceanpremium.api.core.util.Constants
 import com.oceanpremium.api.core.util.ObjectMapperConfig
@@ -18,7 +15,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.server.ServerErrorException
 
 @RestController
 @RequestMapping("api/v1/products")
@@ -70,7 +66,6 @@ class ProductsController(
      */
     @RequestMapping("/{productId}")
     @ResponseBody
-    @Throws(ServerErrorException::class, BadRequestException::class, UnauthorizedException::class, NotFoundException::class)
     fun getProductById(@PathVariable productId:Int): ResponseEntity<*>  {
         val logMessage = "[API] - GET products with request parameters: $productId"
         logger.debug(logMessage)

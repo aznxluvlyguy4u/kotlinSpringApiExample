@@ -124,6 +124,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         var customFields: ProductCustomFieldsDto? = null
         val rates = mapProductRatesToDto(itemBody)
         val imageSources = mapImageSourcesToDto(itemBody, customFields)
+        val accessories = AccessoryDtoMapper(itemBody).data
 
         try {
             if (itemBody.containsKey("id")) {
@@ -157,7 +158,8 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             productGroup,
             rates.pricings,
             imageSources.sources,
-            customFields
+            customFields,
+            accessories
         )
     }
 
