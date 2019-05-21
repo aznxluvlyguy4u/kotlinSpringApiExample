@@ -21,7 +21,7 @@ import retrofit2.http.QueryMap
  */
 interface ProductsApi {
     /**
-     * Endpoint to query products by given query parameters.
+     * Endpoint to query products by given query parameters (does not account for availability).
      */
     @GET("products")
     fun getProducts(
@@ -45,7 +45,7 @@ interface ProductsApi {
     ): Call<Any>
 
     /**
-     * Endpoint to query products based on their availabitlity and given query paramters.
+     * Endpoint to query products based on their availability and given query parameters.
      */
     @GET("products/inventory")
     fun getProductsInventory(
