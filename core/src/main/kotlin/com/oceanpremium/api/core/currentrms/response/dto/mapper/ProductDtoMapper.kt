@@ -13,7 +13,7 @@ import com.oceanpremium.api.core.exception.throwable.BadRequestException
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class ErrorResponse {
-    val errors: MutableList<String> = mutableListOf()
+    val errors: MutableList<Any> = mutableListOf()
 }
 
 @JsonInclude(JsonInclude.Include.NON_NULL)

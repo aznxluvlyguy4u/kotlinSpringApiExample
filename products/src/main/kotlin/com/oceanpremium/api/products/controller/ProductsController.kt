@@ -86,6 +86,7 @@ class ProductsController(
         return CurrentRmsApiResponse.build {
             rawResponse = productResponse
             dtoMapper = productDto
+            error = productDto.error
         }
     }
 
@@ -104,6 +105,7 @@ class ProductsController(
         return CurrentRmsApiResponse.build {
             rawResponse = productGroupsResponse
             dtoMapper = productGroupsDto
+            error = productGroupsDto.error
         }
     }
 
@@ -126,6 +128,7 @@ class ProductsController(
         return CurrentRmsApiResponse.build {
             rawResponse = productsResponse
             dtoMapper = productsDto
+            error = productsDto.error
         }
     }
 }
