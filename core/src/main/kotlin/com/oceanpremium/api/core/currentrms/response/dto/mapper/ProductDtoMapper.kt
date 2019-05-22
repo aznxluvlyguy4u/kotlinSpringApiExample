@@ -10,6 +10,7 @@ import retrofit2.Response
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
+import com.oceanpremium.api.core.util.FileSizeFormatUtil
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class ErrorResponse {
@@ -134,6 +135,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         val rates = mapProductRatesToDto(itemBody)
         val accessoryIds = mapAccessoryIds(itemBody)
         val imageSources: ImageDto?
+        val attachments: List<AttachmentDto>? = mapAttachments(itemBody)
 
         try {
             if (itemBody.containsKey("id")) {
@@ -176,7 +178,8 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             rates.pricings,
             imageSources.sources,
             customFields,
-            accessoryIds
+            accessoryIds,
+            attachments
         )
     }
 
@@ -405,5 +408,51 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         }
 
         return items
+    }
+
+    private fun mapAttachments(itemBody: Map<*, *>): List<AttachmentDto>? {
+        val attachments: MutableList<AttachmentDto> = mutableListOf()
+
+        try {
+            if (itemBody.containsKey("attachments")) {
+                val attachmentItems = itemBody["attachments"] as List<Map<*,*>>
+
+                attachmentItems.forEach {
+
+                    var mimeType: String? = null
+                    var fileSize: String? = null
+                    var fileUrl: String? = null
+
+                    if (it.containsKey("attachment_content_type")) {
+                        mimeType = it["attachment_content_type"] as String?
+                    }
+
+                    if (it.containsKey("attachment_file_size")) {
+                        val size = (it["attachment_file_size"] as Double?)?.toInt()
+
+                        when {
+                            size != null -> fileSize = FileSizeFormatUtil.convert(size)
+                        }
+                    }
+
+                    if (it.containsKey("attachment_url")) {
+                        fileUrl = it["attachment_url"] as String?
+                    }
+
+                    if (mimeType != null && fileSize != null && fileUrl != null) {
+                        attachments.add(AttachmentDto(mimeType, fileSize, fileUrl))
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+
+            val message = "Failed to map product attachments response to Dto: ${e.message}"
+            logger.error(message)
+
+            throw BadRequestException(e.message)
+        }
+
+        return attachments
     }
 }

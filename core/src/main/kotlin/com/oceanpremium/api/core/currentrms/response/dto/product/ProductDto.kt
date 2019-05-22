@@ -19,7 +19,8 @@ class ProductDto(
     val images: List<ImageSource>,
     var customFields: ProductCustomFieldsDto? = null,
     @JsonIgnore
-    val accesoryIds: List<AccessoryItem>? = null
+    val accesoryIds: List<AccessoryItem>? = null,
+    val attachments: List<AttachmentDto>? = null
 ) {
     var accessories: MutableList<ProductDto>? = null
 }
