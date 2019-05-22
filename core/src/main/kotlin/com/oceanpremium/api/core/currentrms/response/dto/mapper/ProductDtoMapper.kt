@@ -79,7 +79,11 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
 
                         if (metaMapper.overrideHttpStatus) {
                             httpStatus = HttpStatus.NOT_FOUND
-                            error = ApiError(code = response.code(), message = response.message())
+
+                            val errorResponse = ErrorResponse()
+                            errorResponse.errors.add(httpStatus.reasonPhrase)
+
+                            error = ApiError(code = httpStatus.value(), message = errorResponse)
 
                             return null
                         }

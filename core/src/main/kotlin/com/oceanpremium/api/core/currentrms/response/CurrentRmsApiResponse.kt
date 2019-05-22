@@ -63,7 +63,7 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
         private val logger = LoggerFactory.getLogger(this::class.java)
         var rawResponse: Response<Any>? = null
         var dtoMapper: CurrentRmsBaseDtoMapper? = null
-        var error: Any? = null
+        var error: ApiError? = null
 
         fun build(): ResponseEntity<*> {
             return buildResponse(rawResponse, dtoMapper, error)
@@ -73,7 +73,7 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
         private fun buildResponse(
             rawResponse: Response<Any>?,
             dtoMapper: CurrentRmsBaseDtoMapper? = null,
-            error: Any? = null
+            error: ApiError? = null
         ): ResponseEntity<*> {
 
             val statusCode = dtoMapper?.httpStatus!!
@@ -89,7 +89,7 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
                      */
                     if (dtoMapper.httpStatus == HttpStatus.NOT_FOUND) {
 
-                        var errorResponse: Any? = error
+                        var errorResponse: ApiError? = error
 
                         when (error) {
                             null -> if (dtoMapper.error  != null) {
@@ -121,9 +121,14 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
                             if (error != null) {
                                 buildErrorResponse(statusCode = statusCode, error = error, rawResponse = null)
                             } else {
+
+                                val errorResponse = ErrorResponse()
+                                errorResponse.errors.add(statusCode.reasonPhrase)
+                                val error = ApiError(code = statusCode.value(), exception = NotFoundException(), message = errorResponse)
+
                                 buildErrorResponse(
                                     statusCode = statusCode,
-                                    error = statusCode.reasonPhrase,
+                                    error = error,
                                     rawResponse = null
                                 )
                             }
@@ -174,16 +179,14 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
         private fun buildErrorResponse(
             statusCode: HttpStatus,
             rawResponse: Response<Any>?,
-            error: Any?
+            error: ApiError?
         ): ResponseEntity<Any> {
             val wrappedBody = when {
 
                 error != null -> {
-                    logger.debug("Error not null setting passed error as response: $error")
-                    val errorResponse = ErrorResponse()
-                    errorResponse.errors.add(error)
+                    logger.debug("Error not null returning passed error as response: $error")
 
-                    ApiError(code = statusCode.value(), message = errorResponse)
+                    error
                 }
 
                 rawResponse?.errorBody() != null -> {
