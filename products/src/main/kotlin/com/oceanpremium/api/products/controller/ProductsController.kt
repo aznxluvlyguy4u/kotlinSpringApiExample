@@ -73,15 +73,18 @@ class ProductsController(
         val productResponse = productsApi.getProductById(productId)
         val productDto = ProductDtoMapper(productResponse?.code()!!, productResponse)
         val productData = productDto.data as ProductDto?
+        val accessoryDtos: MutableList<ProductDto> = mutableListOf()
 
         productData?.accesoryIds?.forEach {
-            val accessoryResponse = productsApi.getProductById(it)
+            val accessoryResponse = productsApi.getProductById(it.id)
             val accessoryDto = ProductDtoMapper(accessoryResponse?.code()!!, accessoryResponse).data as ProductDto
-            accessoryDto.type = "Accessory"
+            accessoryDto.type = it.type
 
+            accessoryDtos.add(accessoryDto)
             logger.debug("Retrieved accessory for product with id: ${productData.id}: - $accessoryDto")
-            productData.accessories = mutableListOf(accessoryDto)
         }
+
+        productData?.accessories = accessoryDtos
 
         return CurrentRmsApiResponse.build {
             rawResponse = productResponse

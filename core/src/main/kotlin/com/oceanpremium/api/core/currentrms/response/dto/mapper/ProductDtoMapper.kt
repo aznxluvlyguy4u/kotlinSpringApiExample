@@ -376,25 +376,34 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
     /**
      * Grab accessory ids to get the full accessories details in additional API calls.
      */
-    private fun mapAccessoryIds(itemBody: Map<*, *>): List<Int> {
-        val ids: MutableList<Int> = mutableListOf()
+    private fun mapAccessoryIds(itemBody: Map<*, *>): List<AccessoryItem> {
+        val items: MutableList<AccessoryItem> = mutableListOf()
         val accessoryIdKey = "related_id"
-
         if (itemBody.containsKey(ACCESSORIES_KEY)) {
             @Suppress("UNCHECKED_CAST")
             val productsItemsBody = itemBody[ACCESSORIES_KEY] as List<Map<*, *>>
 
+            var id: Int? = null
+            var type: String? = null
+
             productsItemsBody.forEach {
-
                 if (it.containsKey(accessoryIdKey) && it[accessoryIdKey] != null) {
-                    val id = (it[accessoryIdKey] as Double).toInt()
-                    ids.add(id)
-                    logger.debug("Found accessory with Id: $id")
+                    id = (it[accessoryIdKey] as Double).toInt()
 
+                }
+
+                if (it.containsKey("inclusion_type_name") && it["inclusion_type_name"] != null) {
+                    type = it["inclusion_type_name"] as String
+
+                    logger.debug("Found accessory with Id: $id and type: $type")
+                }
+
+                if (id != null && type != null) {
+                    items.add(AccessoryItem(id!!, type!!))
                 }
             }
         }
 
-        return ids
+        return items
     }
 }
