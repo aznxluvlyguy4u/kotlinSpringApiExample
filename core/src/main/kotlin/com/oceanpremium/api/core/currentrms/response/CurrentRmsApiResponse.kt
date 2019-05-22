@@ -124,11 +124,10 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
 
                                 val errorResponse = ErrorResponse()
                                 errorResponse.errors.add(statusCode.reasonPhrase)
-                                val error = ApiError(code = statusCode.value(), exception = NotFoundException(), message = errorResponse)
 
                                 buildErrorResponse(
                                     statusCode = statusCode,
-                                    error = error,
+                                    error = ApiError(code = statusCode.value(), exception = NotFoundException(), message = errorResponse),
                                     rawResponse = null
                                 )
                             }
@@ -190,7 +189,7 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
                 }
 
                 rawResponse?.errorBody() != null -> {
-                    logger.debug("No error object passed, setting rawResponse error message: $rawResponse.message()")
+                    logger.debug("No error object passed, setting rawResponse errorBody: $rawResponse.message()")
 
                     val errorResponse = ErrorResponse()
                     errorResponse.errors.add(rawResponse.message())
@@ -199,19 +198,10 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
                 }
 
                 rawResponse?.message() != null -> {
+                    logger.debug("No error object passed, setting rawResponse errorMessage: $rawResponse.message()")
 
                     val errorResponse = ErrorResponse()
-
-                    /**
-                     * Overrides a 200 OK with empty result set because current rms returns a 200 OK,
-                     * for empty result sets ;(
-                     */
-                    if (rawResponse.message() == "OK") {
-                        logger.debug("No error object passed, but we handle it as an error response (empty set - 404")
-
-                        errorResponse.errors.add(HttpStatus.NOT_FOUND.reasonPhrase)
-                    }
-
+                    errorResponse.errors.add(rawResponse.message())
                     ApiError(code = statusCode.value(), exception = NotFoundException(), message = errorResponse)
                 }
 
