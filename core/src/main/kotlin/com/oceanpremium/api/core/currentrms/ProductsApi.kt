@@ -8,6 +8,7 @@ import com.oceanpremium.api.core.enum.AuthorizationType
 import com.oceanpremium.api.core.exception.throwable.*
 import io.sentry.Sentry
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import retrofit2.Call
@@ -56,7 +57,7 @@ interface ProductsApi {
 class ProductsApiImpl(
     currentRmsClient: CurrentRmsClient = CurrentRmsClient(),
     private val queryParametersResolver: QueryParametersResolver = QueryParametersResolverImpl(),
-    private val locationStoreResolver: LocationStoreResolver = LocationStoreResolverImpl()
+    @Autowired private val locationStoreResolver: LocationStoreResolver
 )  {
 
     private val productsApi = currentRmsClient.getRetrofitClient().create(ProductsApi::class.java)
@@ -181,11 +182,11 @@ class ProductsApiImpl(
      * @inherit
      */
     fun getProductsInventory(queryParameters: MutableMap<String, String>, headers: HttpHeaders): List<Response<Any>>? {
-        val stores = locationStoreResolver.resolveStoreByLocation(queryParameters)
+        val storeIds = locationStoreResolver.resolveStoreByLocation(queryParameters)
         val calls: MutableList<Call<Any>> = mutableListOf()
         val responses: MutableList<Response<Any>> = mutableListOf()
 
-        stores.forEach {
+        storeIds.forEach {
             val validatedMap = queryParametersResolver.resolveGetProductsInventory(queryParameters, headers, it)
             val retrofitCall = productsApi.getProductsInventory(map = validatedMap)
             calls.add(retrofitCall)

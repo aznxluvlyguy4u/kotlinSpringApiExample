@@ -1,4 +1,4 @@
-package com.oceanpremium.api.locations.builder
+package com.oceanpremium.api.core.currentrms.builder
 
 import org.springframework.stereotype.Service
 
