@@ -20,7 +20,8 @@ class ProductDto(
     var customFields: ProductCustomFieldsDto? = null,
     @JsonIgnore
     val accesoryIds: List<AccessoryItem>? = null,
-    val attachments: List<AttachmentDto>? = null
+    val attachments: List<AttachmentDto>? = null,
+    val configurations: Any? = null
 ) {
     var accessories: MutableList<ProductDto>? = null
 }

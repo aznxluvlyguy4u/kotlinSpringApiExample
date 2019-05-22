@@ -137,6 +137,12 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         val imageSources: ImageDto?
         val attachments: List<AttachmentDto>? = mapAttachments(itemBody)
 
+        val mockedListSizes: List<String> = listOf("Xtra Small", "Small", "Medium", "Large", "Xtra Large")
+        val mockedListColors: List<String> = listOf("Blue", "Magenta", "Cyan", "White")
+
+        val configMap = mapOf("color" to mockedListColors, "size" to mockedListSizes)
+        val configurations = ConfigurationDto(configMap)
+
         try {
             if (itemBody.containsKey("id")) {
                 id = (itemBody["id"] as Double?)?.toInt()
@@ -179,7 +185,8 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             imageSources.sources,
             customFields,
             accessoryIds,
-            attachments
+            attachments,
+            mapOf("color" to mockedListColors, "size" to mockedListSizes)
         )
     }
 
