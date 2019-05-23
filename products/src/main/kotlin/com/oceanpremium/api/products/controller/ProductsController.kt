@@ -79,6 +79,9 @@ class ProductsController(
             val accessoryResponse = productsApi.getProductById(it.id)
             val accessoryDto = ProductDtoMapper(accessoryResponse?.code()!!, accessoryResponse).data as ProductDto
             accessoryDto.type = it.type
+            accessoryDto.rates.forEach {rates ->
+                rates.quantityAvailable = it.quantity
+            }
 
             accessoryDtos.add(accessoryDto)
             logger.debug("Retrieved accessory for product with id: ${productData.id}: - $accessoryDto")

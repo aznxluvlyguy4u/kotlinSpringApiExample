@@ -137,11 +137,28 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         val imageSources: ImageDto?
         val attachments: List<AttachmentDto>? = mapAttachments(itemBody)
 
-        val mockedListSizes: List<String> = listOf("Xtra Small", "Small", "Medium", "Large", "Xtra Large")
-        val mockedListColors: List<String> = listOf("Blue", "Magenta", "Cyan", "White")
+        // Setup mocked list of configurations
+        val mockedListSizes: List<Map<*,*>> = listOf(
+            mapOf("id" to 987654321, "name" to "Xtra Small"),
+            mapOf("id" to 123456789, "name" to "Small"),
+            mapOf("id" to 23456789, "name" to "Medium"),
+            mapOf("id" to 98765432, "name" to "Large"),
+            mapOf("id" to 3456789, "name" to "Xerta Large")
+        )
 
-        val configMap = mapOf("color" to mockedListColors, "size" to mockedListSizes)
-        val configurations = ConfigurationDto(configMap)
+        val mockedListColors: List<Map<*,*>> = listOf(
+            mapOf("id" to 9876543, "name" to "Pink"),
+            mapOf("id" to 456789, "name" to "Magenta"),
+            mapOf("id" to 987654, "name" to "Cyan"),
+            mapOf("id" to 56789, "name" to "Yellow")
+        )
+
+        val sizesConfig = ConfigurationsDto("size", mockedListSizes)
+        val colorsConfig = ConfigurationsDto("color", mockedListColors)
+
+        val configurations: MutableList<ConfigurationsDto> = mutableListOf()
+        configurations.add(sizesConfig)
+        configurations.add(colorsConfig)
 
         try {
             if (itemBody.containsKey("id")) {
@@ -186,7 +203,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             customFields,
             accessoryIds,
             attachments,
-            mapOf("color" to mockedListColors, "size" to mockedListSizes)
+            configurations
         )
     }
 
@@ -395,6 +412,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
 
             var id: Int? = null
             var type: String? = null
+            var quantity: String? = null
 
             productsItemsBody.forEach {
                 if (it.containsKey(accessoryIdKey) && it[accessoryIdKey] != null) {
@@ -408,8 +426,12 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                     logger.debug("Found accessory with Id: $id and type: $type")
                 }
 
-                if (id != null && type != null) {
-                    items.add(AccessoryItem(id!!, type!!))
+                if (it.containsKey("quantity") && it["quantity"] != null) {
+                    quantity = it["quantity"] as String
+                }
+
+                if (id != null && type != null && quantity != null) {
+                    items.add(AccessoryItem(id!!, type!!, quantity!!))
                 }
             }
         }

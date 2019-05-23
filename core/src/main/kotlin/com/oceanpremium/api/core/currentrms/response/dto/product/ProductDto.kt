@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonInclude
 
 class AccessoryItem(
     val id: Int,
-    val type: String
+    val type: String,
+    val quantity: String? = null
 )
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -21,7 +22,7 @@ class ProductDto(
     @JsonIgnore
     val accesoryIds: List<AccessoryItem>? = null,
     val attachments: List<AttachmentDto>? = null,
-    val configurations: Any? = null
+    val configurations: List<ConfigurationsDto>? = null
 ) {
     var accessories: MutableList<ProductDto>? = null
 }
