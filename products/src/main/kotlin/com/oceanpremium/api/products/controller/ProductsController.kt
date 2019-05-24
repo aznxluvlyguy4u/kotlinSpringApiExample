@@ -78,7 +78,7 @@ class ProductsController(
         val allConfigOptionsResponse = productsApi.getProductConfigOptions()
         val allConfigOptionsDto = ProductConfigsDtoMapper(allConfigOptionsResponse?.code()!!, allConfigOptionsResponse)
 
-         val productConfigOptionsResolver : ProductConfigOptionsResolver = ProductConfigOptionsResolverImpl(allConfigOptionsDto.data as List<ConfigProperty>)
+        // val productConfigOptionsResolver : ProductConfigOptionsResolver = ProductConfigOptionsResolverImpl(allConfigOptionsDto.data as List<ConfigProperty>)
         // productData?.configurations = productConfigOptionsResolver.resolveForProduct(productId)
         // process product
         val productResponse = productsApi.getProductById(productId)
