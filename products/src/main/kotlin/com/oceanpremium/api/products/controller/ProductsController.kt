@@ -125,7 +125,6 @@ class ProductsController(
             if (combinedDto == null || combinedDto?.httpStatus !== HttpStatus.OK) {
                 combinedDto = dto
             } else {
-
                 if (dto.httpStatus == HttpStatus.OK) {
                     var combinedDtoData: List<ProductDto> = combinedDto!!.data as List<ProductDto>
                     var currentDtoData: List<ProductDto>? = dto.data as List<ProductDto>?
@@ -140,7 +139,8 @@ class ProductsController(
             }
         }
 
-        combinedDto?.data = (combinedDto?.data as List<ProductDto>?)?.filter{ p -> p.rates.first().quantityAvailable?.toDouble()!! > 0 }
+        val filteredData: List<ProductDto>? = (combinedDto?.data as List<ProductDto>?)?.filter{ p -> p.rates.first().quantityAvailable?.toDouble()!! > 0 }
+        combinedDto?.data = filteredData
 
         return CurrentRmsApiResponse.build {
             rawResponse = responses?.first()
