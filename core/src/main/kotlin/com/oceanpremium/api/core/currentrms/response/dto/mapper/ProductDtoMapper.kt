@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus
 import retrofit2.Response
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.oceanpremium.api.core.currentrms.response.dto.config.ConfigProperty
+import com.oceanpremium.api.core.currentrms.response.dto.config.ConfigPropertyValue
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.util.FileSizeFormatUtil
 
@@ -137,26 +139,24 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         val imageSources: ImageDto?
         val attachments: List<AttachmentDto>? = mapAttachments(itemBody)
 
-        // Setup mocked list of configurations
-        val mockedListSizes: List<Map<*,*>> = listOf(
-            mapOf("id" to 987654321, "name" to "Xtra Small"),
-            mapOf("id" to 123456789, "name" to "Small"),
-            mapOf("id" to 23456789, "name" to "Medium"),
-            mapOf("id" to 98765432, "name" to "Large"),
-            mapOf("id" to 3456789, "name" to "Xerta Large")
-        )
+        val mockedListSizes: MutableList<ConfigPropertyValue> = mutableListOf()
+        mockedListSizes.add(ConfigPropertyValue( 987654321, "Xtra Small"))
+        mockedListSizes.add(ConfigPropertyValue( 123456789, "Small"))
+        mockedListSizes.add(ConfigPropertyValue( 23456789, "Medium"))
+        mockedListSizes.add(ConfigPropertyValue( 98765432, "Large"))
+        mockedListSizes.add(ConfigPropertyValue( 3456789, "Xtra Large"))
 
-        val mockedListColors: List<Map<*,*>> = listOf(
-            mapOf("id" to 9876543, "name" to "Pink"),
-            mapOf("id" to 456789, "name" to "Magenta"),
-            mapOf("id" to 987654, "name" to "Cyan"),
-            mapOf("id" to 56789, "name" to "Yellow")
-        )
+        val sizesConfig = ConfigProperty(11111, "size", mockedListSizes)
 
-        val sizesConfig = ConfigurationsDto("size", mockedListSizes)
-        val colorsConfig = ConfigurationsDto("color", mockedListColors)
+        val mockedListColors: MutableList<ConfigPropertyValue> = mutableListOf()
+        mockedListColors.add(ConfigPropertyValue( 9876543, "Pink"))
+        mockedListColors.add(ConfigPropertyValue( 456789, "Magenta"))
+        mockedListColors.add(ConfigPropertyValue( 987654, "Cyan"))
+        mockedListColors.add(ConfigPropertyValue( 56789, "Yellow"))
 
-        val configurations: MutableList<ConfigurationsDto> = mutableListOf()
+        val colorsConfig = ConfigProperty(22222, "color", mockedListColors)
+
+        val configurations: MutableList<ConfigProperty> = mutableListOf()
         configurations.add(sizesConfig)
         configurations.add(colorsConfig)
 

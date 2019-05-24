@@ -49,6 +49,15 @@ interface ProductsApi {
     fun getProductsInventory(
         @QueryMap map: Map<String, String>
     ): Call<Any>
+
+    /**
+     * Endpoint to query products based on their availabitlity and given query paramters.
+     */
+    @GET("list_names")
+    fun getProductConfigOptions(
+        @QueryMap map: Map<String, String>
+    ): Call<Any>
+
 }
 
 class ProductsApiImpl(
@@ -187,6 +196,39 @@ class ProductsApiImpl(
         } catch (e: Exception) {
             e.printStackTrace()
             logger.error("Request to Current RMS API failed: ${e.message}")
+            Sentry.capture(e)
+
+            throw CurrentRmsAPIException(e.message)
+        }
+
+        logger.debug("Current RMS API call - HTTP status: ${response.code()}")
+
+        when {
+            response.isSuccessful -> {
+                logger.debug("Current RMS API response body: ${response.body()}")
+            }
+            else ->  {
+                logger.debug("Request to Current RMS API failed: ${response.message()}")
+                handleException(response)
+            }
+        }
+
+        return response
+    }
+
+    /**
+     * @inherit
+     */
+    fun getProductConfigOptions(): Response<Any>? {
+        val retrofitCall = productsApi.getProductConfigOptions(map = mapOf("q[name_cont]" to "ProductConfig"))
+
+        lateinit var response: Response<Any>
+
+        try {
+            response = retrofitCall.execute()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            logger.error("Request to Current RMS API /api/v1/list_names failed: ${e.message}")
             Sentry.capture(e)
 
             throw CurrentRmsAPIException(e.message)

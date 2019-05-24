@@ -2,6 +2,7 @@ package com.oceanpremium.api.core.currentrms.response.dto.product
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.oceanpremium.api.core.currentrms.response.dto.config.ConfigProperty
 
 class AccessoryItem(
     val id: Int,
@@ -22,7 +23,7 @@ class ProductDto(
     @JsonIgnore
     val accesoryIds: List<AccessoryItem>? = null,
     val attachments: List<AttachmentDto>? = null,
-    val configurations: List<ConfigurationsDto>? = null
+    var configurations: List<ConfigProperty>? = null
 ) {
     var accessories: MutableList<ProductDto>? = null
 }
