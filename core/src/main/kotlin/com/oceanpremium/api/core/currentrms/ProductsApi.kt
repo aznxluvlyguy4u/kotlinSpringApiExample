@@ -1,7 +1,6 @@
 package com.oceanpremium.api.core.currentrms
 
 import com.oceanpremium.api.core.currentrms.response.dto.parameter.LocationStoreResolver
-import com.oceanpremium.api.core.currentrms.response.dto.parameter.LocationStoreResolverImpl
 import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolver
 import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolverImpl
 import com.oceanpremium.api.core.enum.AuthorizationType
@@ -182,7 +181,7 @@ class ProductsApiImpl(
      * @inherit
      */
     fun getProductsInventory(queryParameters: MutableMap<String, String>, headers: HttpHeaders): List<Response<Any>>? {
-        val storeIds = locationStoreResolver.resolveStoreByLocation(queryParameters)
+        val storeIds: List<Int> = locationStoreResolver.resolveStoreByLocation(queryParameters)
         val calls: MutableList<Call<Any>> = mutableListOf()
         val responses: MutableList<Response<Any>> = mutableListOf()
 
