@@ -38,6 +38,10 @@ class ProductsControllerTest {
     @Autowired
     val restTemplate: TestRestTemplate? = null
 
+    /**
+     * This is a product setup in Current RMS through the FunctionalIntegrationTest product group.
+     * These products are filtered out from public results queries results. And are only returned on LOCAL & TEST environments.
+     */
     internal class TestProduct(
         val id: Int = 247,
         val name: String = "JVTRubberDuck",
@@ -158,6 +162,19 @@ class ProductsControllerTest {
 
     /**
      * Get products inventory.
+     *
+     * Query for products containing jvt term. These products belong to a specific product group:
+     *
+     * FunctionalIntegrationTest
+     *
+     * that has been setup in current RMS to setup testing through functional integration testing
+     *
+     * Products under the group are setup with a product name of the following format:
+     *
+     * JVTSpecificProductName
+     *
+     * The Functional Integration Test group is excluded in the result sets for public usage.
+     * It is ONLY EXPOSED on the LOCAL & TEST environments.
      */
     @Test
     fun testGetProductsInventory() {
@@ -201,6 +218,27 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductsInventoryNotFoundOnTestProductGroup() {
+        val params = "q[product_tags_name_cont]=${testProduct.name}"
+        val productsErrorResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ErrorResponse::class.java)
+
+        assertThat(productsErrorResponse).isNotNull
+        assertThat(productsErrorResponse?.code).isEqualTo(HttpStatus.NOT_FOUND.value())
+        assertThat(productsErrorResponse?.message).isNotNull
+
+        val errorMessage = productsErrorResponse?.message
+        assertThat(errorMessage?.errors).isNotEmpty
+
+        errorMessage?.errors?.forEach {
+            assertThat(it.toLowerCase()).contains("not found")
+        }
+    }
+
+    /**
+     * Get products inventory bad request for start date before end date.
+     */
+    @Test
+    fun testBadRequestStartDateBeforeEndDateGetProductsInventory() {
+        //?starts_at=2018-09-04&ends_at=2018-09-15&delivery_location_id=23&collection_location_id=32&page=1&per_page=2&q[product_group_id_eq]=19&q[product_tags_name_cont]=seabob
         val params = "q[product_tags_name_cont]=${testProduct.name}"
         val productsErrorResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ErrorResponse::class.java)
 
