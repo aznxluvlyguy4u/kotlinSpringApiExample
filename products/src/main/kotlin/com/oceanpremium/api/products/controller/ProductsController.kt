@@ -3,7 +3,6 @@ package com.oceanpremium.api.products.controller
 import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
 import com.oceanpremium.api.core.currentrms.response.dto.config.ConfigProperty
-import com.oceanpremium.api.core.currentrms.response.dto.config.ProductConfigOptionsResolver
 import com.oceanpremium.api.core.currentrms.response.dto.config.ProductConfigOptionsResolverImpl
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductConfigsDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductDtoMapper
@@ -70,32 +69,48 @@ class ProductsController(
      */
     @RequestMapping("/{productId}")
     @ResponseBody
-    fun getProductById(@PathVariable productId:Int): ResponseEntity<*>  {
+    fun getProductById(@PathVariable productId: Int): ResponseEntity<*> {
         val logMessage = "[API] - GET products with request parameters: $productId"
         logger.debug(logMessage)
 
-        // process product configuration options
+        // Get all product configuration options
         val allConfigOptionsResponse = productsApi.getProductConfigOptions()
         val allConfigOptionsDto = ProductConfigsDtoMapper(allConfigOptionsResponse?.code()!!, allConfigOptionsResponse)
 
-        // val productConfigOptionsResolver : ProductConfigOptionsResolver = ProductConfigOptionsResolverImpl(allConfigOptionsDto.data as List<ConfigProperty>)
-        // productData?.configurations = productConfigOptionsResolver.resolveForProduct(productId)
-        // process product
+        // Process product
         val productResponse = productsApi.getProductById(productId)
         val productDto = ProductDtoMapper(productResponse?.code()!!, productResponse)
         val productData = productDto.data as ProductDto?
 
-        // process product accessories
+        // Resolve the product specific configurations
+        @Suppress("UNCHECKED_CAST")
+        val resolvedProductConfigurationOptions = ProductConfigOptionsResolverImpl(
+            allConfigOptionsDto.data as List<ConfigProperty>,
+            productData
+        )
+        productData?.configurations = resolvedProductConfigurationOptions.data
+
+        // Process product accessories
         val accessoryDtos: MutableList<ProductDto> = mutableListOf()
         productData?.accesoryIds?.forEach {
             val accessoryResponse = productsApi.getProductById(it.id)
-            val accessoryDto = ProductDtoMapper(accessoryResponse?.code()!!, accessoryResponse).data as ProductDto
-            accessoryDto.type = it.type
-            accessoryDto.rates.forEach {rates ->
+            val accessoryDto = ProductDtoMapper(accessoryResponse?.code()!!, accessoryResponse)
+            val accessoryData = accessoryDto.data as ProductDto?
+
+            // Resolve the accessory specific configurations
+            @Suppress("UNCHECKED_CAST")
+            val resolvedAccessoryConfigurationOptions = ProductConfigOptionsResolverImpl(
+                allConfigOptionsDto.data as List<ConfigProperty>,
+                accessoryData
+            )
+
+            accessoryData?.configurations = resolvedAccessoryConfigurationOptions.data
+            accessoryData?.type = it.type
+            accessoryData?.rates?.forEach { rates ->
                 rates.quantityAvailable = it.quantity
             }
+            accessoryDtos.add(accessoryData!!)
 
-            accessoryDtos.add(accessoryDto)
             logger.debug("Retrieved accessory for product with id: ${productData.id}: - $accessoryDto")
         }
         productData?.accessories = accessoryDtos

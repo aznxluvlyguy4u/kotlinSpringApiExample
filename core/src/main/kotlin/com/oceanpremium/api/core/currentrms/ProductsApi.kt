@@ -1,5 +1,6 @@
 package com.oceanpremium.api.core.currentrms
 
+import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductConfigsDtoMapper.Companion.PRODUCT_CONFIG_OPTION_PREFIX
 import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolver
 import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolverImpl
 import com.oceanpremium.api.core.enum.AuthorizationType
@@ -43,7 +44,7 @@ interface ProductsApi {
     ): Call<Any>
 
     /**
-     * Endpoint to query products based on their availabitlity and given query paramters.
+     * Endpoint to query products based on their availability and given query parameters.
      */
     @GET("products/inventory")
     fun getProductsInventory(
@@ -51,7 +52,7 @@ interface ProductsApi {
     ): Call<Any>
 
     /**
-     * Endpoint to query products based on their availabitlity and given query paramters.
+     * Endpoint to query products based on their availability and given query parameters.
      */
     @GET("list_names")
     fun getProductConfigOptions(
@@ -62,8 +63,8 @@ interface ProductsApi {
 
 class ProductsApiImpl(
     currentRmsClient: CurrentRmsClient = CurrentRmsClient(),
-    private  val queryParametersResolver: QueryParametersResolver = QueryParametersResolverImpl()
-)  {
+    private val queryParametersResolver: QueryParametersResolver = QueryParametersResolverImpl()
+) {
 
     private val productsApi = currentRmsClient.getRetrofitClient().create(ProductsApi::class.java)
 
@@ -83,7 +84,7 @@ class ProductsApiImpl(
             response = retrofitCall.execute()
         } catch (e: Exception) {
             e.printStackTrace()
-            logger.error("Request to Current RMS API failed: ${e.message}")
+            logger.error("Request to Current RMS API api/v1/products/{productId} failed: ${e.message}")
             Sentry.capture(e)
 
             throw CurrentRmsAPIException(e.message)
@@ -93,10 +94,10 @@ class ProductsApiImpl(
 
         when {
             response.isSuccessful -> {
-                logger.debug("Current RMS API response body: ${response.body()}")
+                logger.debug("Current RMS API api/v1/products/{productId} response body: ${response.body()}")
             }
-            else ->  {
-                logger.debug("Request to Current RMS API failed: ${response.message()}")
+            else -> {
+                logger.debug("Request to Current RMS API api/v1/products/{productId} failed: ${response.message()}")
 
                 handleException(response)
             }
@@ -120,16 +121,16 @@ class ProductsApiImpl(
 
             when {
                 response != null && response.isSuccessful -> {
-                    logger.debug("Current RMS API response body: ${response.body()}")
+                    logger.debug("Current RMS API api/v1/products response body: ${response.body()}")
                 }
 
                 response != null && !response.isSuccessful -> {
-                    logger.debug("Request to Current RMS API failed: ${response.message()}")
+                    logger.debug("Request to Current RMS API api/v1/products failed: ${response.message()}")
 
                     handleException(response)
                 }
 
-                else ->  {
+                else -> {
                     val message = "Request to Current RMS API failed, response object is null"
                     logger.error(message)
 
@@ -140,7 +141,7 @@ class ProductsApiImpl(
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            logger.error("Request to Current RMS API failed$ ${e.message}")
+            logger.error("Request to Current RMS API api/v1/products failed$ ${e.message}")
             Sentry.capture(e)
 
             throw CurrentRmsAPIException(e.message)
@@ -161,7 +162,7 @@ class ProductsApiImpl(
             response = retrofitCall.execute()
         } catch (e: Exception) {
             e.printStackTrace()
-            logger.error("Request to Current RMS API failed: ${e.message}")
+            logger.error("Request to Current RMS API api/v1/product_groups failed: ${e.message}")
             Sentry.capture(e)
 
             throw CurrentRmsAPIException(e.message)
@@ -171,10 +172,10 @@ class ProductsApiImpl(
 
         when {
             response.isSuccessful -> {
-                logger.debug("Current RMS API response body: ${response.body()}")
+                logger.debug("Current RMS API api/v1/product_groups response body: ${response.body()}")
             }
-            else ->  {
-                logger.debug("Request to Current RMS API failed: ${response.message()}")
+            else -> {
+                logger.debug("Request to Current RMS API api/v1/product_groups failed: ${response.message()}")
 
                 handleException(response)
             }
@@ -195,7 +196,7 @@ class ProductsApiImpl(
             response = retrofitCall.execute()
         } catch (e: Exception) {
             e.printStackTrace()
-            logger.error("Request to Current RMS API failed: ${e.message}")
+            logger.error("Request to Current RMS API api/v1/products/inventory failed: ${e.message}")
             Sentry.capture(e)
 
             throw CurrentRmsAPIException(e.message)
@@ -205,10 +206,10 @@ class ProductsApiImpl(
 
         when {
             response.isSuccessful -> {
-                logger.debug("Current RMS API response body: ${response.body()}")
+                logger.debug("Current RMS API api/v1/products/inventory response body: ${response.body()}")
             }
-            else ->  {
-                logger.debug("Request to Current RMS API failed: ${response.message()}")
+            else -> {
+                logger.debug("Request to Current RMS API api/v1/products/inventory failed: ${response.message()}")
                 handleException(response)
             }
         }
@@ -220,7 +221,8 @@ class ProductsApiImpl(
      * @inherit
      */
     fun getProductConfigOptions(): Response<Any>? {
-        val retrofitCall = productsApi.getProductConfigOptions(map = mapOf("q[name_cont]" to "ProductConfig"))
+        val retrofitCall =
+            productsApi.getProductConfigOptions(map = mapOf("q[name_cont]" to PRODUCT_CONFIG_OPTION_PREFIX))
 
         lateinit var response: Response<Any>
 
@@ -228,20 +230,20 @@ class ProductsApiImpl(
             response = retrofitCall.execute()
         } catch (e: Exception) {
             e.printStackTrace()
-            logger.error("Request to Current RMS API /api/v1/list_names failed: ${e.message}")
+            logger.error("Request to Current RMS API api/v1/list_names failed: ${e.message}")
             Sentry.capture(e)
 
             throw CurrentRmsAPIException(e.message)
         }
 
-        logger.debug("Current RMS API call - HTTP status: ${response.code()}")
+        logger.debug("Current RMS API call: api/v1/list_names - HTTP status: ${response.code()}")
 
         when {
             response.isSuccessful -> {
-                logger.debug("Current RMS API response body: ${response.body()}")
+                logger.debug("Current RMS API api/v1/list_names response body: ${response.body()}")
             }
-            else ->  {
-                logger.debug("Request to Current RMS API failed: ${response.message()}")
+            else -> {
+                logger.debug("Request to Current RMS API api/v1/list_names failed: ${response.message()}")
                 handleException(response)
             }
         }

@@ -15,6 +15,7 @@ class ProductConfigsDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsB
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
+        const val PRODUCT_CONFIG_OPTION_PREFIX = "custom_product_config_option"
     }
 
     init {
@@ -135,18 +136,15 @@ class ProductConfigsDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsB
                 name = itemBody["name"] as String?
 
                 when {
-                    name != null && name.contains("custom_product_config_option_") -> {
-                        val originalName= name
-                        name = name.replace("custom_product_config_option_", "")
-
-                        logger.debug("Parsed config name: $originalName to: $name" )
+                    // Build a consumer friendly field name value for the concerning configuration
+                    name != null && name.contains(PRODUCT_CONFIG_OPTION_PREFIX) -> {
+                        logger.debug("Found config: $name")
                     }
                 }
             }
 
             if (id != null && name != null && values != null) {
-                configProperty =
-                    ConfigProperty(id, name, values)
+                configProperty = ConfigProperty(id, name, values)
             }
         } catch (e: Exception) {
             e.printStackTrace()

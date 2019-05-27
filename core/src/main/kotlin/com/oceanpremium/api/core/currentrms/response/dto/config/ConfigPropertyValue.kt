@@ -1,5 +1,12 @@
 package com.oceanpremium.api.core.currentrms.response.dto.config
 
-class ConfigProperty(val id: Int? = null, val name: String? = null, val values: List<ConfigPropertyValue>? = null)
+import com.fasterxml.jackson.annotation.JsonInclude
 
-class ConfigPropertyValue(val id: Int? = null, val name: String? = null)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+class ConfigPropertyField(val fieldName: String, var ids: List<Int>? = null)
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+class ConfigProperty(var id: Int? = null, var name: String? = null, var values: List<ConfigPropertyValue>? = null)
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+class ConfigPropertyValue(var id: Int? = null, var name: String? = null)
