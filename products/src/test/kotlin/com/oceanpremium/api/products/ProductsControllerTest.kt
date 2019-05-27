@@ -55,7 +55,7 @@ class ProductsControllerTest {
     @Test
     fun testGetProductApiDocs() {
         val response = restTemplate?.getForEntity("$endpoint/docs", Response::class.java)
-        
+
         assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.OK.value())
     }
 
@@ -120,7 +120,8 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductByIdNotFound() {
-        val productErrorResponse = restTemplate?.getForObject("$endpoint/9999999", ErrorResponse::class.java)
+        val id = 9999999
+        val productErrorResponse = restTemplate?.getForObject("$endpoint/$id", ErrorResponse::class.java)
 
         assertThat(productErrorResponse).isNotNull
         assertThat(productErrorResponse?.code).isEqualTo(HttpStatus.NOT_FOUND.value())
@@ -130,7 +131,7 @@ class ProductsControllerTest {
         assertThat(errorMessage?.errors).isNotEmpty
 
         errorMessage?.errors?.forEach {
-            assertThat(it.toLowerCase()).contains("not found")
+            assertThat(it.toLowerCase()).contains("couldn't find product with 'id'=$id")
         }
     }
 

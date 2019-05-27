@@ -63,7 +63,7 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
         private val logger = LoggerFactory.getLogger(this::class.java)
         var rawResponse: Response<Any>? = null
         var dtoMapper: CurrentRmsBaseDtoMapper? = null
-        var error: Any? = null
+        var error: ApiError? = null
 
         fun build(): ResponseEntity<*> {
             return buildResponse(rawResponse, dtoMapper, error)
@@ -73,7 +73,7 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
         private fun buildResponse(
             rawResponse: Response<Any>?,
             dtoMapper: CurrentRmsBaseDtoMapper? = null,
-            error: Any? = null
+            error: ApiError? = null
         ): ResponseEntity<*> {
 
             val statusCode = dtoMapper?.httpStatus!!
@@ -84,10 +84,22 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
                 statusCode.value() >= HTTPStatusCodeRange.SUCCESS.code
                         && statusCode.value() < HTTPStatusCodeRange.REDIRECT.code -> {
 
+                    /**
+                     * Override the Current RMS API response with a 404 , because it returned an empty result set.
+                     */
                     if (dtoMapper.httpStatus == HttpStatus.NOT_FOUND) {
+
+                        var errorResponse: ApiError? = error
+
+                        when (error) {
+                            null -> if (dtoMapper.error  != null) {
+                                errorResponse = dtoMapper.error
+                            }
+                        }
+
                         buildErrorResponse(
                             statusCode = dtoMapper.httpStatus,
-                            errorMessage = error,
+                            error = errorResponse,
                             rawResponse = rawResponse
                         )
                     }
@@ -107,17 +119,22 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
                     when (rawResponse) {
                         null ->
                             if (error != null) {
-                                buildErrorResponse(statusCode = statusCode, errorMessage = error, rawResponse = null)
+                                buildErrorResponse(statusCode = statusCode, error = error, rawResponse = null)
                             } else {
+
+                                val errorResponse = ErrorResponse()
+                                errorResponse.errors.add(statusCode.reasonPhrase)
+                                val error = ApiError(code = statusCode.value(), exception = NotFoundException(), message = errorResponse)
+
                                 buildErrorResponse(
                                     statusCode = statusCode,
-                                    errorMessage = statusCode.reasonPhrase,
+                                    error = error,
                                     rawResponse = null
                                 )
                             }
                         else -> buildErrorResponse(
                             statusCode = statusCode,
-                            errorMessage = error,
+                            error = error,
                             rawResponse = rawResponse
                         )
                     }
@@ -162,15 +179,19 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
         private fun buildErrorResponse(
             statusCode: HttpStatus,
             rawResponse: Response<Any>?,
-            errorMessage: Any?
+            error: ApiError?
         ): ResponseEntity<Any> {
             val wrappedBody = when {
 
-                errorMessage != null -> {
-                    ApiError(code = statusCode.value(), message = errorMessage)
+                error != null -> {
+                    logger.debug("Error not null returning passed error as response: $error")
+
+                    error
                 }
 
                 rawResponse?.errorBody() != null -> {
+                    logger.debug("No error object passed, setting rawResponse error message: $rawResponse.message()")
+
                     val errorResponse = ErrorResponse()
                     errorResponse.errors.add(rawResponse.message())
 
@@ -178,6 +199,7 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
                 }
 
                 rawResponse?.message() != null -> {
+
                     val errorResponse = ErrorResponse()
 
                     /**
@@ -185,6 +207,8 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
                      * for empty result sets ;(
                      */
                     if (rawResponse.message() == "OK") {
+                        logger.debug("No error object passed, but we handle it as an error response (empty set - 404")
+
                         errorResponse.errors.add(HttpStatus.NOT_FOUND.reasonPhrase)
                     }
 
@@ -192,8 +216,10 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
                 }
 
                 else -> {
+                    logger.debug("No error object passed or raw error response available, http reason phrase as error message: ${HttpStatus.valueOf(rawResponse?.code()!!).reasonPhrase}")
+
                     val errorResponse = ErrorResponse()
-                    errorResponse.errors.add("Error ${HttpStatus.valueOf(rawResponse?.code()!!).reasonPhrase}")
+                    errorResponse.errors.add("Error ${HttpStatus.valueOf(rawResponse.code()).reasonPhrase}")
 
                     ApiError(
                         code = statusCode.value(),

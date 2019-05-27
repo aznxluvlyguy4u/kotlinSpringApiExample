@@ -780,500 +780,332 @@
 					"_postman_isSubFolder": true
 				},
 				{
+					"name": "test",
+					"item": [
+						{
+							"name": "Find All Products",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products",
+									"protocol": "https",
+									"host": [
+										"1qie0vagy1",
+										"execute-api",
+										"eu-west-1",
+										"amazonaws",
+										"com"
+									],
+									"path": [
+										"dev",
+										"api",
+										"v1",
+										"products"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find Products based on mixed query params",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "f816c1c9-4046-461a-974f-0911f042d1c4",
+										"exec": [
+											"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
+											"    pm.response.to.have.status(200);",
+											"})",
+											"",
+											"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
+											"    pm.response.to.have.jsonBody('code');",
+											"    pm.response.to.have.jsonBody('data');",
+											"    pm.response.to.have.jsonBody('meta');",
+											"    ",
+											"    pm.response.to.not.have.jsonBody('error');",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products?product_group_id_eq=22&tags=[\"Fins\"]",
+									"protocol": "https",
+									"host": [
+										"1qie0vagy1",
+										"execute-api",
+										"eu-west-1",
+										"amazonaws",
+										"com"
+									],
+									"path": [
+										"dev",
+										"api",
+										"v1",
+										"products"
+									],
+									"query": [
+										{
+											"key": "product_group_id_eq",
+											"value": "22"
+										},
+										{
+											"key": "tags",
+											"value": "[\"Fins\"]"
+										}
+									]
+								},
+								"description": "In this case \n\nproducts that belong to product group id = 22\n\nAND\n\nhas the tag \"Fins\"\n"
+							},
+							"response": []
+						},
+						{
+							"name": "Find Products by Product Group ONLY (option 1: by name string)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "60282a34-b410-4c10-84c0-47f457b17956",
+										"exec": [
+											"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
+											"    pm.response.to.have.status(200);",
+											"})",
+											"",
+											"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
+											"    pm.response.to.have.jsonBody('code');",
+											"    pm.response.to.have.jsonBody('data');",
+											"    pm.response.to.have.jsonBody('meta');",
+											"    ",
+											"    pm.response.to.not.have.jsonBody('error');",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products?q[product_group_name_cont]=Fun_Activities",
+									"protocol": "https",
+									"host": [
+										"1qie0vagy1",
+										"execute-api",
+										"eu-west-1",
+										"amazonaws",
+										"com"
+									],
+									"path": [
+										"dev",
+										"api",
+										"v1",
+										"products"
+									],
+									"query": [
+										{
+											"key": "q[product_group_name_cont]",
+											"value": "Fun_Activities"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find Products By Tag ONLY",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "f2913478-3fe2-4754-9b38-9d3c2c9d278d",
+										"exec": [
+											"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
+											"    pm.response.to.have.status(200);",
+											"})",
+											"",
+											"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
+											"    pm.response.to.have.jsonBody('code');",
+											"    pm.response.to.have.jsonBody('data');",
+											"    pm.response.to.have.jsonBody('meta');",
+											"    ",
+											"    pm.response.to.not.have.jsonBody('error');",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products?tags=[\"sierra\"]",
+									"protocol": "https",
+									"host": [
+										"1qie0vagy1",
+										"execute-api",
+										"eu-west-1",
+										"amazonaws",
+										"com"
+									],
+									"path": [
+										"dev",
+										"api",
+										"v1",
+										"products"
+									],
+									"query": [
+										{
+											"key": "tags",
+											"value": "[\"sierra\"]"
+										}
+									]
+								},
+								"description": "In this case all products with the tag called 'Sierra'"
+							},
+							"response": []
+						},
+						{
+							"name": "Find Products By [Name OR ProductGroup name OR Tag]",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "7a6adba7-1f51-40ba-b24f-41214b8bb5ea",
+										"exec": [
+											"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
+											"    pm.response.to.have.status(200);",
+											"})",
+											"",
+											"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
+											"    pm.response.to.have.jsonBody('code');",
+											"    pm.response.to.have.jsonBody('data');",
+											"    pm.response.to.have.jsonBody('meta');",
+											"    ",
+											"    pm.response.to.not.have.jsonBody('error');",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products?page=1&per_page=2&q[name_or_product_group_name_or_product_tags_name_cont]=seabob",
+									"protocol": "https",
+									"host": [
+										"1qie0vagy1",
+										"execute-api",
+										"eu-west-1",
+										"amazonaws",
+										"com"
+									],
+									"path": [
+										"dev",
+										"api",
+										"v1",
+										"products"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "per_page",
+											"value": "2"
+										},
+										{
+											"key": "q[name_or_product_group_name_or_product_tags_name_cont]",
+											"value": "seabob"
+										}
+									]
+								},
+								"description": "page (number, optional) 1   \nThe requested page number\n\nper_page (number, optional) 20  \nThe number of records to return for the requested page\n\nfiltermode (string, optional)   all \nA built in filtermode name (e.g. active, inactive, all)\n\nq[name_or_product_group_name_or_tags_name_cont] (string, optional)  search_text_here    \nSearch on name, product group name or tags for matching records"
+							},
+							"response": []
+						},
+						{
+							"name": "Find product by inventory EXCLUDE those of product group Accessories Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "9a7b77b2-74e0-4219-b5d7-aae49ce8de9c",
+										"exec": [
+											"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
+											"    pm.response.to.have.status(200);",
+											"})",
+											"",
+											"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
+											"    pm.response.to.have.jsonBody('code');",
+											"    pm.response.to.have.jsonBody('data');",
+											"    pm.response.to.have.jsonBody('meta');",
+											"    ",
+											"    pm.response.to.not.have.jsonBody('error');",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products/inventory?q[product_tags_name_cont]=tiwal%20sail",
+									"protocol": "https",
+									"host": [
+										"1qie0vagy1",
+										"execute-api",
+										"eu-west-1",
+										"amazonaws",
+										"com"
+									],
+									"path": [
+										"dev",
+										"api",
+										"v1",
+										"products",
+										"inventory"
+									],
+									"query": [
+										{
+											"key": "q[product_tags_name_cont]",
+											"value": "tiwal%20sail"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
 					"name": "products",
 					"item": [
 						{
 							"name": "dev",
 							"item": [
 								{
-									"name": "Find Product by Product ID",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "2d3bcccc-165d-480c-9043-fb9dbf8ec781",
-												"exec": [
-													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
-													"    pm.response.to.have.status(200);",
-													"})",
-													"",
-													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
-													"    pm.response.to.have.jsonBody('code');",
-													"    pm.response.to.have.jsonBody('data');",
-													"    ",
-													"    pm.response.to.not.have.jsonBody('meta');",
-													"    pm.response.to.not.have.jsonBody('error');",
-													"})"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "X-SUBDOMAIN",
-												"value": "{{op-domain}}",
-												"type": "text"
-											},
-											{
-												"key": "X-AUTH-TOKEN",
-												"value": "{{op-token}}",
-												"type": "text"
-											}
-										],
-										"url": {
-											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products/19",
-											"protocol": "https",
-											"host": [
-												"1qie0vagy1",
-												"execute-api",
-												"eu-west-1",
-												"amazonaws",
-												"com"
-											],
-											"path": [
-												"dev",
-												"api",
-												"v1",
-												"products",
-												"19"
-											]
-										},
-										"description": "Find product by ID"
-									},
-									"response": []
-								},
-								{
-									"name": "Find All Product Groups",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "b77714f8-bd1f-48ea-930e-bc63ed40f88a",
-												"exec": [
-													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
-													"    pm.response.to.have.status(200);",
-													"})",
-													"",
-													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
-													"    pm.response.to.have.jsonBody('code');",
-													"    pm.response.to.have.jsonBody('data');",
-													"    pm.response.to.have.jsonBody('meta');",
-													"    ",
-													"    pm.response.to.not.have.jsonBody('error');",
-													"})"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "X-SUBDOMAIN",
-												"value": "{{op-domain}}",
-												"type": "text"
-											},
-											{
-												"key": "X-AUTH-TOKEN",
-												"value": "{{op-token}}",
-												"type": "text"
-											}
-										],
-										"url": {
-											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products/groups",
-											"protocol": "https",
-											"host": [
-												"1qie0vagy1",
-												"execute-api",
-												"eu-west-1",
-												"amazonaws",
-												"com"
-											],
-											"path": [
-												"dev",
-												"api",
-												"v1",
-												"products",
-												"groups"
-											]
-										},
-										"description": "Get a list of all configured product groups and their id's"
-									},
-									"response": []
-								},
-								{
-									"name": "Find All Products",
-									"request": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "Content-Type",
-												"name": "Content-Type",
-												"type": "text",
-												"value": "application/json"
-											}
-										],
-										"url": {
-											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products",
-											"protocol": "https",
-											"host": [
-												"1qie0vagy1",
-												"execute-api",
-												"eu-west-1",
-												"amazonaws",
-												"com"
-											],
-											"path": [
-												"dev",
-												"api",
-												"v1",
-												"products"
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "Find Products based on mixed query params",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "f816c1c9-4046-461a-974f-0911f042d1c4",
-												"exec": [
-													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
-													"    pm.response.to.have.status(200);",
-													"})",
-													"",
-													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
-													"    pm.response.to.have.jsonBody('code');",
-													"    pm.response.to.have.jsonBody('data');",
-													"    pm.response.to.have.jsonBody('meta');",
-													"    ",
-													"    pm.response.to.not.have.jsonBody('error');",
-													"})"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "X-SUBDOMAIN",
-												"value": "{{op-domain}}",
-												"type": "text"
-											},
-											{
-												"key": "X-AUTH-TOKEN",
-												"value": "{{op-token}}",
-												"type": "text"
-											}
-										],
-										"url": {
-											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products?product_group_id_eq=22&tags=[\"Fins\"]",
-											"protocol": "https",
-											"host": [
-												"1qie0vagy1",
-												"execute-api",
-												"eu-west-1",
-												"amazonaws",
-												"com"
-											],
-											"path": [
-												"dev",
-												"api",
-												"v1",
-												"products"
-											],
-											"query": [
-												{
-													"key": "product_group_id_eq",
-													"value": "22"
-												},
-												{
-													"key": "tags",
-													"value": "[\"Fins\"]"
-												}
-											]
-										},
-										"description": "In this case \n\nproducts that belong to product group id = 22\n\nAND\n\nhas the tag \"Fins\"\n"
-									},
-									"response": []
-								},
-								{
-									"name": "Find Products by Product Group ONLY (option 1: by name string)",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "60282a34-b410-4c10-84c0-47f457b17956",
-												"exec": [
-													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
-													"    pm.response.to.have.status(200);",
-													"})",
-													"",
-													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
-													"    pm.response.to.have.jsonBody('code');",
-													"    pm.response.to.have.jsonBody('data');",
-													"    pm.response.to.have.jsonBody('meta');",
-													"    ",
-													"    pm.response.to.not.have.jsonBody('error');",
-													"})"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "X-SUBDOMAIN",
-												"value": "{{op-domain}}",
-												"type": "text"
-											},
-											{
-												"key": "X-AUTH-TOKEN",
-												"value": "{{op-token}}",
-												"type": "text"
-											}
-										],
-										"url": {
-											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products?q[product_group_name_cont]=Fun_Activities",
-											"protocol": "https",
-											"host": [
-												"1qie0vagy1",
-												"execute-api",
-												"eu-west-1",
-												"amazonaws",
-												"com"
-											],
-											"path": [
-												"dev",
-												"api",
-												"v1",
-												"products"
-											],
-											"query": [
-												{
-													"key": "q[product_group_name_cont]",
-													"value": "Fun_Activities"
-												}
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "Find Products by Product Group ONLY (option 2: by product group ID)",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "4100a119-619c-4357-b1d2-891d59e95db3",
-												"exec": [
-													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
-													"    pm.response.to.have.status(200);",
-													"})",
-													"",
-													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
-													"    pm.response.to.have.jsonBody('code');",
-													"    pm.response.to.have.jsonBody('data');",
-													"    pm.response.to.have.jsonBody('meta');",
-													"    ",
-													"    pm.response.to.not.have.jsonBody('error');",
-													"})"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "X-SUBDOMAIN",
-												"value": "{{op-domain}}",
-												"type": "text"
-											},
-											{
-												"key": "X-AUTH-TOKEN",
-												"value": "{{op-token}}",
-												"type": "text"
-											}
-										],
-										"url": {
-											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products?q[product_group_id_eq]=19",
-											"protocol": "https",
-											"host": [
-												"1qie0vagy1",
-												"execute-api",
-												"eu-west-1",
-												"amazonaws",
-												"com"
-											],
-											"path": [
-												"dev",
-												"api",
-												"v1",
-												"products"
-											],
-											"query": [
-												{
-													"key": "q[product_group_id_eq]",
-													"value": "19"
-												}
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "Find Products By Tag ONLY",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "f2913478-3fe2-4754-9b38-9d3c2c9d278d",
-												"exec": [
-													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
-													"    pm.response.to.have.status(200);",
-													"})",
-													"",
-													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
-													"    pm.response.to.have.jsonBody('code');",
-													"    pm.response.to.have.jsonBody('data');",
-													"    pm.response.to.have.jsonBody('meta');",
-													"    ",
-													"    pm.response.to.not.have.jsonBody('error');",
-													"})"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "X-SUBDOMAIN",
-												"type": "text",
-												"value": "{{op-domain}}"
-											},
-											{
-												"key": "X-AUTH-TOKEN",
-												"type": "text",
-												"value": "{{op-token}}"
-											}
-										],
-										"url": {
-											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products?tags=[\"sierra\"]",
-											"protocol": "https",
-											"host": [
-												"1qie0vagy1",
-												"execute-api",
-												"eu-west-1",
-												"amazonaws",
-												"com"
-											],
-											"path": [
-												"dev",
-												"api",
-												"v1",
-												"products"
-											],
-											"query": [
-												{
-													"key": "tags",
-													"value": "[\"sierra\"]"
-												}
-											]
-										},
-										"description": "In this case all products with the tag called 'Sierra'"
-									},
-									"response": []
-								},
-								{
-									"name": "Find Products By [Name OR ProductGroup name OR Tag]",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "7a6adba7-1f51-40ba-b24f-41214b8bb5ea",
-												"exec": [
-													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
-													"    pm.response.to.have.status(200);",
-													"})",
-													"",
-													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
-													"    pm.response.to.have.jsonBody('code');",
-													"    pm.response.to.have.jsonBody('data');",
-													"    pm.response.to.have.jsonBody('meta');",
-													"    ",
-													"    pm.response.to.not.have.jsonBody('error');",
-													"})"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "X-SUBDOMAIN",
-												"type": "text",
-												"value": "{{op-domain}}"
-											},
-											{
-												"key": "X-AUTH-TOKEN",
-												"type": "text",
-												"value": "{{op-token}}"
-											}
-										],
-										"url": {
-											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products?page=1&per_page=2&q[name_or_product_group_name_or_product_tags_name_cont]=seabob",
-											"protocol": "https",
-											"host": [
-												"1qie0vagy1",
-												"execute-api",
-												"eu-west-1",
-												"amazonaws",
-												"com"
-											],
-											"path": [
-												"dev",
-												"api",
-												"v1",
-												"products"
-											],
-											"query": [
-												{
-													"key": "page",
-													"value": "1"
-												},
-												{
-													"key": "per_page",
-													"value": "2"
-												},
-												{
-													"key": "q[name_or_product_group_name_or_product_tags_name_cont]",
-													"value": "seabob"
-												}
-											]
-										},
-										"description": "page (number, optional) 1   \nThe requested page number\n\nper_page (number, optional) 20  \nThe number of records to return for the requested page\n\nfiltermode (string, optional)   all \nA built in filtermode name (e.g. active, inactive, all)\n\nq[name_or_product_group_name_or_tags_name_cont] (string, optional)  search_text_here    \nSearch on name, product group name or tags for matching records"
-									},
-									"response": []
-								},
-								{
-									"name": "Get API docs",
+									"name": "GET /api/v1/products/docs",
 									"event": [
 										{
 											"listen": "test",
@@ -1318,12 +1150,61 @@
 									"response": []
 								},
 								{
-									"name": "Find product by Inventory with dates and store id Copy Copy",
+									"name": "GET /api/v1/products/:id",
 									"event": [
 										{
 											"listen": "test",
 											"script": {
-												"id": "366d5527-092b-48dd-aed7-2102333daaee",
+												"id": "2d3bcccc-165d-480c-9043-fb9dbf8ec781",
+												"exec": [
+													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
+													"    pm.response.to.have.status(200);",
+													"})",
+													"",
+													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
+													"    pm.response.to.have.jsonBody('code');",
+													"    pm.response.to.have.jsonBody('data');",
+													"    ",
+													"    pm.response.to.not.have.jsonBody('meta');",
+													"    pm.response.to.not.have.jsonBody('error');",
+													"})"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products/19",
+											"protocol": "https",
+											"host": [
+												"1qie0vagy1",
+												"execute-api",
+												"eu-west-1",
+												"amazonaws",
+												"com"
+											],
+											"path": [
+												"dev",
+												"api",
+												"v1",
+												"products",
+												"19"
+											]
+										},
+										"description": "Find product by ID"
+									},
+									"response": []
+								},
+								{
+									"name": "GET api/v1/products wih keyword",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "ebd193a2-96e3-448e-9895-9c68af712605",
 												"exec": [
 													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
 													"    pm.response.to.have.status(200);",
@@ -1343,20 +1224,9 @@
 									],
 									"request": {
 										"method": "GET",
-										"header": [
-											{
-												"key": "X-SUBDOMAIN",
-												"type": "text",
-												"value": "{{op-domain}}"
-											},
-											{
-												"key": "X-AUTH-TOKEN",
-												"type": "text",
-												"value": "{{op-token}}"
-											}
-										],
+										"header": [],
 										"url": {
-											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products/inventory?starts_at=2018-09-04&ends_at=2018-09-15&filtermode[]=rental&store_id=1&q[name_or_product_group_name_or_product_tags_name_cont]=seabob",
+											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products?tags=[\"jvt\"]",
 											"protocol": "https",
 											"host": [
 												"1qie0vagy1",
@@ -1369,29 +1239,13 @@
 												"dev",
 												"api",
 												"v1",
-												"products",
-												"inventory"
+												"products"
 											],
 											"query": [
 												{
-													"key": "starts_at",
-													"value": "2018-09-04"
-												},
-												{
-													"key": "ends_at",
-													"value": "2018-09-15"
-												},
-												{
-													"key": "filtermode[]",
-													"value": "rental"
-												},
-												{
-													"key": "store_id",
-													"value": "1"
-												},
-												{
-													"key": "q[name_or_product_group_name_or_product_tags_name_cont]",
-													"value": "seabob"
+													"key": "tags",
+													"value": "[\"jvt\"]",
+													"description": "mandatory"
 												}
 											]
 										}
@@ -1399,7 +1253,164 @@
 									"response": []
 								},
 								{
-									"name": "Find product by inventory by [TAGS ONLY] with dates and store id",
+									"name": "GET /api/v1/products/groups",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "b77714f8-bd1f-48ea-930e-bc63ed40f88a",
+												"exec": [
+													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
+													"    pm.response.to.have.status(200);",
+													"})",
+													"",
+													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
+													"    pm.response.to.have.jsonBody('code');",
+													"    pm.response.to.have.jsonBody('data');",
+													"    pm.response.to.have.jsonBody('meta');",
+													"    ",
+													"    pm.response.to.not.have.jsonBody('error');",
+													"})"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products/groups",
+											"protocol": "https",
+											"host": [
+												"1qie0vagy1",
+												"execute-api",
+												"eu-west-1",
+												"amazonaws",
+												"com"
+											],
+											"path": [
+												"dev",
+												"api",
+												"v1",
+												"products",
+												"groups"
+											]
+										},
+										"description": "Get a list of all configured product groups and their id's"
+									},
+									"response": []
+								},
+								{
+									"name": "GET /api/v1/products with group id",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "4100a119-619c-4357-b1d2-891d59e95db3",
+												"exec": [
+													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
+													"    pm.response.to.have.status(200);",
+													"})",
+													"",
+													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
+													"    pm.response.to.have.jsonBody('code');",
+													"    pm.response.to.have.jsonBody('data');",
+													"    pm.response.to.have.jsonBody('meta');",
+													"    ",
+													"    pm.response.to.not.have.jsonBody('error');",
+													"})"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products?q[product_group_id_eq]=19",
+											"protocol": "https",
+											"host": [
+												"1qie0vagy1",
+												"execute-api",
+												"eu-west-1",
+												"amazonaws",
+												"com"
+											],
+											"path": [
+												"dev",
+												"api",
+												"v1",
+												"products"
+											],
+											"query": [
+												{
+													"key": "q[product_group_id_eq]",
+													"value": "19",
+													"description": "mandatory"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "GET /api/v1/products/inventory with group id",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "4100a119-619c-4357-b1d2-891d59e95db3",
+												"exec": [
+													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
+													"    pm.response.to.have.status(200);",
+													"})",
+													"",
+													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
+													"    pm.response.to.have.jsonBody('code');",
+													"    pm.response.to.have.jsonBody('data');",
+													"    pm.response.to.have.jsonBody('meta');",
+													"    ",
+													"    pm.response.to.not.have.jsonBody('error');",
+													"})"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products?q[product_group_id_eq]=19",
+											"protocol": "https",
+											"host": [
+												"1qie0vagy1",
+												"execute-api",
+												"eu-west-1",
+												"amazonaws",
+												"com"
+											],
+											"path": [
+												"dev",
+												"api",
+												"v1",
+												"products"
+											],
+											"query": [
+												{
+													"key": "q[product_group_id_eq]",
+													"value": "19",
+													"description": "mandatory"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "GET /api/v1/products/inventory with dates & location & keyword",
 									"event": [
 										{
 											"listen": "test",
@@ -1424,20 +1435,9 @@
 									],
 									"request": {
 										"method": "GET",
-										"header": [
-											{
-												"key": "X-SUBDOMAIN",
-												"type": "text",
-												"value": "{{op-domain}}"
-											},
-											{
-												"key": "X-AUTH-TOKEN",
-												"type": "text",
-												"value": "{{op-token}}"
-											}
-										],
+										"header": [],
 										"url": {
-											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products/inventory?starts_at=2018-09-04&ends_at=2018-09-15&filtermode[]=rental&store_id=1&q[product_tags_name_cont]=tiwal%20sail",
+											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products/inventory?starts_at=2018-09-04&ends_at=2018-09-15&delivery_location_id=23&collection_location_id=32&q[product_tags_name_cont]=seabob",
 											"protocol": "https",
 											"host": [
 												"1qie0vagy1",
@@ -1456,88 +1456,28 @@
 											"query": [
 												{
 													"key": "starts_at",
-													"value": "2018-09-04"
+													"value": "2018-09-04",
+													"description": "optional yyyy-dd-mm"
 												},
 												{
 													"key": "ends_at",
-													"value": "2018-09-15"
+													"value": "2018-09-15",
+													"description": "optional yyyy-dd-mm"
 												},
 												{
-													"key": "filtermode[]",
-													"value": "rental"
+													"key": "delivery_location_id",
+													"value": "23",
+													"description": "optional "
 												},
 												{
-													"key": "store_id",
-													"value": "1"
+													"key": "collection_location_id",
+													"value": "32",
+													"description": "optional"
 												},
 												{
 													"key": "q[product_tags_name_cont]",
-													"value": "tiwal%20sail"
-												}
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "Find product by inventory EXCLUDE those of product group Accessories Copy",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "9a7b77b2-74e0-4219-b5d7-aae49ce8de9c",
-												"exec": [
-													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
-													"    pm.response.to.have.status(200);",
-													"})",
-													"",
-													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
-													"    pm.response.to.have.jsonBody('code');",
-													"    pm.response.to.have.jsonBody('data');",
-													"    pm.response.to.have.jsonBody('meta');",
-													"    ",
-													"    pm.response.to.not.have.jsonBody('error');",
-													"})"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "X-SUBDOMAIN",
-												"type": "text",
-												"value": "{{op-domain}}"
-											},
-											{
-												"key": "X-AUTH-TOKEN",
-												"type": "text",
-												"value": "{{op-token}}"
-											}
-										],
-										"url": {
-											"raw": "https://1qie0vagy1.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products/inventory?q[product_tags_name_matches]=tiwal%20sail",
-											"protocol": "https",
-											"host": [
-												"1qie0vagy1",
-												"execute-api",
-												"eu-west-1",
-												"amazonaws",
-												"com"
-											],
-											"path": [
-												"dev",
-												"api",
-												"v1",
-												"products",
-												"inventory"
-											],
-											"query": [
-												{
-													"key": "q[product_tags_name_matches]",
-													"value": "tiwal%20sail"
+													"value": "seabob",
+													"description": "mandatory"
 												}
 											]
 										}
@@ -1551,12 +1491,57 @@
 							"name": "staging",
 							"item": [
 								{
-									"name": "Find Product by Product ID",
+									"name": "GET /api/v1/products/docs",
 									"event": [
 										{
 											"listen": "test",
 											"script": {
-												"id": "2ae4090b-27e7-4671-ad90-7d632bf2920c",
+												"id": "ed7a8a9f-3a96-4b5f-9442-a7dddfaf48e4",
+												"exec": [
+													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
+													"    pm.response.to.have.status(200);",
+													"})",
+													"",
+													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
+													"    pm.response.to.have.jsonBody('openapi');",
+													"    pm.response.to.not.have.jsonBody('error');",
+													"})"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products/docs",
+											"protocol": "https",
+											"host": [
+												"zu6wjlgc49",
+												"execute-api",
+												"eu-west-1",
+												"amazonaws",
+												"com"
+											],
+											"path": [
+												"staging",
+												"api",
+												"v1",
+												"products",
+												"docs"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "GET /api/v1/products/:id",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "2d3bcccc-165d-480c-9043-fb9dbf8ec781",
 												"exec": [
 													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
 													"    pm.response.to.have.status(200);",
@@ -1600,12 +1585,65 @@
 									"response": []
 								},
 								{
-									"name": "Find All Product Groups",
+									"name": "GET api/v1/products wih keyword",
 									"event": [
 										{
 											"listen": "test",
 											"script": {
-												"id": "3a3745fb-4031-4521-a394-01454fbac59d",
+												"id": "ebd193a2-96e3-448e-9895-9c68af712605",
+												"exec": [
+													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
+													"    pm.response.to.have.status(200);",
+													"})",
+													"",
+													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
+													"    pm.response.to.have.jsonBody('code');",
+													"    pm.response.to.have.jsonBody('data');",
+													"    pm.response.to.have.jsonBody('meta');",
+													"    ",
+													"    pm.response.to.not.have.jsonBody('error');",
+													"})"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products?tags=[\"jvt\"]",
+											"protocol": "https",
+											"host": [
+												"zu6wjlgc49",
+												"execute-api",
+												"eu-west-1",
+												"amazonaws",
+												"com"
+											],
+											"path": [
+												"staging",
+												"api",
+												"v1",
+												"products"
+											],
+											"query": [
+												{
+													"key": "tags",
+													"value": "[\"jvt\"]"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "GET /api/v1/products/groups",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "b77714f8-bd1f-48ea-930e-bc63ed40f88a",
 												"exec": [
 													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
 													"    pm.response.to.have.status(200);",
@@ -1649,12 +1687,12 @@
 									"response": []
 								},
 								{
-									"name": "Find Products based on mixed query params",
+									"name": "GET /api/v1/products with group id",
 									"event": [
 										{
 											"listen": "test",
 											"script": {
-												"id": "b3875229-dbe0-47c0-9c2a-ab1efc9a2b39",
+												"id": "4100a119-619c-4357-b1d2-891d59e95db3",
 												"exec": [
 													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
 													"    pm.response.to.have.status(200);",
@@ -1676,7 +1714,7 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products?product_group_id_eq=22&tags=[\"Fins\"]",
+											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products?q[product_group_id_eq]=19",
 											"protocol": "https",
 											"host": [
 												"zu6wjlgc49",
@@ -1693,248 +1731,157 @@
 											],
 											"query": [
 												{
-													"key": "product_group_id_eq",
-													"value": "22"
+													"key": "q[product_group_id_eq]",
+													"value": "19",
+													"description": "mandatory"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "GET /api/v1/products/inventory with group id",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "4100a119-619c-4357-b1d2-891d59e95db3",
+												"exec": [
+													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
+													"    pm.response.to.have.status(200);",
+													"})",
+													"",
+													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
+													"    pm.response.to.have.jsonBody('code');",
+													"    pm.response.to.have.jsonBody('data');",
+													"    pm.response.to.have.jsonBody('meta');",
+													"    ",
+													"    pm.response.to.not.have.jsonBody('error');",
+													"})"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products?q[product_group_id_eq]=19",
+											"protocol": "https",
+											"host": [
+												"zu6wjlgc49",
+												"execute-api",
+												"eu-west-1",
+												"amazonaws",
+												"com"
+											],
+											"path": [
+												"staging",
+												"api",
+												"v1",
+												"products"
+											],
+											"query": [
+												{
+													"key": "q[product_group_id_eq]",
+													"value": "19",
+													"description": "mandatory"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "GET /api/v1/products/inventory with dates & location & keyword",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "366d5527-092b-48dd-aed7-2102333daaee",
+												"exec": [
+													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
+													"    pm.response.to.have.status(200);",
+													"})",
+													"",
+													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
+													"    pm.response.to.have.jsonBody('code');",
+													"    pm.response.to.have.jsonBody('data');",
+													"    pm.response.to.have.jsonBody('meta');",
+													"    ",
+													"    pm.response.to.not.have.jsonBody('error');",
+													"})"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products/inventory?starts_at=2018-09-04&ends_at=2018-09-15&delivery_location_id=23&collection_location_id=32&q[product_tags_name_cont]=seabob",
+											"protocol": "https",
+											"host": [
+												"zu6wjlgc49",
+												"execute-api",
+												"eu-west-1",
+												"amazonaws",
+												"com"
+											],
+											"path": [
+												"staging",
+												"api",
+												"v1",
+												"products",
+												"inventory"
+											],
+											"query": [
+												{
+													"key": "starts_at",
+													"value": "2018-09-04",
+													"description": "optional yyyy-dd-mm"
 												},
 												{
-													"key": "tags",
-													"value": "[\"Fins\"]"
-												}
-											]
-										},
-										"description": "In this case \n\nproducts that belong to product group id = 22\n\nAND\n\nhas the tag \"Fins\"\n"
-									},
-									"response": []
-								},
-								{
-									"name": "Find Products by Product Group ONLY (option 1: by name string)",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "3abd5d80-55aa-4345-b513-5ed41010090c",
-												"exec": [
-													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
-													"    pm.response.to.have.status(200);",
-													"})",
-													"",
-													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
-													"    pm.response.to.have.jsonBody('code');",
-													"    pm.response.to.have.jsonBody('data');",
-													"    pm.response.to.have.jsonBody('meta');",
-													"    ",
-													"    pm.response.to.not.have.jsonBody('error');",
-													"})"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products?q[product_group_name_cont]=Fun_Activities",
-											"protocol": "https",
-											"host": [
-												"zu6wjlgc49",
-												"execute-api",
-												"eu-west-1",
-												"amazonaws",
-												"com"
-											],
-											"path": [
-												"staging",
-												"api",
-												"v1",
-												"products"
-											],
-											"query": [
-												{
-													"key": "q[product_group_name_cont]",
-													"value": "Fun_Activities"
-												}
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "Find Products by Product Group ONLY (option 2: by product group ID)",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "12a8e8b0-2538-4fc8-b0d2-fb06daae74b1",
-												"exec": [
-													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
-													"    pm.response.to.have.status(200);",
-													"})",
-													"",
-													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
-													"    pm.response.to.have.jsonBody('code');",
-													"    pm.response.to.have.jsonBody('data');",
-													"    pm.response.to.have.jsonBody('meta');",
-													"    ",
-													"    pm.response.to.not.have.jsonBody('error');",
-													"})"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products?q[name_cont]=wakeboard",
-											"protocol": "https",
-											"host": [
-												"zu6wjlgc49",
-												"execute-api",
-												"eu-west-1",
-												"amazonaws",
-												"com"
-											],
-											"path": [
-												"staging",
-												"api",
-												"v1",
-												"products"
-											],
-											"query": [
-												{
-													"key": "q[name_cont]",
-													"value": "wakeboard"
-												}
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "Find Products By Tag ONLY",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "7faf062a-2470-4c14-83af-df50ed0f1d7c",
-												"exec": [
-													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
-													"    pm.response.to.have.status(200);",
-													"})",
-													"",
-													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
-													"    pm.response.to.have.jsonBody('code');",
-													"    pm.response.to.have.jsonBody('data');",
-													"    pm.response.to.have.jsonBody('meta');",
-													"    ",
-													"    pm.response.to.not.have.jsonBody('error');",
-													"})"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products?tags=[\"sierra\"]",
-											"protocol": "https",
-											"host": [
-												"zu6wjlgc49",
-												"execute-api",
-												"eu-west-1",
-												"amazonaws",
-												"com"
-											],
-											"path": [
-												"staging",
-												"api",
-												"v1",
-												"products"
-											],
-											"query": [
-												{
-													"key": "tags",
-													"value": "[\"sierra\"]"
-												}
-											]
-										},
-										"description": "In this case all products with the tag called 'Sierra'"
-									},
-									"response": []
-								},
-								{
-									"name": "Find Products By [Name OR ProductGroup name OR Tag]",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "2c2201af-ff55-456f-a352-0b32d0eed1ae",
-												"exec": [
-													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
-													"    pm.response.to.have.status(200);",
-													"})",
-													"",
-													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
-													"    pm.response.to.have.jsonBody('code');",
-													"    pm.response.to.have.jsonBody('data');",
-													"    pm.response.to.have.jsonBody('meta');",
-													"    ",
-													"    pm.response.to.not.have.jsonBody('error');",
-													"})"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products?page=1&per_page=2&q[name_or_product_group_name_or_product_tags_name_cont]=seabob",
-											"protocol": "https",
-											"host": [
-												"zu6wjlgc49",
-												"execute-api",
-												"eu-west-1",
-												"amazonaws",
-												"com"
-											],
-											"path": [
-												"staging",
-												"api",
-												"v1",
-												"products"
-											],
-											"query": [
-												{
-													"key": "page",
-													"value": "1"
+													"key": "ends_at",
+													"value": "2018-09-15",
+													"description": "optional yyyy-dd-mm"
 												},
 												{
-													"key": "per_page",
-													"value": "2"
+													"key": "delivery_location_id",
+													"value": "23",
+													"description": "optional "
 												},
 												{
-													"key": "q[name_or_product_group_name_or_product_tags_name_cont]",
-													"value": "seabob"
+													"key": "collection_location_id",
+													"value": "32",
+													"description": "optional"
+												},
+												{
+													"key": "q[product_tags_name_cont]",
+													"value": "seabob",
+													"description": "mandatory"
 												}
 											]
-										},
-										"description": "page (number, optional) 1   \nThe requested page number\n\nper_page (number, optional) 20  \nThe number of records to return for the requested page\n\nfiltermode (string, optional)   all \nA built in filtermode name (e.g. active, inactive, all)\n\nq[name_or_product_group_name_or_tags_name_cont] (string, optional)  search_text_here    \nSearch on name, product group name or tags for matching records"
+										}
 									},
 									"response": []
-								},
+								}
+							],
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "local",
+							"item": [
 								{
-									"name": "Get API docs",
+									"name": "GET /api/v1/products/docs",
 									"event": [
 										{
 											"listen": "test",
 											"script": {
-												"id": "73a3a710-c162-47f1-9d78-f831de8ec56c",
+												"id": "ed7a8a9f-3a96-4b5f-9442-a7dddfaf48e4",
 												"exec": [
 													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
 													"    pm.response.to.have.status(200);",
@@ -1953,17 +1900,13 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products/docs",
-											"protocol": "https",
+											"raw": "http://localhost:8080/api/v1/products/docs",
+											"protocol": "http",
 											"host": [
-												"zu6wjlgc49",
-												"execute-api",
-												"eu-west-1",
-												"amazonaws",
-												"com"
+												"localhost"
 											],
+											"port": "8080",
 											"path": [
-												"staging",
 												"api",
 												"v1",
 												"products",
@@ -1974,303 +1917,12 @@
 									"response": []
 								},
 								{
-									"name": "Find All Products",
+									"name": "GET /api/v1/products/:id",
 									"event": [
 										{
 											"listen": "test",
 											"script": {
-												"id": "27b58f06-6fc0-4a7b-95f5-c289908e1138",
-												"exec": [
-													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
-													"    pm.response.to.have.status(200);",
-													"})",
-													"",
-													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
-													"    pm.response.to.have.jsonBody('code');",
-													"    pm.response.to.have.jsonBody('data');",
-													"    pm.response.to.have.jsonBody('meta');",
-													"    ",
-													"    pm.response.to.not.have.jsonBody('error');",
-													"})"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "Content-Type",
-												"name": "Content-Type",
-												"type": "text",
-												"value": "application/json"
-											}
-										],
-										"url": {
-											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products",
-											"protocol": "https",
-											"host": [
-												"zu6wjlgc49",
-												"execute-api",
-												"eu-west-1",
-												"amazonaws",
-												"com"
-											],
-											"path": [
-												"staging",
-												"api",
-												"v1",
-												"products"
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "Find product by Inventory with dates and store id",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "eff305f1-f2f0-4ef2-b6e0-78925a000360",
-												"exec": [
-													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
-													"    pm.response.to.have.status(200);",
-													"})",
-													"",
-													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
-													"    pm.response.to.have.jsonBody('code');",
-													"    pm.response.to.have.jsonBody('data');",
-													"    pm.response.to.have.jsonBody('meta');",
-													"    ",
-													"    pm.response.to.not.have.jsonBody('error');",
-													"})"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "X-SUBDOMAIN",
-												"type": "text",
-												"value": "{{op-domain}}",
-												"disabled": true
-											},
-											{
-												"key": "X-AUTH-TOKEN",
-												"type": "text",
-												"value": "{{op-token}}",
-												"disabled": true
-											}
-										],
-										"url": {
-											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products/inventory?starts_at=2018-09-04&ends_at=2018-09-15&filtermode[]=rental&store_id=1&q[name_or_product_group_name_or_product_tags_name_cont]=seabob",
-											"protocol": "https",
-											"host": [
-												"zu6wjlgc49",
-												"execute-api",
-												"eu-west-1",
-												"amazonaws",
-												"com"
-											],
-											"path": [
-												"staging",
-												"api",
-												"v1",
-												"products",
-												"inventory"
-											],
-											"query": [
-												{
-													"key": "starts_at",
-													"value": "2018-09-04"
-												},
-												{
-													"key": "ends_at",
-													"value": "2018-09-15"
-												},
-												{
-													"key": "filtermode[]",
-													"value": "rental"
-												},
-												{
-													"key": "store_id",
-													"value": "1"
-												},
-												{
-													"key": "q[name_or_product_group_name_or_product_tags_name_cont]",
-													"value": "seabob"
-												}
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "Find product by inventory by [TAGS ONLY] with dates and store id",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "eff305f1-f2f0-4ef2-b6e0-78925a000360",
-												"exec": [
-													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
-													"    pm.response.to.have.status(200);",
-													"})",
-													"",
-													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
-													"    pm.response.to.have.jsonBody('code');",
-													"    pm.response.to.have.jsonBody('data');",
-													"    pm.response.to.have.jsonBody('meta');",
-													"    ",
-													"    pm.response.to.not.have.jsonBody('error');",
-													"})"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "X-SUBDOMAIN",
-												"type": "text",
-												"value": "{{op-domain}}",
-												"disabled": true
-											},
-											{
-												"key": "X-AUTH-TOKEN",
-												"type": "text",
-												"value": "{{op-token}}",
-												"disabled": true
-											}
-										],
-										"url": {
-											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/staging/api/v1/products/inventory?starts_at=2018-09-04&ends_at=2018-09-15&filtermode[]=rental&store_id=1&q[product_tags_name_cont]=tiwal%20sail",
-											"protocol": "https",
-											"host": [
-												"zu6wjlgc49",
-												"execute-api",
-												"eu-west-1",
-												"amazonaws",
-												"com"
-											],
-											"path": [
-												"staging",
-												"api",
-												"v1",
-												"products",
-												"inventory"
-											],
-											"query": [
-												{
-													"key": "starts_at",
-													"value": "2018-09-04"
-												},
-												{
-													"key": "ends_at",
-													"value": "2018-09-15"
-												},
-												{
-													"key": "filtermode[]",
-													"value": "rental"
-												},
-												{
-													"key": "store_id",
-													"value": "1"
-												},
-												{
-													"key": "q[product_tags_name_cont]",
-													"value": "tiwal%20sail"
-												}
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "Find product by inventory EXCLUDE those of product group Accessories Copy Copy",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "9a7b77b2-74e0-4219-b5d7-aae49ce8de9c",
-												"exec": [
-													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
-													"    pm.response.to.have.status(200);",
-													"})",
-													"",
-													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
-													"    pm.response.to.have.jsonBody('code');",
-													"    pm.response.to.have.jsonBody('data');",
-													"    pm.response.to.have.jsonBody('meta');",
-													"    ",
-													"    pm.response.to.not.have.jsonBody('error');",
-													"})"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "X-SUBDOMAIN",
-												"type": "text",
-												"value": "{{op-domain}}"
-											},
-											{
-												"key": "X-AUTH-TOKEN",
-												"type": "text",
-												"value": "{{op-token}}"
-											}
-										],
-										"url": {
-											"raw": "https://zu6wjlgc49.execute-api.eu-west-1.amazonaws.com/dev/api/v1/products/inventory?q[product_tags_name_matches]=tiwal%20sail",
-											"protocol": "https",
-											"host": [
-												"zu6wjlgc49",
-												"execute-api",
-												"eu-west-1",
-												"amazonaws",
-												"com"
-											],
-											"path": [
-												"dev",
-												"api",
-												"v1",
-												"products",
-												"inventory"
-											],
-											"query": [
-												{
-													"key": "q[product_tags_name_matches]",
-													"value": "tiwal%20sail"
-												}
-											]
-										}
-									},
-									"response": []
-								}
-							],
-							"_postman_isSubFolder": true
-						},
-						{
-							"name": "local",
-							"item": [
-								{
-									"name": "Find Product by Product ID",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "2cbfa0e2-e92d-4cfa-a483-0fa8f0955f80",
+												"id": "2d3bcccc-165d-480c-9043-fb9dbf8ec781",
 												"exec": [
 													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
 													"    pm.response.to.have.status(200);",
@@ -2310,12 +1962,61 @@
 									"response": []
 								},
 								{
-									"name": "Find All Product Groups",
+									"name": "GET api/v1/products wih keyword",
 									"event": [
 										{
 											"listen": "test",
 											"script": {
-												"id": "62101fba-b51c-4082-ba57-d4c1f8546af9",
+												"id": "14eb1116-f7c5-495d-88b3-23c63c494dbe",
+												"exec": [
+													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
+													"    pm.response.to.have.status(200);",
+													"})",
+													"",
+													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
+													"    pm.response.to.have.jsonBody('code');",
+													"    pm.response.to.have.jsonBody('data');",
+													"    pm.response.to.have.jsonBody('meta');",
+													"    ",
+													"    pm.response.to.not.have.jsonBody('error');",
+													"})"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/api/v1/products?tags=[\"jvt\"]",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"api",
+												"v1",
+												"products"
+											],
+											"query": [
+												{
+													"key": "tags",
+													"value": "[\"jvt\"]"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "GET /api/v1/products/groups",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "b77714f8-bd1f-48ea-930e-bc63ed40f88a",
 												"exec": [
 													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
 													"    pm.response.to.have.status(200);",
@@ -2355,12 +2056,12 @@
 									"response": []
 								},
 								{
-									"name": "Find Products based on mixed query params",
+									"name": "GET /api/v1/products with group id",
 									"event": [
 										{
 											"listen": "test",
 											"script": {
-												"id": "47070856-5a8e-4bea-8f49-4f24e6c6f22e",
+												"id": "4100a119-619c-4357-b1d2-891d59e95db3",
 												"exec": [
 													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
 													"    pm.response.to.have.status(200);",
@@ -2382,7 +2083,7 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "http://localhost:8080/api/v1/products?product_group_id_eq=22&tags=[\"Fins\"]",
+											"raw": "http://localhost:8080/api/v1/products?q[product_group_id_eq]=19",
 											"protocol": "http",
 											"host": [
 												"localhost"
@@ -2395,26 +2096,21 @@
 											],
 											"query": [
 												{
-													"key": "product_group_id_eq",
-													"value": "22"
-												},
-												{
-													"key": "tags",
-													"value": "[\"Fins\"]"
+													"key": "q[product_group_id_eq]",
+													"value": "19"
 												}
 											]
-										},
-										"description": "In this case \n\nproducts that belong to product group id = 22\n\nAND\n\nhas the tag \"Fins\"\n"
+										}
 									},
 									"response": []
 								},
 								{
-									"name": "Find Products by Product Group ONLY (option 1: by name string)",
+									"name": "GET /api/v1/products/inventory with group id",
 									"event": [
 										{
 											"listen": "test",
 											"script": {
-												"id": "fe2e8eee-f4c8-4027-8353-9b58f2ff126e",
+												"id": "4100a119-619c-4357-b1d2-891d59e95db3",
 												"exec": [
 													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
 													"    pm.response.to.have.status(200);",
@@ -2436,7 +2132,7 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "http://localhost:8080/api/v1/products?q[product_group_name_cont]=Fun_Activities",
+											"raw": "http://localhost:8080/api/v1/products?q[product_group_id_eq]=19",
 											"protocol": "http",
 											"host": [
 												"localhost"
@@ -2449,8 +2145,8 @@
 											],
 											"query": [
 												{
-													"key": "q[product_group_name_cont]",
-													"value": "Fun_Activities"
+													"key": "q[product_group_id_eq]",
+													"value": "19"
 												}
 											]
 										}
@@ -2458,74 +2154,12 @@
 									"response": []
 								},
 								{
-									"name": "Find Products by Product Group ONLY (option 2: by product group ID)",
+									"name": "GET /api/v1/products/inventory with dates & location & keyword",
 									"event": [
 										{
 											"listen": "test",
 											"script": {
-												"id": "c50f4c3d-ca0a-456e-817a-10851fd783cf",
-												"exec": [
-													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
-													"    pm.response.to.have.status(200);",
-													"})",
-													"",
-													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
-													"    pm.response.to.have.jsonBody('code');",
-													"    pm.response.to.have.jsonBody('data');",
-													"    pm.response.to.have.jsonBody('meta');",
-													"    ",
-													"    pm.response.to.not.have.jsonBody('error');",
-													"})"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "X-SUBDOMAIN",
-												"value": "{{op-domain}}",
-												"type": "text",
-												"disabled": true
-											},
-											{
-												"key": "X-AUTH-TOKEN",
-												"value": "{{op-token}}",
-												"type": "text",
-												"disabled": true
-											}
-										],
-										"url": {
-											"raw": "http://localhost:8080/api/v1/products?q[name_cont]=wakeboard",
-											"protocol": "http",
-											"host": [
-												"localhost"
-											],
-											"port": "8080",
-											"path": [
-												"api",
-												"v1",
-												"products"
-											],
-											"query": [
-												{
-													"key": "q[name_cont]",
-													"value": "wakeboard"
-												}
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "Find Products By Tag ONLY",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "1a46e777-db3b-4271-b9ec-fbbb07ec8d7c",
+												"id": "366d5527-092b-48dd-aed7-2102333daaee",
 												"exec": [
 													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
 													"    pm.response.to.have.status(200);",
@@ -2547,219 +2181,7 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "http://localhost:8080/api/v1/products?tags=[\"sierra\"]",
-											"protocol": "http",
-											"host": [
-												"localhost"
-											],
-											"port": "8080",
-											"path": [
-												"api",
-												"v1",
-												"products"
-											],
-											"query": [
-												{
-													"key": "tags",
-													"value": "[\"sierra\"]"
-												}
-											]
-										},
-										"description": "In this case all products with the tag called 'Sierra'"
-									},
-									"response": []
-								},
-								{
-									"name": "Find Products By [Name OR ProductGroup name OR Tag]",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "7214a38c-a444-4140-9419-104b32abb86a",
-												"exec": [
-													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
-													"    pm.response.to.have.status(200);",
-													"})",
-													"",
-													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
-													"    pm.response.to.have.jsonBody('code');",
-													"    pm.response.to.have.jsonBody('data');",
-													"    pm.response.to.have.jsonBody('meta');",
-													"    ",
-													"    pm.response.to.not.have.jsonBody('error');",
-													"})"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "http://localhost:8080/api/v1/products?page=1&per_page=2&q[name_or_product_group_name_or_product_tags_name_cont]=seabob",
-											"protocol": "http",
-											"host": [
-												"localhost"
-											],
-											"port": "8080",
-											"path": [
-												"api",
-												"v1",
-												"products"
-											],
-											"query": [
-												{
-													"key": "page",
-													"value": "1"
-												},
-												{
-													"key": "per_page",
-													"value": "2"
-												},
-												{
-													"key": "q[name_or_product_group_name_or_product_tags_name_cont]",
-													"value": "seabob"
-												}
-											]
-										},
-										"description": "page (number, optional) 1   \nThe requested page number\n\nper_page (number, optional) 20  \nThe number of records to return for the requested page\n\nfiltermode (string, optional)   all \nA built in filtermode name (e.g. active, inactive, all)\n\nq[name_or_product_group_name_or_tags_name_cont] (string, optional)  search_text_here    \nSearch on name, product group name or tags for matching records"
-									},
-									"response": []
-								},
-								{
-									"name": "Get API docs",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "0ddb6506-4d50-4d38-b874-3b37e2b854a2",
-												"exec": [
-													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
-													"    pm.response.to.have.status(200);",
-													"})",
-													"",
-													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
-													"    pm.response.to.have.jsonBody('openapi');",
-													"    pm.response.to.not.have.jsonBody('error');",
-													"})"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "http://localhost:8080/api/v1/products/docs",
-											"protocol": "http",
-											"host": [
-												"localhost"
-											],
-											"port": "8080",
-											"path": [
-												"api",
-												"v1",
-												"products",
-												"docs"
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "Find All Products",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "fa00ea66-fc89-4231-b218-7b01fd508294",
-												"exec": [
-													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
-													"    pm.response.to.have.status(200);",
-													"})",
-													"",
-													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
-													"    pm.response.to.have.jsonBody('code');",
-													"    pm.response.to.have.jsonBody('data');",
-													"    pm.response.to.have.jsonBody('meta');",
-													"    ",
-													"    pm.response.to.not.have.jsonBody('error');",
-													"})"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "Content-Type",
-												"name": "Content-Type",
-												"type": "text",
-												"value": "application/json"
-											}
-										],
-										"url": {
-											"raw": "http://localhost:8080/api/v1/products",
-											"protocol": "http",
-											"host": [
-												"localhost"
-											],
-											"port": "8080",
-											"path": [
-												"api",
-												"v1",
-												"products"
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "Find product by Inventory with dates and store id Copy",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "22cb913e-206e-4f62-903b-10d76071ba4b",
-												"exec": [
-													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
-													"    pm.response.to.have.status(200);",
-													"})",
-													"",
-													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
-													"    pm.response.to.have.jsonBody('code');",
-													"    pm.response.to.have.jsonBody('data');",
-													"    pm.response.to.have.jsonBody('meta');",
-													"    ",
-													"    pm.response.to.not.have.jsonBody('error');",
-													"})"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "X-SUBDOMAIN",
-												"type": "text",
-												"value": "{{op-domain}}",
-												"disabled": true
-											},
-											{
-												"key": "X-AUTH-TOKEN",
-												"type": "text",
-												"value": "{{op-token}}",
-												"disabled": true
-											}
-										],
-										"url": {
-											"raw": "http://localhost:8080/api/v1/products/inventory?starts_at=2018-09-04&ends_at=2018-09-15&filtermode[]=rental&store_id=1&q[name_or_product_group_name_or_product_tags_name_cont]=seabob",
+											"raw": "http://localhost:8080/api/v1/products/inventory?starts_at=2018-09-04&ends_at=2018-09-15&delivery_location_id=23&collection_location_id=32&q[product_tags_name_cont]=seabob",
 											"protocol": "http",
 											"host": [
 												"localhost"
@@ -2774,141 +2196,28 @@
 											"query": [
 												{
 													"key": "starts_at",
-													"value": "2018-09-04"
+													"value": "2018-09-04",
+													"description": "optional yyyy-dd-mm"
 												},
 												{
 													"key": "ends_at",
-													"value": "2018-09-15"
+													"value": "2018-09-15",
+													"description": "optional yyyy-dd-mm"
 												},
 												{
-													"key": "filtermode[]",
-													"value": "rental"
+													"key": "delivery_location_id",
+													"value": "23",
+													"description": "optional "
 												},
 												{
-													"key": "store_id",
-													"value": "1"
-												},
-												{
-													"key": "q[name_or_product_group_name_or_product_tags_name_cont]",
-													"value": "seabob"
-												}
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "Find product by Inventory by [TAGS ONLY] with dates and store id",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "22cb913e-206e-4f62-903b-10d76071ba4b",
-												"exec": [
-													"pm.test(\"Status code is 200, because requested resource should exist\", function () {",
-													"    pm.response.to.have.status(200);",
-													"})",
-													"",
-													"pm.test(\"Response has a json body, with a wellformed structure\", function () {",
-													"    pm.response.to.have.jsonBody('code');",
-													"    pm.response.to.have.jsonBody('data');",
-													"    pm.response.to.have.jsonBody('meta');",
-													"    ",
-													"    pm.response.to.not.have.jsonBody('error');",
-													"})"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "X-SUBDOMAIN",
-												"type": "text",
-												"value": "{{op-domain}}",
-												"disabled": true
-											},
-											{
-												"key": "X-AUTH-TOKEN",
-												"type": "text",
-												"value": "{{op-token}}",
-												"disabled": true
-											}
-										],
-										"url": {
-											"raw": "http://localhost:8080/api/v1/products/inventory?starts_at=2018-09-04&ends_at=2018-09-15&filtermode[]=rental&store_id=1&q[product_tags_name_cont]=tiwal%20sail",
-											"protocol": "http",
-											"host": [
-												"localhost"
-											],
-											"port": "8080",
-											"path": [
-												"api",
-												"v1",
-												"products",
-												"inventory"
-											],
-											"query": [
-												{
-													"key": "starts_at",
-													"value": "2018-09-04"
-												},
-												{
-													"key": "ends_at",
-													"value": "2018-09-15"
-												},
-												{
-													"key": "filtermode[]",
-													"value": "rental"
-												},
-												{
-													"key": "store_id",
-													"value": "1"
+													"key": "collection_location_id",
+													"value": "32",
+													"description": "optional"
 												},
 												{
 													"key": "q[product_tags_name_cont]",
-													"value": "tiwal%20sail"
-												}
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "Find product by inventory EXCLUDE those of product group Accessories",
-									"request": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "X-SUBDOMAIN",
-												"type": "text",
-												"value": "{{op-domain}}"
-											},
-											{
-												"key": "X-AUTH-TOKEN",
-												"type": "text",
-												"value": "{{op-token}}"
-											}
-										],
-										"url": {
-											"raw": "http://localhost:8080/api/v1/products/inventory?q[product_tags_name_matches]=tiwal%20sail",
-											"protocol": "http",
-											"host": [
-												"localhost"
-											],
-											"port": "8080",
-											"path": [
-												"api",
-												"v1",
-												"products",
-												"inventory"
-											],
-											"query": [
-												{
-													"key": "q[product_tags_name_matches]",
-													"value": "tiwal%20sail"
+													"value": "seabob",
+													"description": "mandatory"
 												}
 											]
 										}
@@ -2950,18 +2259,7 @@
 									],
 									"request": {
 										"method": "GET",
-										"header": [
-											{
-												"key": "X-SUBDOMAIN",
-												"type": "text",
-												"value": "{{op-domain}}"
-											},
-											{
-												"key": "X-AUTH-TOKEN",
-												"type": "text",
-												"value": "{{op-token}}"
-											}
-										],
+										"header": [],
 										"url": {
 											"raw": "https://3rk3xtficb.execute-api.eu-west-1.amazonaws.com/dev/api/v1/locations",
 											"protocol": "https",
@@ -3057,18 +2355,7 @@
 									],
 									"request": {
 										"method": "GET",
-										"header": [
-											{
-												"key": "X-SUBDOMAIN",
-												"type": "text",
-												"value": "{{op-domain}}"
-											},
-											{
-												"key": "X-AUTH-TOKEN",
-												"type": "text",
-												"value": "{{op-token}}"
-											}
-										],
+										"header": [],
 										"url": {
 											"raw": "https://7s2c5akwy2.execute-api.eu-west-1.amazonaws.com/staging/api/v1/locations",
 											"protocol": "https",
@@ -3164,18 +2451,7 @@
 									],
 									"request": {
 										"method": "GET",
-										"header": [
-											{
-												"key": "X-SUBDOMAIN",
-												"type": "text",
-												"value": "{{op-domain}}"
-											},
-											{
-												"key": "X-AUTH-TOKEN",
-												"type": "text",
-												"value": "{{op-token}}"
-											}
-										],
+										"header": [],
 										"url": {
 											"raw": "http://localhost:8080/api/v1/locations",
 											"protocol": "http",

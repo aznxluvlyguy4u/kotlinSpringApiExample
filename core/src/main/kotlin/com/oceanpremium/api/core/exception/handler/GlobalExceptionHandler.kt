@@ -224,6 +224,7 @@ class GlobalExceptionHandler {
      */
     @ExceptionHandler(Throwable::class)
     fun handleThrowable(ex: Throwable, request: WebRequest): ResponseEntity<ApiError> {
+        ex.printStackTrace()
         logger.debug("Build general 500 INTERNAL SERVER ERROR response")
 
         val status = HttpStatus.INTERNAL_SERVER_ERROR
