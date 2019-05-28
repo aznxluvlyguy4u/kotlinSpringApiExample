@@ -253,7 +253,7 @@ class ProductsControllerTest {
         val productsResponse = restTemplate?.postForEntity("$endpoint/availability", request, Any::class.java)
 
         assertThat(productsResponse).isNotNull
-        assertThat(productsResponse?.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(productsResponse?.statusCode).isEqualTo(HttpStatus.CREATED)
     }
 
     /**

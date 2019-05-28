@@ -161,8 +161,8 @@ class ProductsController(
         }
 
         return ResponseEntity(
-            WrappedResponse(HttpStatus.OK.value(), productItems),
-            HttpStatus.OK
+            WrappedResponse(HttpStatus.CREATED.value(), productItems),
+            HttpStatus.CREATED
         )
     }
 }
