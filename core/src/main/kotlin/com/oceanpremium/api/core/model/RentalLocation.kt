@@ -2,4 +2,4 @@ package com.oceanpremium.api.core.model
 
 import java.util.*
 
-class RentalLocation(collection: Int, dropOff: Int )
+class RentalLocation(val collection: Int, val dropOff: Int )

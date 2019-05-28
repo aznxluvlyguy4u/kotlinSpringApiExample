@@ -2,4 +2,4 @@ package com.oceanpremium.api.core.model
 
 import java.util.*
 
-class RentalPeriod(start: Date, end: Date)
+class RentalPeriod(val start: Date, val end: Date)

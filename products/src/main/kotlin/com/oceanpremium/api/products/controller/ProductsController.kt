@@ -6,9 +6,7 @@ import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductGroupDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.messenger.Slogger
-import com.oceanpremium.api.core.model.ProductAvailability
-import com.oceanpremium.api.core.model.RentalLocation
-import com.oceanpremium.api.core.model.RentalPeriod
+import com.oceanpremium.api.core.model.ProductAvailabilityItem
 import com.oceanpremium.api.core.util.Constants
 import com.oceanpremium.api.core.util.ObjectMapperConfig
 import org.slf4j.LoggerFactory
@@ -145,16 +143,12 @@ class ProductsController(
      */
     @RequestMapping("availability")
     @ResponseBody
-    fun getProductBatchAvailability(@RequestBody productAvailability: ProductAvailability): ResponseEntity<*> {
-        val logMessage = "[API] - GET products availability for batch $productAvailability"
+    fun getProductBatchAvailability(@RequestBody productItems: List<ProductAvailabilityItem>): ResponseEntity<*> {
+        val logMessage = "[API] - GET products availability for batch $productItems"
         logger.debug(logMessage)
 
-
-//        val productsResponse = productsApi.getProductsInventory(queryParameters, headers)
-//        val productsDto = ProductDtoMapper(productsResponse?.code()!!, productsResponse)
-
         return ResponseEntity(
-            productAvailability,
+            productItems,
             HttpStatus.OK
         )
     }
