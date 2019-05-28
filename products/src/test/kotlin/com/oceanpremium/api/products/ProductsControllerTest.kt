@@ -238,19 +238,18 @@ class ProductsControllerTest {
      */
     @Test
     fun testBadRequestStartDateBeforeEndDateGetProductsInventory() {
-        //?starts_at=2018-09-04&ends_at=2018-09-15&delivery_location_id=23&collection_location_id=32&page=1&per_page=2&q[product_group_id_eq]=19&q[product_tags_name_cont]=seabob
-        val params = "q[product_tags_name_cont]=${testProduct.name}"
+        val params = "starts_at=2019-09-15&ends_at=2019-09-01&q[product_tags_name_cont]=seabob"
         val productsErrorResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ErrorResponse::class.java)
 
         assertThat(productsErrorResponse).isNotNull
-        assertThat(productsErrorResponse?.code).isEqualTo(HttpStatus.NOT_FOUND.value())
+        assertThat(productsErrorResponse?.code).isEqualTo(HttpStatus.BAD_REQUEST.value())
         assertThat(productsErrorResponse?.message).isNotNull
 
         val errorMessage = productsErrorResponse?.message
         assertThat(errorMessage?.errors).isNotEmpty
 
         errorMessage?.errors?.forEach {
-            assertThat(it.toLowerCase()).contains("not found")
+            assertThat(it.toLowerCase()).contains("bad request")
         }
     }
 }
