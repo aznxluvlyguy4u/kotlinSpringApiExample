@@ -238,7 +238,7 @@ class ProductsControllerTest {
      */
     @Test
     fun testBadRequestStartDateBeforeEndDateGetProductsInventory() {
-        val params = "q[product_tags_name_cont]=${testProduct.name}&?starts_at=2018-09-15&ends_at=2018-09-01"
+        val params = "starts_at=2019-09-15&ends_at=2019-09-01&q[product_tags_name_cont]=seabob"
         val productsErrorResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ErrorResponse::class.java)
 
         assertThat(productsErrorResponse).isNotNull
@@ -249,7 +249,7 @@ class ProductsControllerTest {
         assertThat(errorMessage?.errors).isNotEmpty
 
         errorMessage?.errors?.forEach {
-            assertThat(it.toLowerCase()).contains("may not be before delivery date")
+            assertThat(it.toLowerCase()).contains("bad request")
         }
     }
 }
