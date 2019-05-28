@@ -5,6 +5,7 @@ import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductGroupDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
+import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.messenger.Slogger
 import com.oceanpremium.api.core.model.ProductAvailabilityItem
 import com.oceanpremium.api.core.model.WrappedResponse
@@ -144,9 +145,17 @@ class ProductsController(
      */
     @RequestMapping("availability")
     @ResponseBody
-    fun getProductBatchAvailability(@RequestBody productItems: List<ProductAvailabilityItem>): ResponseEntity<*> {
+    fun getProductBatchAvailability(@RequestBody productItems: List<ProductAvailabilityItem>?): ResponseEntity<*> {
         val logMessage = "[API] - GET products availability for batch $productItems"
         logger.debug(logMessage)
+
+        if (productItems == null) {
+            throw BadRequestException("Payload may not be empty")
+        }
+
+        if (productItems.isEmpty()) {
+            throw BadRequestException("Payload may not contain empty array")
+        }
 
         productItems.forEach {
             logger.debug("check availability for product with id: ${it.id} on location collection: ${it.location?.collectionId} - dropOff: ${it.location?.dropOffId} in period: ${it.period?.start} - ${it.period?.end}")
