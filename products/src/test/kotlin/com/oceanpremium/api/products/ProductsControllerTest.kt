@@ -222,7 +222,7 @@ class ProductsControllerTest {
     }
 
     /**
-     * Get product batch availability.
+     * Check product batch availability.
      */
     @Test
     fun testGetProductBatchAvailability() {
@@ -254,5 +254,34 @@ class ProductsControllerTest {
 
         assertThat(productsResponse).isNotNull
         assertThat(productsResponse?.statusCode).isEqualTo(HttpStatus.OK)
+    }
+
+    /**
+     * Check product batch availability empty array payload.
+     */
+    @Test
+    fun testGetProductBatchAvailabilityEmptyArrayPayload() {
+        val batch: MutableList<ProductAvailabilityItem> = mutableListOf()
+
+        val request = HttpEntity<List<ProductAvailabilityItem>>(batch)
+        val productsResponse = restTemplate?.postForEntity("$endpoint/availability", request, Any::class.java)
+
+        assertThat(productsResponse).isNotNull
+        assertThat(productsResponse?.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+    }
+
+
+    /**
+     * Check product batch availability empty array payload.
+     */
+    @Test
+    fun testGetProductBatchAvailabilityInvalidQuantity() {
+        val batch: MutableList<ProductAvailabilityItem> = mutableListOf()
+
+        val request = HttpEntity<List<ProductAvailabilityItem>>(batch)
+        val productsResponse = restTemplate?.postForEntity("$endpoint/availability", request, Any::class.java)
+
+        assertThat(productsResponse).isNotNull
+        assertThat(productsResponse?.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
     }
 }

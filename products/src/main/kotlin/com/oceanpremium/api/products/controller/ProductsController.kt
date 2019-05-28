@@ -154,6 +154,9 @@ class ProductsController(
         }
 
         productItems.forEach {
+            if (it.quantity == 0) {
+                throw BadRequestException("Quantity supplied for product with id: ${it.id} may not be equal to 0")
+            }
             logger.debug("check availability for product with id: ${it.id} on location collection: ${it.location?.collectionId} - dropOff: ${it.location?.dropOffId} in period: ${it.period?.start} - ${it.period?.end}")
         }
 
