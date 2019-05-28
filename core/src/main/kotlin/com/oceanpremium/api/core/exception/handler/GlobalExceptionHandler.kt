@@ -54,11 +54,16 @@ class GlobalExceptionHandler {
 
         val status = HttpStatus.BAD_REQUEST
         val apiError = when {
-            showStacktrace -> ApiError(
-                status.value(),
-                ex,
-                status.reasonPhrase
-            )
+            showStacktrace -> {
+                val errorMessage = ErrorResponse()
+                errorMessage.errors.add(status.reasonPhrase)
+
+                ApiError(
+                    status.value(),
+                    ex,
+                    errorMessage
+                )
+            }
             else -> {
                 val errorMessage = ErrorResponse()
                 errorMessage.errors.add(status.reasonPhrase)
@@ -82,11 +87,16 @@ class GlobalExceptionHandler {
 
         val status = HttpStatus.UNAUTHORIZED
         val apiError = when {
-            showStacktrace -> ApiError(
-                status.value(),
-                ex,
-                status.reasonPhrase
-            )
+            showStacktrace -> {
+                val errorMessage = ErrorResponse()
+                errorMessage.errors.add(status.reasonPhrase)
+
+                ApiError(
+                    status.value(),
+                    ex,
+                    errorMessage
+                )
+            }
             else -> {
                 val errorMessage = ErrorResponse()
                 errorMessage.errors.add(status.reasonPhrase)
@@ -110,11 +120,16 @@ class GlobalExceptionHandler {
 
         val status = HttpStatus.NOT_FOUND
         val apiError = when {
-            showStacktrace -> ApiError(
-                status.value(),
-                ex,
-                status.reasonPhrase
-            )
+            showStacktrace -> {
+                val errorMessage = ErrorResponse()
+                errorMessage.errors.add(status.reasonPhrase)
+
+                ApiError(
+                    status.value(),
+                    ex,
+                    errorMessage
+                )
+            }
             else -> {
                 val errorMessage = ErrorResponse()
                 errorMessage.errors.add(status.reasonPhrase)
@@ -138,11 +153,16 @@ class GlobalExceptionHandler {
 
         val status = HttpStatus.TOO_MANY_REQUESTS
         val apiError = when {
-            showStacktrace -> ApiError(
-                status.value(),
-                ex,
-                status.reasonPhrase
-            )
+            showStacktrace -> {
+                val errorMessage = ErrorResponse()
+                errorMessage.errors.add(status.reasonPhrase)
+
+                ApiError(
+                    status.value(),
+                    ex,
+                    errorMessage
+                )
+            }
             else ->  {
                 val errorMessage = ErrorResponse()
                 errorMessage.errors.add(status.reasonPhrase)
@@ -168,11 +188,16 @@ class GlobalExceptionHandler {
 
         val status = HttpStatus.INTERNAL_SERVER_ERROR
         val apiError = when {
-            showStacktrace -> ApiError(
-                status.value(),
-                ex,
-                status.reasonPhrase
-            )
+            showStacktrace -> {
+                val errorMessage = ErrorResponse()
+                errorMessage.errors.add(status.reasonPhrase)
+
+                ApiError(
+                    status.value(),
+                    ex,
+                    errorMessage
+                )
+            }
             else -> {
                 val errorMessage = ErrorResponse()
                 errorMessage.errors.add(status.reasonPhrase)
@@ -198,11 +223,16 @@ class GlobalExceptionHandler {
 
         val status = HttpStatus.INTERNAL_SERVER_ERROR
         val apiError = when {
-            showStacktrace -> ApiError(
-                status.value(),
-                ex,
-                status.reasonPhrase
-            )
+            showStacktrace -> {
+                val errorMessage = ErrorResponse()
+                errorMessage.errors.add(status.reasonPhrase)
+
+                ApiError(
+                    status.value(),
+                    ex,
+                    errorMessage
+                )
+            }
             else -> {
                 val errorMessage = ErrorResponse()
                 errorMessage.errors.add(status.reasonPhrase)
