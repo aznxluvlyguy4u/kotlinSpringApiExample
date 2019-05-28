@@ -38,7 +38,15 @@ import kotlin.jvm.java as java1
  * The main application entry point that spins up the API.
  */
 @SpringBootApplication
-@Import(ProductsApiImpl::class, LocationStoreResolverImpl::class, LocationBuilderImpl::class, RegionBuilderImpl::class, StoreBuilderImpl::class, ProductConfigOptionsResolverImpl::class, GlobalExceptionHandler::class)
+@Import(
+    ProductsApiImpl::class,
+    LocationStoreResolverImpl::class,
+    LocationBuilderImpl::class,
+    RegionBuilderImpl::class,
+    StoreBuilderImpl::class,
+    ProductConfigOptionsResolverImpl::class,
+    GlobalExceptionHandler::class
+)
 class ProductsDriver : SpringBootServletInitializer() {
 
     companion object {
