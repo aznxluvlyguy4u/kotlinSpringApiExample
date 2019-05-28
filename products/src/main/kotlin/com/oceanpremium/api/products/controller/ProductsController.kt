@@ -7,6 +7,7 @@ import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductGroupDtoM
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.messenger.Slogger
 import com.oceanpremium.api.core.model.ProductAvailabilityItem
+import com.oceanpremium.api.core.model.WrappedResponse
 import com.oceanpremium.api.core.util.Constants
 import com.oceanpremium.api.core.util.ObjectMapperConfig
 import org.slf4j.LoggerFactory
@@ -137,7 +138,7 @@ class ProductsController(
     }
 
     /**
-     * Endpoint to get the inventory of a batch of selected products.
+     * Endpoint to get the availability of a batch of selected products.
      *
      *
      */
@@ -147,8 +148,12 @@ class ProductsController(
         val logMessage = "[API] - GET products availability for batch $productItems"
         logger.debug(logMessage)
 
+        productItems.forEach {
+            logger.debug("check availability for product with id: ${it.id} on location collection: ${it.location?.collectionId} - dropOff: ${it.location?.dropOffId} in period: ${it.period?.start} - ${it.period?.end}")
+        }
+
         return ResponseEntity(
-            productItems,
+            WrappedResponse(HttpStatus.OK.value(), productItems),
             HttpStatus.OK
         )
     }
