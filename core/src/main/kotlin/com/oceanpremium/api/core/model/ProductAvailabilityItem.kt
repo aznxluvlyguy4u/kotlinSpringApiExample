@@ -11,6 +11,6 @@ class ProductAvailabilityItem(
     var configuration: Map<*,*>? = null,
     var accessories: List<ProductAvailabilityItem>? = null
 ) {
-    var quantityAvailable: Int? = null
+    var quantityAvailable: Int = 0
     var available: Boolean = false
 }
