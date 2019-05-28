@@ -4,6 +4,7 @@ import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParamete
 import com.oceanpremium.api.core.model.ProductAvailabilityItem
 import com.oceanpremium.api.core.model.RentalLocation
 import com.oceanpremium.api.core.model.RentalPeriod
+import com.oceanpremium.api.core.model.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -54,172 +55,172 @@ class ProductsControllerTest {
         private val testProduct = TestProduct()
     }
 
-//    /**
-//     * Get product API docs.
-//     */
-//    @Test
-//    fun testGetProductApiDocs() {
-//        val response = restTemplate?.getForEntity("$endpoint/docs", Response::class.java)
-//
-//        assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.OK.value())
-//    }
-//
-//    /**
-//     * Find products by query parameters.
-//     */
-//    @Test
-//    fun testGetProductsByQueryParameters() {
-//        val params = "tags=[\"ci\"]"
-//        val productsResponse = restTemplate?.getForObject("$endpoint?$params", ProductsResponse::class.java)
-//
-//        assertThat(productsResponse).isNotNull
-//        assertThat(productsResponse?.code).isEqualTo(HttpStatus.OK.value())
-//        assertThat(productsResponse?.data).isNotNull
-//
-//        val productItems = productsResponse?.data
-//        assertThat(productItems).isNotEmpty
-//
-//        productItems?.forEach {
-//            assertThat(it.name).startsWith("JVT")
-//        }
-//    }
-//
-//    /**
-//     * Find products by query parameters that are not found.
-//     */
-//    @Test
-//    fun testGetProductsByQueryParametersNotFound() {
-//        val params = "tags=[\"notfound\"]"
-//        val productsErrorResponse = restTemplate?.getForObject("$endpoint?$params", ErrorResponse::class.java)
-//
-//        assertThat(productsErrorResponse).isNotNull
-//        assertThat(productsErrorResponse?.code).isEqualTo(HttpStatus.NOT_FOUND.value())
-//        assertThat(productsErrorResponse?.message).isNotNull
-//
-//        val errorMessage = productsErrorResponse?.message
-//        assertThat(errorMessage?.errors).isNotEmpty
-//
-//        errorMessage?.errors?.forEach {
-//            assertThat(it.toLowerCase()).contains("not found")
-//        }
-//    }
-//
-//    /**
-//     * Get product by id.
-//     */
-//    @Test
-//    fun testGetProductById() {
-//        val productsResponse = restTemplate?.getForObject("$endpoint/${testProduct.id}", ProductResponse::class.java)
-//
-//        assertThat(productsResponse).isNotNull
-//        assertThat(productsResponse?.code).isEqualTo(HttpStatus.OK.value())
-//        assertThat(productsResponse?.data).isNotNull
-//
-//        val productItem = productsResponse?.data
-//        assertThat(productItem).isNotNull
-//        assertThat(productItem?.id).isEqualTo(testProduct.id)
-//    }
-//
-//    /**
-//     * Get product by id that is not found.
-//     */
-//    @Test
-//    fun testGetProductByIdNotFound() {
-//        val id = 9999999
-//        val productErrorResponse = restTemplate?.getForObject("$endpoint/$id", ErrorResponse::class.java)
-//
-//        assertThat(productErrorResponse).isNotNull
-//        assertThat(productErrorResponse?.code).isEqualTo(HttpStatus.NOT_FOUND.value())
-//        assertThat(productErrorResponse?.message).isNotNull
-//
-//        val errorMessage = productErrorResponse?.message
-//        assertThat(errorMessage?.errors).isNotEmpty
-//
-//        errorMessage?.errors?.forEach {
-//            assertThat(it.toLowerCase()).contains("couldn't find product with 'id'=$id")
-//        }
-//    }
-//
-//    /**
-//     * Get products groups.
-//     * Note that this test does not yet account for paginated results, so it could actually miss a hit.
-//     */
-//    @Test
-//    fun testGetProductGroups() {
-//        val productGroupsResponse = restTemplate?.getForObject("$endpoint/groups?page=1&per_page=100", ProductGroupsResponse::class.java)
-//
-//        assertThat(productGroupsResponse).isNotNull
-//        assertThat(productGroupsResponse?.code).isEqualTo(HttpStatus.OK.value())
-//        assertThat(productGroupsResponse?.data).isNotNull
-//
-//        val productGroupItem = productGroupsResponse?.data
-//        assertThat(productGroupItem).isNotNull
-//
-//        val filteredGroups  = productGroupItem?.filter { item -> item.name.contains(testProduct.group)}
-//
-//        assertThat(filteredGroups).isNotNull
-//        assertThat(filteredGroups?.size).isEqualTo(1)
-//    }
-//
-//    /**
-//     * Get products inventory.
-//     */
-//    @Test
-//    fun testGetProductsInventory() {
-//        val params = "q[product_tags_name_cont]=jvt"
-//        val productsResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ProductsResponse::class.java)
-//
-//        assertThat(productsResponse).isNotNull
-//        assertThat(productsResponse?.code).isEqualTo(HttpStatus.OK.value())
-//        assertThat(productsResponse?.data).isNotNull
-//
-//        val productItems = productsResponse?.data
-//        assertThat(productItems).isNotEmpty
-//
-//        productItems?.forEach {
-//            assertThat(it.name).contains(testProduct.name)
-//        }
-//    }
-//
-//    /**
-//     * Get products inventory that is not found.
-//     */
-//    @Test
-//    fun testGetProductsInventoryNotFound() {
-//        val params = "q[product_tags_name_cont]=${testProduct.name}"
-//        val productsErrorResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ErrorResponse::class.java)
-//
-//        assertThat(productsErrorResponse).isNotNull
-//        assertThat(productsErrorResponse?.code).isEqualTo(HttpStatus.NOT_FOUND.value())
-//        assertThat(productsErrorResponse?.message).isNotNull
-//
-//        val errorMessage = productsErrorResponse?.message
-//        assertThat(errorMessage?.errors).isNotEmpty
-//
-//        errorMessage?.errors?.forEach {
-//            assertThat(it.toLowerCase()).contains("not found")
-//        }
-//    }
-//
-//    /**
-//     * Get products inventory that is not found on the FunctionalIntegrationTest product group.
-//     */
-//    @Test
-//    fun testGetProductsInventoryNotFoundOnTestProductGroup() {
-//        val params = "q[product_tags_name_cont]=${testProduct.name}"
-//        val productsErrorResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ErrorResponse::class.java)
-//
-//        assertThat(productsErrorResponse).isNotNull
-//        assertThat(productsErrorResponse?.code).isEqualTo(HttpStatus.NOT_FOUND.value())
-//        assertThat(productsErrorResponse?.message).isNotNull
-//
-//        val errorMessage = productsErrorResponse?.message
-//        assertThat(errorMessage?.errors).isNotEmpty
-//
-//        errorMessage?.errors?.forEach {
-//            assertThat(it.toLowerCase()).contains("not found")
-//        }
-//    }
+    /**
+     * Get product API docs.
+     */
+    @Test
+    fun testGetProductApiDocs() {
+        val response = restTemplate?.getForEntity("$endpoint/docs", Response::class.java)
+
+        assertThat(response?.statusCodeValue).isEqualTo(HttpStatus.OK.value())
+    }
+
+    /**
+     * Find products by query parameters.
+     */
+    @Test
+    fun testGetProductsByQueryParameters() {
+        val params = "tags=[\"ci\"]"
+        val productsResponse = restTemplate?.getForObject("$endpoint?$params", ProductsResponse::class.java)
+
+        assertThat(productsResponse).isNotNull
+        assertThat(productsResponse?.code).isEqualTo(HttpStatus.OK.value())
+        assertThat(productsResponse?.data).isNotNull
+
+        val productItems = productsResponse?.data
+        assertThat(productItems).isNotEmpty
+
+        productItems?.forEach {
+            assertThat(it.name).startsWith("JVT")
+        }
+    }
+
+    /**
+     * Find products by query parameters that are not found.
+     */
+    @Test
+    fun testGetProductsByQueryParametersNotFound() {
+        val params = "tags=[\"notfound\"]"
+        val productsErrorResponse = restTemplate?.getForObject("$endpoint?$params", ErrorResponse::class.java)
+
+        assertThat(productsErrorResponse).isNotNull
+        assertThat(productsErrorResponse?.code).isEqualTo(HttpStatus.NOT_FOUND.value())
+        assertThat(productsErrorResponse?.message).isNotNull
+
+        val errorMessage = productsErrorResponse?.message
+        assertThat(errorMessage?.errors).isNotEmpty
+
+        errorMessage?.errors?.forEach {
+            assertThat(it.toLowerCase()).contains("not found")
+        }
+    }
+
+    /**
+     * Get product by id.
+     */
+    @Test
+    fun testGetProductById() {
+        val productsResponse = restTemplate?.getForObject("$endpoint/${testProduct.id}", ProductResponse::class.java)
+
+        assertThat(productsResponse).isNotNull
+        assertThat(productsResponse?.code).isEqualTo(HttpStatus.OK.value())
+        assertThat(productsResponse?.data).isNotNull
+
+        val productItem = productsResponse?.data
+        assertThat(productItem).isNotNull
+        assertThat(productItem?.id).isEqualTo(testProduct.id)
+    }
+
+    /**
+     * Get product by id that is not found.
+     */
+    @Test
+    fun testGetProductByIdNotFound() {
+        val id = 9999999
+        val productErrorResponse = restTemplate?.getForObject("$endpoint/$id", ErrorResponse::class.java)
+
+        assertThat(productErrorResponse).isNotNull
+        assertThat(productErrorResponse?.code).isEqualTo(HttpStatus.NOT_FOUND.value())
+        assertThat(productErrorResponse?.message).isNotNull
+
+        val errorMessage = productErrorResponse?.message
+        assertThat(errorMessage?.errors).isNotEmpty
+
+        errorMessage?.errors?.forEach {
+            assertThat(it.toLowerCase()).contains("couldn't find product with 'id'=$id")
+        }
+    }
+
+    /**
+     * Get products groups.
+     * Note that this test does not yet account for paginated results, so it could actually miss a hit.
+     */
+    @Test
+    fun testGetProductGroups() {
+        val productGroupsResponse = restTemplate?.getForObject("$endpoint/groups?page=1&per_page=100", ProductGroupsResponse::class.java)
+
+        assertThat(productGroupsResponse).isNotNull
+        assertThat(productGroupsResponse?.code).isEqualTo(HttpStatus.OK.value())
+        assertThat(productGroupsResponse?.data).isNotNull
+
+        val productGroupItem = productGroupsResponse?.data
+        assertThat(productGroupItem).isNotNull
+
+        val filteredGroups  = productGroupItem?.filter { item -> item.name.contains(testProduct.group)}
+
+        assertThat(filteredGroups).isNotNull
+        assertThat(filteredGroups?.size).isEqualTo(1)
+    }
+
+    /**
+     * Get products inventory.
+     */
+    @Test
+    fun testGetProductsInventory() {
+        val params = "q[product_tags_name_cont]=jvt"
+        val productsResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ProductsResponse::class.java)
+
+        assertThat(productsResponse).isNotNull
+        assertThat(productsResponse?.code).isEqualTo(HttpStatus.OK.value())
+        assertThat(productsResponse?.data).isNotNull
+
+        val productItems = productsResponse?.data
+        assertThat(productItems).isNotEmpty
+
+        productItems?.forEach {
+            assertThat(it.name).contains(testProduct.name)
+        }
+    }
+
+    /**
+     * Get products inventory that is not found.
+     */
+    @Test
+    fun testGetProductsInventoryNotFound() {
+        val params = "q[product_tags_name_cont]=${testProduct.name}"
+        val productsErrorResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ErrorResponse::class.java)
+
+        assertThat(productsErrorResponse).isNotNull
+        assertThat(productsErrorResponse?.code).isEqualTo(HttpStatus.NOT_FOUND.value())
+        assertThat(productsErrorResponse?.message).isNotNull
+
+        val errorMessage = productsErrorResponse?.message
+        assertThat(errorMessage?.errors).isNotEmpty
+
+        errorMessage?.errors?.forEach {
+            assertThat(it.toLowerCase()).contains("not found")
+        }
+    }
+
+    /**
+     * Get products inventory that is not found on the FunctionalIntegrationTest product group.
+     */
+    @Test
+    fun testGetProductsInventoryNotFoundOnTestProductGroup() {
+        val params = "q[product_tags_name_cont]=${testProduct.name}"
+        val productsErrorResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ErrorResponse::class.java)
+
+        assertThat(productsErrorResponse).isNotNull
+        assertThat(productsErrorResponse?.code).isEqualTo(HttpStatus.NOT_FOUND.value())
+        assertThat(productsErrorResponse?.message).isNotNull
+
+        val errorMessage = productsErrorResponse?.message
+        assertThat(errorMessage?.errors).isNotEmpty
+
+        errorMessage?.errors?.forEach {
+            assertThat(it.toLowerCase()).contains("not found")
+        }
+    }
 
     /**
      * Get product batch availability.
