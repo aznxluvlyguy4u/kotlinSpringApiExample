@@ -145,13 +145,9 @@ class ProductsController(
      */
     @RequestMapping("availability")
     @ResponseBody
-    fun getProductBatchAvailability(@RequestBody productItems: List<ProductAvailabilityItem>?): ResponseEntity<*> {
+    fun getProductBatchAvailability(@RequestBody productItems: List<ProductAvailabilityItem>): ResponseEntity<*> {
         val logMessage = "[API] - GET products availability for batch $productItems"
         logger.debug(logMessage)
-
-        if (productItems == null) {
-            throw BadRequestException("Payload may not be empty")
-        }
 
         if (productItems.isEmpty()) {
             throw BadRequestException("Payload may not contain empty array")
