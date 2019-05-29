@@ -40,7 +40,7 @@ class ProductsControllerTest {
 
     /**
      * This is a product setup in Current RMS through the FunctionalIntegrationTest product group.
-     * These products are filtered out from public results queries results. And are only returned on LOCAL & TEST environments.
+     * These products are filtered out from public results queries results. And are only returned on LOCAL, DEV, STAGING & TEST environments.
      */
     internal class TestProduct(
         val id: Int = 247,
