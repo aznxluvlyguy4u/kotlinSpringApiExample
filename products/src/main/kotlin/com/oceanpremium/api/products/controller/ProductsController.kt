@@ -2,7 +2,6 @@ package com.oceanpremium.api.products.controller
 
 import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
-import com.oceanpremium.api.core.currentrms.response.dto.mapper.CurrentRmsBaseDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductGroupDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.config.ConfigProperty
@@ -24,7 +23,8 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("api/v1/products")
 class ProductsController(
     @Autowired private val resourceLoader: ResourceLoader,
-    @Autowired private val productsApi: ProductsApiImpl
+    @Autowired private val productsApi: ProductsApiImpl,
+    @Autowired private val getProductInventoryUseCase: GetProductInventoryUseCase
 ) {
 
     companion object {
@@ -155,39 +155,10 @@ class ProductsController(
         logger.debug(logMessageSales)
         Slogger.send(messageBody = logMessage, salesLog = true, inDebugMode = true)
 
-        val responses = productsApi.getProductsInventory(queryParameters, headers)
-
-        val dtos: MutableList<CurrentRmsBaseDtoMapper> = mutableListOf()
-
-        responses?.forEach {
-            dtos.add(ProductDtoMapper(it.code(), it))
-        }
-
-        var combinedDto: CurrentRmsBaseDtoMapper? = null
-        dtos.forEach {dto ->
-            if (combinedDto == null || combinedDto?.httpStatus !== HttpStatus.OK) {
-                combinedDto = dto
-            } else {
-                if (dto.httpStatus == HttpStatus.OK) {
-                    var combinedDtoData: List<ProductDto> = combinedDto!!.data as List<ProductDto>
-                    var currentDtoData: List<ProductDto>? = dto.data as List<ProductDto>?
-
-                    combinedDtoData.forEachIndexed {index, baseProductDto ->
-                        val baseQuantityAvailable: Double? = baseProductDto.rates.first().quantityAvailable?.toDouble()
-                        val currentQuantityAvailable: Double? = currentDtoData?.get(index)?.rates?.first()?.quantityAvailable?.toDouble()
-                        val newQuantityAvailable: String = baseQuantityAvailable?.plus(currentQuantityAvailable!!).toString()
-                        baseProductDto.rates.first().quantityAvailable = newQuantityAvailable
-                    }
-                }
-            }
-        }
-
-        val filteredData: List<ProductDto>? = (combinedDto?.data as List<ProductDto>?)?.filter{ p -> p.rates.first().quantityAvailable?.toDouble()!! > 0 }
-        combinedDto?.data = filteredData
+        val responses =  getProductInventoryUseCase.execute(queryParameters, headers)
 
         return CurrentRmsApiResponse.build {
-            rawResponse = responses?.first()
-            dtoMapper = combinedDto
+            dtoMapper = responses.first().dtoMapper
         }
     }
 }

@@ -13,6 +13,7 @@ import com.oceanpremium.api.core.currentrms.builder.StoreBuilderImpl
 import com.oceanpremium.api.core.currentrms.response.dto.parameter.LocationStoreResolverImpl
 import com.oceanpremium.api.core.currentrms.response.dto.config.ProductConfigOptionsResolverImpl
 import com.oceanpremium.api.core.exception.handler.GlobalExceptionHandler
+import com.oceanpremium.api.products.controller.GetProductInventoryUseCaseImpl
 import io.sentry.spring.SentryServletContextInitializer
 import org.slf4j.LoggerFactory
 import org.springframework.boot.SpringApplication
@@ -45,7 +46,8 @@ import kotlin.jvm.java as java1
     RegionBuilderImpl::class,
     StoreBuilderImpl::class,
     ProductConfigOptionsResolverImpl::class,
-    GlobalExceptionHandler::class
+    GlobalExceptionHandler::class,
+    GetProductInventoryUseCaseImpl::class
 )
 class ProductsDriver : SpringBootServletInitializer() {
 

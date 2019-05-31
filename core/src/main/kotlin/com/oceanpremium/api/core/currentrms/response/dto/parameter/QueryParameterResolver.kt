@@ -10,7 +10,7 @@ interface QueryParametersResolver {
 
     fun resolveGetProducts(map: Map<String, String>, headers: HttpHeaders): Map<String, String>
 
-    fun resolveGetProductsInventory(map: Map<String, String>, headers: HttpHeaders, storeId: Int): Map<String, String>
+    fun resolveGetProductsInventory(map: Map<String, String>, headers: HttpHeaders, storeId: Int?): Map<String, String>
 
     fun resolveGetProductGroups(map: Map<String, String>, headers: HttpHeaders): Map<String, String>
 
@@ -87,7 +87,7 @@ class QueryParametersResolverImpl : QueryParametersResolver {
      * 7  ends_at=YYYY-MM-DD
      * 8  q[product_product_group_name_not_eq]=FunctionalIntegrationTest
      */
-    override fun resolveGetProductsInventory(map: Map<String, String>, headers: HttpHeaders, storeId: Int): Map<String, String> {
+    override fun resolveGetProductsInventory(map: Map<String, String>, headers: HttpHeaders, storeId: Int?): Map<String, String> {
         val validatedMap = mutableMapOf<String, String>()
         val host = getHost(headers)
 
@@ -205,7 +205,7 @@ class QueryParametersResolverImpl : QueryParametersResolver {
 
             // Use to location/collection id's to resolve to a store id
             // Only query products on a specific store (for now)
-            if (!map.containsKey(DEFAULT_STORE_ID_QUERY)) {
+            if (!map.containsKey(DEFAULT_STORE_ID_QUERY) && storeId != null) {
                 validatedMap[DEFAULT_STORE_ID_QUERY] = "$storeId"
             }
 
