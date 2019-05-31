@@ -24,6 +24,13 @@ class GetProductInventoryUseCaseImpl(@Autowired private val locationStoreResolve
         private val logger = LoggerFactory.getLogger(this::class.java)
     }
 
+    /**
+     * Checks the availability for the given search term(s). The availability is checked on multiple stores based on given
+     * collection- & drop-off locations, which are mapped to multiple stores. Based on the current CurrentRMS API design.
+     * querying on multiple stores is a call per store. Thus, if a location X is mapped to N stores. The invocation of the usecase
+     * will result in N calls to the CurrentRMS API, to determine the availability for N stores. The resulting availability count
+     * then gets accumulated and presented back as a total availability count for all stores bound to given input location(s) (collection / drop-off)
+     */
     override fun execute(queryParameters: MutableMap<String, String>, headers: HttpHeaders): List<ProductInventoryResponseContainer> {
         // List of mapped store ids for the given input location(s), for which we need to query each store, to get the product inventory of
         val storeIds = locationStoreResolver.resolveStoreByLocation(queryParameters)
