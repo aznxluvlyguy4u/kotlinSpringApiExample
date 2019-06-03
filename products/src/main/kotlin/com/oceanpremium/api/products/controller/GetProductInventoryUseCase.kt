@@ -12,7 +12,10 @@ import org.springframework.http.HttpStatus
 import retrofit2.Response
 import java.lang.NumberFormatException
 
-class ResponseContainer(val successResponse: Response<Any>?, val errorResponse: Response<Any>?, val productInventoryResponseContainers: List<ProductInventoryResponseContainer>) {
+class ResponseContainer(
+    val successResponse: Response<Any>?,
+    val errorResponse: Response<Any>?,
+    val productInventoryResponseContainers: List<ProductInventoryResponseContainer>) {
 
     fun getResponse(): Response<Any>? {
         if (successResponse != null) {
@@ -29,9 +32,10 @@ class ProductInventoryResponseContainer(val rawResponse: Response<Any>, val dtoM
 /**
  * Checks the availability for the given search term(s). The availability is checked on multiple stores based on given
  * collection- & drop-off locations, which are mapped to multiple stores. Based on the current CurrentRMS API design.
- * querying on multiple stores is a call per store. Thus, if a location X is mapped to N stores. The invocation of the usecase
+ * querying on multiple stores is a call per store. Thus, if a location X is mapped to N stores. The invocation of the use case
  * will result in N calls to the CurrentRMS API, to determine the availability for N stores. The resulting availability count
- * then gets accumulated and presented back as a total availability count for all stores bound to given input location(s) (collection / drop-off)
+ * then gets accumulated and presented back as a total availability count for all stores bound to given input location(s)
+ * (collection / drop-off)
  */
 interface GetProductInventoryUseCase {
     fun execute(queryParameters: MutableMap<String, String>, headers: HttpHeaders): ResponseContainer
@@ -47,7 +51,8 @@ class GetProductInventoryUseCaseImpl(@Autowired private val locationStoreResolve
     }
 
     override fun execute(queryParameters: MutableMap<String, String>, headers: HttpHeaders): ResponseContainer {
-        // List of mapped store ids for the given input location(s), for which we need to query each store, to get the product inventory of
+        // List of mapped store ids for the given input location(s), for which we need to query each store,
+        // to get the product inventory of
         val storeIds = locationStoreResolver.resolveStoreByLocation(queryParameters)
         val productResponseContainers: MutableList<ProductInventoryResponseContainer> = mutableListOf()
         var seedSuccessResponse: Response<Any>? = null
@@ -62,20 +67,25 @@ class GetProductInventoryUseCaseImpl(@Autowired private val locationStoreResolve
 
             @Suppress("UNCHECKED_CAST")
             when {
+                // Handle error responses
                 response == null || response.code() != HttpStatus.OK.value() -> {
                     if (seedErrorResponse == null) {
                         seedErrorResponse = response
                     }
                 }
 
+                // Handle success response
                 response.code() == HttpStatus.OK.value() -> {
                     val dto = ProductDtoMapper(response.code(), response)
                     val productDtos = dto.data as List<ProductDto>?
 
+                    // Set the seed response, to be used as the main response to the client
                     if (seedSuccessResponse == null) {
                         seedSuccessResponse = response
                     }
 
+                    // From all the given response items, count the available items, store it as refrerence to set on the seed.
+                    // Parse each item to contain a product response.
                     productDtos?.forEach { dtoItem ->
                         try {
                             when {
@@ -84,18 +94,19 @@ class GetProductInventoryUseCaseImpl(@Autowired private val locationStoreResolve
                                     val itemQuantity = (dtoItemQuantityAvailable!!.toDouble()).toInt()
                                     totalQuantityAvailable += itemQuantity
 
-                                    logger.debug("item: ${dtoItem.id}  itemCount: $dtoItemQuantityAvailable totalCount: $totalQuantityAvailable")
+                                    logger.debug("item: ${dtoItem.id}  itemCount: $dtoItemQuantityAvailable totalCount: " +
+                                            "$totalQuantityAvailable")
                                 }
                             }
                         } catch (e: NumberFormatException) {
                             e.printStackTrace()
-                            logger.error("Failed to parse quantityAvailable for item: ${dtoItem.id} - quantity: ${dtoItem.rates.first().quantityAvailable} ${e.message}")
+                            logger.error("Failed to parse quantityAvailable for item: ${dtoItem.id} - quantity: " +
+                                    "${dtoItem.rates.first().quantityAvailable} ${e.message}")
                         }
                     }
 
                     val productContainerItem = ProductInventoryResponseContainer(response, dto)
                     productResponseContainers.add(productContainerItem)
-
                 }
             }
         }
