@@ -2,16 +2,17 @@ package com.oceanpremium.api.products.controller
 
 import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
+import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductDtoMapper
+import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductGroupDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.config.ConfigProperty
 import com.oceanpremium.api.core.currentrms.response.dto.config.ProductConfigOptionsResolverImpl
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductConfigsDtoMapper
-import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductDtoMapper
-import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductGroupDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.messenger.Slogger
 import com.oceanpremium.api.core.model.ProductAvailabilityItem
 import com.oceanpremium.api.core.model.WrappedResponse
+import com.oceanpremium.api.core.usecase.GetProductInventoryUseCase
 import com.oceanpremium.api.core.util.Constants
 import com.oceanpremium.api.core.util.ObjectMapperConfig
 import org.slf4j.LoggerFactory
@@ -26,7 +27,8 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("api/v1/products")
 class ProductsController(
     @Autowired private val resourceLoader: ResourceLoader,
-    @Autowired private val productsApi: ProductsApiImpl
+    @Autowired private val productsApi: ProductsApiImpl,
+    @Autowired private val getProductInventoryUseCase: GetProductInventoryUseCase
 ) {
 
     companion object {
@@ -157,13 +159,11 @@ class ProductsController(
         logger.debug(logMessageSales)
         Slogger.send(messageBody = logMessage, salesLog = true, inDebugMode = true)
 
-        val productsResponse = productsApi.getProductsInventory(queryParameters, headers)
-        val productsDto = ProductDtoMapper(productsResponse?.code()!!, productsResponse)
+        val result =  getProductInventoryUseCase.execute(queryParameters, headers)
 
         return CurrentRmsApiResponse.build {
-            rawResponse = productsResponse
-            dtoMapper = productsDto
-            error = productsDto.error
+            rawResponse = result.getRawResponse()
+            dtoMapper = result.dtoMapper
         }
     }
 
@@ -186,7 +186,9 @@ class ProductsController(
             if (it.quantity == 0) {
                 throw BadRequestException("Quantity supplied for product with id: ${it.id} may not be equal to 0")
             }
-            logger.debug("check availability for product with id: ${it.id} on location collection: ${it.location?.collectionId} - dropOff: ${it.location?.dropOffId} in period: ${it.period?.start} - ${it.period?.end}")
+            logger.debug("check availability for product with id: ${it.id} on location collection: " +
+                    "${it.location?.collectionId} - dropOff: ${it.location?.dropOffId} " +
+                    "in period: ${it.period?.start} - ${it.period?.end}")
         }
 
         return ResponseEntity(

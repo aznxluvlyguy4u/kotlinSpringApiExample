@@ -45,7 +45,7 @@ class ProductsControllerTest {
 
     /**
      * This is a product setup in Current RMS through the FunctionalIntegrationTest product group.
-     * These products are filtered out from public results queries results. And are only returned on LOCAL & TEST environments.
+     * These products are filtered out from public results queries results. And are only returned on LOCAL, DEV, STAGING & TEST environments.
      */
     internal class TestProduct(
         val id: Int = 247,
@@ -53,9 +53,17 @@ class ProductsControllerTest {
         val group: String = FUNCTIONAL_INTEGRATION_GROUP_NAME
     )
 
+    internal class TestExistingProduct(
+        val id: Int = 148,
+        val name: String = "Seabob F5",
+        val gibraltarLocationId: Int = 1,
+        val portVendresLocationId: Int = 29
+    )
+
     companion object {
         private const val endpoint = "/api/v1/products"
         private val testProduct = TestProduct()
+        private val testExistingProduct = TestExistingProduct()
     }
 
     /**
@@ -183,7 +191,7 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductsInventory() {
-        val params = "q[product_tags_name_cont]=jvt"
+        val params = "q[product_tags_name_cont]=f5"
         val productsResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ProductsResponse::class.java)
 
         assertThat(productsResponse).isNotNull
@@ -194,8 +202,43 @@ class ProductsControllerTest {
         assertThat(productItems).isNotEmpty
 
         productItems?.forEach {
-            assertThat(it.name).contains(testProduct.name)
+            assertThat(it.name).containsIgnoringCase("f5")
         }
+    }
+
+    /**
+     * Get products inventory.
+     */
+    @Test
+    fun testGetProductsInventoryDifferentQuantityAvailableForDifferentLocationId() {
+        // First query inventory with delivery_location_id set to gebraltar
+        val params = "delivery_location_id=${testExistingProduct.gibraltarLocationId}&q[product_tags_name_cont]=f5"
+        val productsResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ProductsResponse::class.java)
+
+        assertThat(productsResponse).isNotNull
+        assertThat(productsResponse?.code).isEqualTo(HttpStatus.OK.value())
+        assertThat(productsResponse?.data).isNotNull
+
+        val productItems = productsResponse?.data
+        assertThat(productItems).isNotEmpty
+
+        val testProduct: Products? = productItems?.find{ p -> p.id == testExistingProduct.id }
+        assertThat(testProduct?.rates?.first()?.quantityAvailable).isEqualTo("2.0")
+
+        // Then query inventory with delivery_location_id set to port vendres
+        val params2 = "delivery_location_id=${testExistingProduct.portVendresLocationId}&q[product_tags_name_cont]=f5"
+        val productsResponse2 = restTemplate?.getForObject("$endpoint/inventory?$params2", ProductsResponse::class.java)
+
+        assertThat(productsResponse2).isNotNull
+        assertThat(productsResponse2?.code).isEqualTo(HttpStatus.OK.value())
+        assertThat(productsResponse2?.data).isNotNull
+
+        val productItems2 = productsResponse2?.data
+        assertThat(productItems2).isNotEmpty
+
+        val testProduct2: Products? = productItems2?.find{ p -> p.id == testExistingProduct.id }
+        assertThat(testProduct2?.rates?.first()?.quantityAvailable).isEqualTo("3.0")
+
     }
 
     /**

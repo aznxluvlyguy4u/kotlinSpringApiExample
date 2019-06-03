@@ -6,11 +6,9 @@ import com.amazonaws.serverless.proxy.model.AwsProxyResponse
 import com.amazonaws.serverless.proxy.spring.SpringBootLambdaContainerHandler
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler
-import com.oceanpremium.api.core.currentrms.ProductsApiImpl
-import com.oceanpremium.api.locations.builder.LocationBuilder
-import com.oceanpremium.api.locations.builder.LocationBuilderImpl
-import com.oceanpremium.api.locations.builder.StoreBuilder
-import com.oceanpremium.api.locations.builder.StoreBuilderImpl
+import com.oceanpremium.api.core.currentrms.builder.LocationBuilderImpl
+import com.oceanpremium.api.core.currentrms.builder.RegionBuilderImpl
+import com.oceanpremium.api.core.exception.handler.GlobalExceptionHandler
 import io.sentry.spring.SentryServletContextInitializer
 import org.slf4j.LoggerFactory
 import org.springframework.boot.SpringApplication
@@ -36,6 +34,7 @@ import kotlin.jvm.java as java1
  * The main application entry point that spins up the API.
  */
 @SpringBootApplication
+@Import(LocationBuilderImpl::class, RegionBuilderImpl::class, GlobalExceptionHandler::class)
 class LocationsDriver : SpringBootServletInitializer() {
 
     companion object {

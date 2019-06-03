@@ -9,7 +9,7 @@ import retrofit2.Response
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class MetaDtoMapper(response: Response<Any>?) {
 
-    var meta: Any? = null
+    var meta: MetaDto? = null
     var overrideHttpStatus: Boolean = false
 
     companion object {
@@ -23,7 +23,7 @@ class MetaDtoMapper(response: Response<Any>?) {
         meta = mapToDto(response)
     }
 
-    private fun mapToDto(response: Response<Any>?): Any {
+    private fun mapToDto(response: Response<Any>?): MetaDto {
         val responseBody = response?.body() as Map<*, *>
         var totalRowCount = 0
         var rowCount = 0

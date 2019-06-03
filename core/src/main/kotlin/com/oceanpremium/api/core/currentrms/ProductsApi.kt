@@ -20,7 +20,7 @@ import retrofit2.http.QueryMap
  */
 interface ProductsApi {
     /**
-     * Endpoint to query products by given query parameters.
+     * Endpoint to query products by given query parameters (does not account for availability).
      */
     @GET("products")
     fun getProducts(
@@ -90,7 +90,7 @@ class ProductsApiImpl(
             throw CurrentRmsAPIException(e.message)
         }
 
-        logger.debug("Current RMS API call - HTTP status: ${response.code()}")
+        logger.debug("Current RMS API call: api/v1/products/{productId} HTTP status: ${response.code()}")
 
         when {
             response.isSuccessful -> {
@@ -117,7 +117,7 @@ class ProductsApiImpl(
         try {
             response = retrofitCall.execute()
 
-            logger.debug("Current RMS API call - HTTP status: ${response.code()}")
+            logger.debug("Current RMS API call: api/v1/products HTTP status: ${response.code()}")
 
             when {
                 response != null && response.isSuccessful -> {
@@ -168,7 +168,7 @@ class ProductsApiImpl(
             throw CurrentRmsAPIException(e.message)
         }
 
-        logger.debug("Current RMS API call - HTTP status: ${response.code()}")
+        logger.debug("Current RMS API call: api/v1/product_groups HTTP status: ${response.code()}")
 
         when {
             response.isSuccessful -> {
@@ -187,8 +187,12 @@ class ProductsApiImpl(
     /**
      * @inherit
      */
-    fun getProductsInventory(queryParameters: MutableMap<String, String>, headers: HttpHeaders): Response<Any>? {
-        val validatedMap = queryParametersResolver.resolveGetProductsInventory(queryParameters, headers)
+    fun getProductsInventory(
+        queryParameters: MutableMap<String, String>,
+        headers: HttpHeaders,
+        storeId: Int?
+    ): Response<Any>? {
+        val validatedMap = queryParametersResolver.resolveGetProductsInventory(queryParameters, headers, storeId)
         val retrofitCall = productsApi.getProductsInventory(map = validatedMap)
         lateinit var response: Response<Any>
 
@@ -202,7 +206,7 @@ class ProductsApiImpl(
             throw CurrentRmsAPIException(e.message)
         }
 
-        logger.debug("Current RMS API call - HTTP status: ${response.code()}")
+        logger.debug("Current RMS API call: api/v1/products/inventory HTTP status: ${response.code()}")
 
         when {
             response.isSuccessful -> {

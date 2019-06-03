@@ -1,10 +1,12 @@
-package com.oceanpremium.api.locations.builder
+package com.oceanpremium.api.core.currentrms.builder
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.util.*
 
 interface StoreBuilder {
     fun getAllStores(): List<Store>
+    fun getAllStoreIds(): SortedSet<Int>
 }
 
 /**
@@ -188,7 +190,7 @@ class StoreBuilderImpl(@Autowired private val regionBuilder: RegionBuilder): Sto
         val stores: MutableList<Store> = mutableListOf()
 
         // FTL
-        val ftl = Store("FTL", 97)
+        val ftl = Store("FTL", 13)
         ftl.addRegion(regionBuilder.buildSpainMainLand())
         ftl.addRegion(regionBuilder.buildBaleraicsIslands())
         ftl.addRegion(regionBuilder.buildSouthOfFrance())
@@ -225,5 +227,21 @@ class StoreBuilderImpl(@Autowired private val regionBuilder: RegionBuilder): Sto
         allStores.addAll(buildFtl())
 
         return allStores
+    }
+
+    override fun getAllStoreIds(): SortedSet<Int> {
+        val allStoreIds: SortedSet<Int> = sortedSetOf()
+
+        allStoreIds.add(99)
+        allStoreIds.add(3)
+        allStoreIds.add(11)
+        allStoreIds.add(5)
+        allStoreIds.add(15)
+        allStoreIds.add(10)
+        allStoreIds.add(98)
+        allStoreIds.add(14)
+        allStoreIds.add(13)
+
+        return allStoreIds
     }
 }
