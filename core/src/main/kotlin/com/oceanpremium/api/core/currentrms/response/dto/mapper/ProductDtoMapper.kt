@@ -9,6 +9,9 @@ import org.springframework.http.HttpStatus
 import retrofit2.Response
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.oceanpremium.api.core.currentrms.response.dto.config.ConfigProperty
+import com.oceanpremium.api.core.currentrms.response.dto.config.ConfigPropertyField
+import com.oceanpremium.api.core.currentrms.response.dto.config.ConfigPropertyValue
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.util.FileSizeFormatUtil
 
@@ -19,7 +22,6 @@ class ErrorResponse {
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoMapper(code) {
-
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
@@ -46,7 +48,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                 val errorBody = response.errorBody()
 
                 error = when {
-                    errorBody != null  -> {
+                    errorBody != null -> {
                         val type = object : TypeToken<ErrorResponse>() {}.type
                         val errorResponse: ErrorResponse? = Gson().fromJson(response.errorBody()!!.charStream(), type)
 
@@ -94,7 +96,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                     }
 
                     responseBody.containsKey("product") -> {
-                         mapJsonObjectToDto(responseBody["product"] as Map<*, *>)
+                        mapJsonObjectToDto(responseBody["product"] as Map<*, *>)
                     }
 
                     else -> null
@@ -136,6 +138,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         val accessoryIds = mapAccessoryIds(itemBody)
         val imageSources: ImageDto?
         val attachments: List<AttachmentDto>? = mapAttachments(itemBody)
+        val rawConfigurationIds = mapConfigIds(itemBody)
 
         try {
             if (itemBody.containsKey("id")) {
@@ -179,7 +182,8 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             imageSources.sources,
             customFields,
             accessoryIds,
-            attachments
+            attachments,
+            rawConfigurationIds
         )
     }
 
@@ -208,8 +212,8 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                 }
             }
 
-            itemBody.containsKey("icon")  -> {
-                val icon = itemBody["icon"] as Map<*,*>?
+            itemBody.containsKey("icon") -> {
+                val icon = itemBody["icon"] as Map<*, *>?
                 var imageUrl: String? = null
                 var thumbUrl: String? = null
 
@@ -238,7 +242,12 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             }
             else -> {
                 if (itemBody.containsKey("icon_thumb_url") && itemBody.containsKey("icon_url")) {
-                    imageSources.add(ImageSource(itemBody["icon_url"] as String?, itemBody["icon_thumb_url"] as String?))
+                    imageSources.add(
+                        ImageSource(
+                            itemBody["icon_url"] as String?,
+                            itemBody["icon_thumb_url"] as String?
+                        )
+                    )
                 }
             }
         }
@@ -269,7 +278,12 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
 
                     when {
                         !rentalPrice.isNullOrEmpty() -> when {
-                            !rentalLeadChargePeriodName.isNullOrEmpty() -> rates.add(PricingDto(price = rentalPrice, chargePeriod = rentalLeadChargePeriodName))
+                            !rentalLeadChargePeriodName.isNullOrEmpty() -> rates.add(
+                                PricingDto(
+                                    price = rentalPrice,
+                                    chargePeriod = rentalLeadChargePeriodName
+                                )
+                            )
                         }
                     }
                 }
@@ -299,7 +313,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
 
             } else {
                 if (itemBody.containsKey("product_group")) {
-                    val productGroup = itemBody["product_group"] as Map<*,*>
+                    val productGroup = itemBody["product_group"] as Map<*, *>
 
                     when {
                         productGroup.containsKey("id") && productGroup.containsKey("name") -> {
@@ -382,17 +396,18 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
     private fun mapAccessoryIds(itemBody: Map<*, *>): List<AccessoryItem> {
         val items: MutableList<AccessoryItem> = mutableListOf()
         val accessoryIdKey = "related_id"
+
         if (itemBody.containsKey(ACCESSORIES_KEY)) {
             @Suppress("UNCHECKED_CAST")
             val productsItemsBody = itemBody[ACCESSORIES_KEY] as List<Map<*, *>>
 
             var id: Int? = null
             var type: String? = null
+            var quantity: String? = null
 
             productsItemsBody.forEach {
                 if (it.containsKey(accessoryIdKey) && it[accessoryIdKey] != null) {
                     id = (it[accessoryIdKey] as Double).toInt()
-
                 }
 
                 if (it.containsKey("inclusion_type_name") && it["inclusion_type_name"] != null) {
@@ -401,10 +416,75 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                     logger.debug("Found accessory with Id: $id and type: $type")
                 }
 
-                if (id != null && type != null) {
-                    items.add(AccessoryItem(id!!, type!!))
+                if (it.containsKey("quantity") && it["quantity"] != null) {
+                    quantity = it["quantity"] as String
+                }
+
+                if (id != null && type != null && quantity != null) {
+                    items.add(AccessoryItem(id!!, type!!, quantity!!))
                 }
             }
+        }
+
+        return items
+    }
+
+    /**
+     * Grab custom field config ids, so we can resolve the configuration option names for the product.
+     * This depends on a HARDCODED FORMAT OF CUSTOM FIELDS (custom_product_config_option_)
+     */
+    private fun mapConfigIds(itemBody: Map<*, *>): List<ConfigPropertyField> {
+        val items: MutableList<ConfigPropertyField> = mutableListOf()
+
+        try {
+
+            when {
+                // Grab custom fields, find specifically keys that contain custom_product_config_option_ substring
+                itemBody.contains("custom_fields") -> {
+                    val customFieldsBody = itemBody["custom_fields"] as Map<*, *>
+
+                    val configKeysToProcess: MutableList<String> = mutableListOf()
+
+                    customFieldsBody.keys.forEach {
+                        it as String
+                        if (it.contains("custom_product_config_option_")) {
+                            // Build collection of config
+                            configKeysToProcess.add(it)
+                        }
+                    }
+
+                    logger.debug("$customFieldsBody")
+
+                    configKeysToProcess.forEach {
+                        val configName: String? = it
+                        @Suppress("UNCHECKED_CAST")
+                        val rawConfigIds = customFieldsBody[it] as List<Double>?
+                        val preparedConfigIds: MutableList<Int> = mutableListOf()
+
+                        // Parse list of doubles to list of ints
+                        rawConfigIds?.forEach { idItem ->
+                            val id = idItem.toInt()
+                            preparedConfigIds.add(id)
+                        }
+
+                        if (configName != null && preparedConfigIds.size > 0) {
+                            logger.debug("HIT list:$configName: $preparedConfigIds")
+                            val configIds = ConfigPropertyField(configName, preparedConfigIds)
+                            items.add(configIds)
+                        }
+
+                    }
+
+                }
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+
+            val message = "Failed to map product response to Dto: ${e.message}"
+            logger.error(message)
+
+            throw BadRequestException(e.message)
         }
 
         return items
@@ -415,7 +495,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
 
         try {
             if (itemBody.containsKey("attachments")) {
-                val attachmentItems = itemBody["attachments"] as List<Map<*,*>>
+                val attachmentItems = itemBody["attachments"] as List<Map<*, *>>
 
                 attachmentItems.forEach {
 

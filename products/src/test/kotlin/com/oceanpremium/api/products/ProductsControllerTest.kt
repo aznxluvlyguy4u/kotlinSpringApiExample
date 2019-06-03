@@ -43,6 +43,10 @@ class ProductsControllerTest {
     @Autowired
     val restTemplate: TestRestTemplate? = null
 
+    /**
+     * This is a product setup in Current RMS through the FunctionalIntegrationTest product group.
+     * These products are filtered out from public results queries results. And are only returned on LOCAL & TEST environments.
+     */
     internal class TestProduct(
         val id: Int = 247,
         val name: String = "JVTRubberDuck",
@@ -163,6 +167,19 @@ class ProductsControllerTest {
 
     /**
      * Get products inventory.
+     *
+     * Query for products containing jvt term. These products belong to a specific product group:
+     *
+     * FunctionalIntegrationTest
+     *
+     * that has been setup in current RMS to setup testing through functional integration testing
+     *
+     * Products under the group are setup with a product name of the following format:
+     *
+     * JVTSpecificProductName
+     *
+     * The Functional Integration Test group is excluded in the result sets for public usage.
+     * It is ONLY EXPOSED on the LOCAL & TEST environments.
      */
     @Test
     fun testGetProductsInventory() {
@@ -283,5 +300,25 @@ class ProductsControllerTest {
 
         assertThat(productsResponse).isNotNull
         assertThat(productsResponse?.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+    }
+
+    /*
+     * Get products inventory bad request for start date before end date.
+     */
+    @Test
+    fun testBadRequestStartDateBeforeEndDateGetProductsInventory() {
+        val params = "starts_at=2019-09-15&ends_at=2019-09-01&q[product_tags_name_cont]=seabob"
+        val productsErrorResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ErrorResponse::class.java)
+
+        assertThat(productsErrorResponse).isNotNull
+        assertThat(productsErrorResponse?.code).isEqualTo(HttpStatus.BAD_REQUEST.value())
+        assertThat(productsErrorResponse?.message).isNotNull
+
+        val errorMessage = productsErrorResponse?.message
+        assertThat(errorMessage?.errors).isNotEmpty
+
+        errorMessage?.errors?.forEach {
+            assertThat(it.toLowerCase()).contains("bad request")
+        }
     }
 }
