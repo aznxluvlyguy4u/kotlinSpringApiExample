@@ -155,11 +155,11 @@ class ProductsController(
         logger.debug(logMessageSales)
         Slogger.send(messageBody = logMessage, salesLog = true, inDebugMode = true)
 
-        val response =  getProductInventoryUseCase.execute(queryParameters, headers)
+        val result =  getProductInventoryUseCase.execute(queryParameters, headers)
 
         return CurrentRmsApiResponse.build {
-            rawResponse = response.getResponse()
-            dtoMapper = response.productInventoryResponseContainers.first().dtoMapper
+            rawResponse = result.getRawResponse()
+            dtoMapper = result.dtoMapper
         }
     }
 }

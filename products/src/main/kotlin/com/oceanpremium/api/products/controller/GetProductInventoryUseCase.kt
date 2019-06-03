@@ -10,14 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import retrofit2.Response
-import java.lang.NumberFormatException
 
 class ResponseContainer(
-    val successResponse: Response<Any>?,
-    val errorResponse: Response<Any>?,
-    val productInventoryResponseContainers: List<ProductInventoryResponseContainer>) {
+    private val successResponse: Response<Any>?,
+    private val errorResponse: Response<Any>?,
+    val dtoMapper: CurrentRmsBaseDtoMapper) {
 
-    fun getResponse(): Response<Any>? {
+    fun getRawResponse(): Response<Any>? {
+
         if (successResponse != null) {
             return successResponse
         }
@@ -25,9 +25,6 @@ class ResponseContainer(
         return errorResponse
     }
 }
-
-class ProductInventoryResponseContainer(val rawResponse: Response<Any>, val dtoMapper: CurrentRmsBaseDtoMapper)
-
 
 /**
  * Checks the availability for the given search term(s). The availability is checked on multiple stores based on given
@@ -50,69 +47,78 @@ class GetProductInventoryUseCaseImpl(@Autowired private val locationStoreResolve
         private val logger = LoggerFactory.getLogger(this::class.java)
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun execute(queryParameters: MutableMap<String, String>, headers: HttpHeaders): ResponseContainer {
         // List of mapped store ids for the given input location(s), for which we need to query each store,
         // to get the product inventory of
         val storeIds = locationStoreResolver.resolveStoreByLocation(queryParameters)
-        val productResponseContainers: MutableList<ProductInventoryResponseContainer> = mutableListOf()
         var seedSuccessResponse: Response<Any>? = null
         var seedErrorResponse: Response<Any>? = null
+        val responses: MutableList<Response<Any>> = mutableListOf()
+        val dtos: MutableList<CurrentRmsBaseDtoMapper> = mutableListOf()
+        var combinedDto: CurrentRmsBaseDtoMapper? = null
 
-        var totalQuantityAvailable = 0
+        storeIds?.forEach { storeId ->
+            val response = productsApi.getProductsInventory(queryParameters, headers, storeId)
 
-        storeIds?.forEach {
-            val response = productsApi.getProductsInventory(queryParameters, headers, it)
+            logger.debug("Response code for query on storeId: $storeId - ${response?.code()}")
 
-            logger.debug("Response code for query on storeId: $it - ${response?.code()}")
+            if (response != null) {
 
-            @Suppress("UNCHECKED_CAST")
-            when {
-                // Handle error responses
-                response == null || response.code() != HttpStatus.OK.value() -> {
-                    if (seedErrorResponse == null) {
-                        seedErrorResponse = response
-                    }
+                when {
+                    !response.isSuccessful && seedErrorResponse == null -> seedErrorResponse = response
                 }
 
-                // Handle success response
-                response.code() == HttpStatus.OK.value() -> {
-                    val dto = ProductDtoMapper(response.code(), response)
-                    val productDtos = dto.data as List<ProductDto>?
+                when {
+                    response.isSuccessful && seedSuccessResponse == null -> seedSuccessResponse = response
+                }
 
-                    // Set the seed response, to be used as the main response to the client
-                    if (seedSuccessResponse == null) {
-                        seedSuccessResponse = response
-                    }
+                responses.add(response)
+            }
+        }
 
-                    // From all the given response items, count the available items, store it as refrerence to set on the seed.
-                    // Parse each item to contain a product response.
-                    productDtos?.forEach { dtoItem ->
-                        try {
-                            when {
-                                dtoItem.rates.first().quantityAvailable != null -> {
-                                    val dtoItemQuantityAvailable = dtoItem.rates.first().quantityAvailable
-                                    val itemQuantity = (dtoItemQuantityAvailable!!.toDouble()).toInt()
-                                    totalQuantityAvailable += itemQuantity
+        responses.forEach {
+            dtos.add(ProductDtoMapper(it.code(), it))
+        }
 
-                                    logger.debug("item: ${dtoItem.id}  itemCount: $dtoItemQuantityAvailable totalCount: " +
-                                            "$totalQuantityAvailable")
+        dtos.forEach { dto ->
+            when {
+                combinedDto == null || combinedDto?.httpStatus !== HttpStatus.OK -> {
+                    combinedDto = dto
+                }
+                else -> {
+                    if (dto.httpStatus == HttpStatus.OK) {
+
+                        val combinedDtoData: List<ProductDto> = combinedDto!!.data as List<ProductDto>
+                        val currentDtoData: List<ProductDto>? = dto.data as List<ProductDto>?
+
+                        combinedDtoData.forEach { productDtoItem ->
+                            val itemQuantityAvailable: Double? = productDtoItem.rates.first().quantityAvailable?.toDouble()
+
+                            // find the matching dto item in current dto data set, based on its id, to update the total count of available quantity
+                            val currentDtoItem = currentDtoData?.find { it.id == productDtoItem.id }
+
+                            if (currentDtoItem != null) {
+                                logger.debug("Found candidate: ${currentDtoItem.name}")
+                                val currentQuantityAvailable: Double? = currentDtoItem.rates.first().quantityAvailable?.toDouble()
+
+                                if (itemQuantityAvailable != null && currentQuantityAvailable != null) {
+                                    val totalQuantityAvailable = itemQuantityAvailable.plus(currentQuantityAvailable)
+
+                                    logger.debug("item id: ${productDtoItem.id} : current quantity: $currentQuantityAvailable, item id:${currentDtoItem.id} addition quantity: $itemQuantityAvailable, total new quantity: $totalQuantityAvailable")
+
+                                    productDtoItem.rates.first().quantityAvailable = totalQuantityAvailable.toString()
                                 }
                             }
-                        } catch (e: NumberFormatException) {
-                            e.printStackTrace()
-                            logger.error("Failed to parse quantityAvailable for item: ${dtoItem.id} - quantity: " +
-                                    "${dtoItem.rates.first().quantityAvailable} ${e.message}")
                         }
                     }
-
-                    val productContainerItem = ProductInventoryResponseContainer(response, dto)
-                    productResponseContainers.add(productContainerItem)
                 }
             }
         }
 
-        logger.debug("Total Quantity Available: $totalQuantityAvailable")
+        val filteredData: List<ProductDto>? = (combinedDto?.data as List<ProductDto>?)?.filter{ p -> p.rates.first().quantityAvailable?.toDouble()!! > 0 }
+        combinedDto?.data = filteredData
 
-        return ResponseContainer(seedSuccessResponse, seedErrorResponse, productResponseContainers)
+        return ResponseContainer(seedSuccessResponse, seedErrorResponse, combinedDto!!)
     }
 }
