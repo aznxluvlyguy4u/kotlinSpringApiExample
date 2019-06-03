@@ -1,4 +1,4 @@
-package com.oceanpremium.api.products.controller
+package com.oceanpremium.api.core.usecase
 
 import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.CurrentRmsBaseDtoMapper
@@ -41,7 +41,8 @@ interface GetProductInventoryUseCase {
 
 /** {@inheritDoc} */
 class GetProductInventoryUseCaseImpl(@Autowired private val locationStoreResolver: LocationStoreResolver,
-                                     @Autowired private val productsApi: ProductsApiImpl) : GetProductInventoryUseCase {
+                                     @Autowired private val productsApi: ProductsApiImpl) :
+    GetProductInventoryUseCase {
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
@@ -119,6 +120,10 @@ class GetProductInventoryUseCaseImpl(@Autowired private val locationStoreResolve
         val filteredData: List<ProductDto>? = (combinedDto?.data as List<ProductDto>?)?.filter{ p -> p.rates.first().quantityAvailable?.toDouble()!! > 0 }
         combinedDto?.data = filteredData
 
-        return ResponseContainer(seedSuccessResponse, seedErrorResponse, combinedDto!!)
+        return ResponseContainer(
+            seedSuccessResponse,
+            seedErrorResponse,
+            combinedDto!!
+        )
     }
 }

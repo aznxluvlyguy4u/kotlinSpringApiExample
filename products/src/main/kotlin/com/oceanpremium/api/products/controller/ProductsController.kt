@@ -9,6 +9,7 @@ import com.oceanpremium.api.core.currentrms.response.dto.config.ProductConfigOpt
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductConfigsDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.messenger.Slogger
+import com.oceanpremium.api.core.usecase.GetProductInventoryUseCase
 import com.oceanpremium.api.core.util.Constants
 import com.oceanpremium.api.core.util.ObjectMapperConfig
 import org.slf4j.LoggerFactory
