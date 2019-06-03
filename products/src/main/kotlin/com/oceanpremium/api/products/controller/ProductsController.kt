@@ -76,7 +76,7 @@ class ProductsController(
         val logMessage = "[API] - GET products with request parameters: $productId"
         logger.debug(logMessage)
 
-        // Get all product configuration options
+        // Get all product configurations options
         val allConfigOptionsResponse = productsApi.getProductConfigOptions()
         val allConfigOptionsDto = ProductConfigsDtoMapper(allConfigOptionsResponse?.code()!!, allConfigOptionsResponse)
 

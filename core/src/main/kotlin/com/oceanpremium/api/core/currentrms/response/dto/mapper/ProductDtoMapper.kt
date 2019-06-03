@@ -430,7 +430,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
     }
 
     /**
-     * Grab custom field config ids, so we can resolve the configuration option names for the product.
+     * Grab custom field config ids, so we can resolve the configurations option names for the product.
      * This depends on a HARDCODED FORMAT OF CUSTOM FIELDS (custom_product_config_option_)
      */
     private fun mapConfigIds(itemBody: Map<*, *>): List<ConfigPropertyField> {

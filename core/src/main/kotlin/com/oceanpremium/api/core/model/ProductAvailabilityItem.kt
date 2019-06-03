@@ -8,7 +8,7 @@ class ProductAvailabilityItem(
     val quantity: Int,
     var period: RentalPeriod? = null,
     var location: RentalLocation? = null,
-    var configuration: Map<*,*>? = null,
+    var configurations: List<Map<*,*>>? = null,
     var accessories: List<ProductAvailabilityItem>? = null
 ) {
     var quantityAvailable: Int = 0
