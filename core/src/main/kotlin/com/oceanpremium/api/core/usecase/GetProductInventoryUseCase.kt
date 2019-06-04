@@ -106,7 +106,13 @@ class GetProductInventoryUseCaseImpl(@Autowired private val locationStoreResolve
                                 if (itemQuantityAvailable != null && currentQuantityAvailable != null) {
                                     val totalQuantityAvailable = itemQuantityAvailable.plus(currentQuantityAvailable)
 
-                                    logger.debug("item id: ${productDtoItem.id} : current quantity: $currentQuantityAvailable, item id:${currentDtoItem.id} addition quantity: $itemQuantityAvailable, total new quantity: $totalQuantityAvailable")
+                                    logger.debug(
+                                        "item id: ${productDtoItem.id} : " +
+                                            "current quantity: $currentQuantityAvailable, " +
+                                            "item id:${currentDtoItem.id} " +
+                                            "addition quantity: $itemQuantityAvailable, " +
+                                            "total new quantity: $totalQuantityAvailable"
+                                    )
 
                                     productDtoItem.rates.first().quantityAvailable = totalQuantityAvailable.toString()
                                 }

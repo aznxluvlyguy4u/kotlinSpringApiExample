@@ -495,6 +495,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
 
         try {
             if (itemBody.containsKey("attachments")) {
+                @Suppress("UNCHECKED_CAST")
                 val attachmentItems = itemBody["attachments"] as List<Map<*, *>>
 
                 attachmentItems.forEach {
