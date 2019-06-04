@@ -97,22 +97,14 @@ class ProductsController(
 
         // Process product accessories
         val accessoryDtos: MutableList<ProductDto> = mutableListOf()
-        productData?.accesoryIds?.forEach {
-            val accessoryResponse = productsApi.getProductById(it.id)
+        productData?.accesoryIds?.forEach { accessoryItem ->
+            val accessoryResponse = productsApi.getProductById(accessoryItem.id)
             val accessoryDto = ProductDtoMapper(accessoryResponse?.code()!!, accessoryResponse)
             val accessoryData = accessoryDto.data as ProductDto?
 
-            // Resolve the accessory specific configurations
-            @Suppress("UNCHECKED_CAST")
-            val resolvedAccessoryConfigurationOptions = ProductConfigOptionsResolverImpl(
-                allConfigOptionsDto.data as List<ConfigProperty>,
-                accessoryData
-            )
-
-            accessoryData?.configurations = resolvedAccessoryConfigurationOptions.data
-            accessoryData?.type = it.type
+            accessoryData?.type = accessoryItem.type
             accessoryData?.rates?.forEach { rates ->
-                rates.quantityAvailable = it.quantity
+                rates.quantityAvailable = accessoryItem.quantity
             }
             accessoryDtos.add(accessoryData!!)
 
