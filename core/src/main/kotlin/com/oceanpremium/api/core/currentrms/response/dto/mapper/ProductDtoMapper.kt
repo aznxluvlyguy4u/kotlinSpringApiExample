@@ -9,9 +9,7 @@ import org.springframework.http.HttpStatus
 import retrofit2.Response
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.oceanpremium.api.core.currentrms.response.dto.config.ConfigProperty
 import com.oceanpremium.api.core.currentrms.response.dto.config.ConfigPropertyField
-import com.oceanpremium.api.core.currentrms.response.dto.config.ConfigPropertyValue
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.util.FileSizeFormatUtil
 
@@ -26,6 +24,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
         private const val ACCESSORIES_KEY = "accessories"
+        private const val CUSTOM_FIELDS_KEY = "custom_fields"
     }
 
     init {
@@ -139,6 +138,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         val imageSources: ImageDto?
         val attachments: List<AttachmentDto>? = mapAttachments(itemBody)
         val rawConfigurationIds = mapConfigIds(itemBody)
+        val descriptionDto: DescriptionDto = mapDescriptionText(itemBody)
 
         try {
             if (itemBody.containsKey("id")) {
@@ -175,7 +175,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         return ProductDto(
             id,
             name,
-            description,
+            descriptionDto,
             type,
             productGroup,
             rates.pricings,
@@ -349,8 +349,13 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
 
         try {
             when {
-                itemBody.contains("custom_fields") -> {
-                    val customFieldsBody = itemBody["custom_fields"] as Map<*, *>
+                itemBody.contains(CUSTOM_FIELDS_KEY) -> {
+                    val customFieldsBody = itemBody[CUSTOM_FIELDS_KEY] as Map<*, *>
+
+                    when {
+                        customFieldsBody.containsKey("public_icon_url") -> publicIconUrl =
+                            customFieldsBody["public_icon_url"] as String?
+                    }
 
                     when {
                         customFieldsBody.containsKey("store_id") ->
@@ -535,5 +540,55 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         }
 
         return attachments
+    }
+
+    /**
+     * Grab the custom fields for the full details of a product item.
+     */
+    private fun mapDescriptionText(itemBody: Map<*, *>): DescriptionDto {
+        val productDescriptionHeading1Key = "custom_product_description_head_1"
+        val productDescriptionHeading2Key = "custom_product_description_head_2"
+        val productDescriptionListKey = "custom_product_description_list"
+
+        var heading1: String? = null
+        var heading2: String? = null
+        var list: List<String>? = null
+
+        try {
+
+           if (itemBody.contains(CUSTOM_FIELDS_KEY)) {
+               val customFieldsBody = itemBody[CUSTOM_FIELDS_KEY] as Map<*, *>
+
+               when {
+                   customFieldsBody.containsKey(productDescriptionHeading1Key) ->
+                       heading1 = customFieldsBody[productDescriptionHeading1Key] as String?
+               }
+
+               when {
+                   customFieldsBody.containsKey(productDescriptionHeading2Key) ->
+                       heading2 = customFieldsBody[productDescriptionHeading2Key] as String?
+               }
+
+               when {
+                   customFieldsBody.containsKey(productDescriptionListKey) -> {
+                       val listString =  customFieldsBody[productDescriptionListKey] as String?
+
+                       if (listString != null) {
+                           list = listString.lines()
+                       }
+                   }
+               }
+           }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+
+            val message = "Failed to map product description response to Dto: ${e.message}"
+            logger.error(message)
+
+            throw BadRequestException(e.message)
+        }
+
+        return DescriptionDto(heading1, heading2, list)
     }
 }
