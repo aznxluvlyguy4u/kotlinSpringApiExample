@@ -35,7 +35,7 @@ class ResponseContainer(
  * (collection / drop-off)
  */
 interface GetProductInventoryUseCase {
-    fun execute(queryParameters: MutableMap<String, String>, headers: HttpHeaders): ResponseContainer
+    fun execute(queryParameters: Map<String, String>, headers: HttpHeaders): ResponseContainer
 }
 
 /** {@inheritDoc} */
@@ -48,7 +48,7 @@ class GetProductInventoryUseCaseImpl(@Autowired private val locationStoreResolve
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun execute(queryParameters: MutableMap<String, String>, headers: HttpHeaders): ResponseContainer {
+    override fun execute(queryParameters: Map<String, String>, headers: HttpHeaders): ResponseContainer {
         // List of mapped store ids for the given input location(s), for which we need to query each store,
         // to get the product inventory of
         val storeIds = locationStoreResolver.resolveStoreByLocation(queryParameters)
