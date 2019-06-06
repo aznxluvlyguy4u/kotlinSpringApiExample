@@ -141,7 +141,9 @@ class QueryParametersResolverImpl : QueryParametersResolver {
             validatedMap[FILTER_MODE_QUERY] = "rental"
 
             // Only query products and accessories that are rentable on it self (exclude non-rentable accessories)
-            validatedMap[ACCESSORY_ONLY_QUERY] = "false"
+            if (!map.containsKey(ACCESSORY_ONLY_QUERY)) {
+                validatedMap[ACCESSORY_ONLY_QUERY] = "false"
+            }
 
             /**
              * WARNING - DO NOT DELETE OR CHANGE THE FUNCTIONAL_INTEGRATION_GROUP_QUERY KEY / VALUE
