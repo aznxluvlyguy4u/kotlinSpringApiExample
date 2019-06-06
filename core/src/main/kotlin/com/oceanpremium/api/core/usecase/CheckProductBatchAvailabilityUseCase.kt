@@ -42,56 +42,96 @@ class CheckProductBatchAvailabilityUseCaseImpl(
             }
 
             logger.debug("check availability for product with id: ${productAvailabilityItem.id} on location collection: " +
-                    "${productAvailabilityItem.location?.collectionId} - dropOff: ${productAvailabilityItem.location?.deliveryId} " +
+                    "${productAvailabilityItem.location?.collection?.id} - dropOff: ${productAvailabilityItem.location?.delivery?.id} " +
                     "in period: ${productAvailabilityItem.period?.start} - ${productAvailabilityItem.period?.end}")
 
-            val queryParameters = mutableMapOf<String, String>()
-            queryParameters["q[product_id_eq]"] = productAvailabilityItem.id.toString()
-
-            if (productAvailabilityItem.period?.start != null) {
-                queryParameters["starts_at"] = DateTimeUtil.toISO8601UTC(productAvailabilityItem.period?.start!!)
-            }
-
-            if (productAvailabilityItem.period?.end != null) {
-                queryParameters["ends_at"] = DateTimeUtil.toISO8601UTC(productAvailabilityItem.period?.end!!)
-            }
-
-            val headers: HttpHeaders = HttpHeaders.EMPTY
-
-            if (productAvailabilityItem.location != null) {
-                queryParameters["delivery_location_id"] = productAvailabilityItem.location?.deliveryId!!.toString()
-
-                if (productAvailabilityItem.location?.collectionId != null) {
-                    queryParameters["collection_location_id"] = productAvailabilityItem.location?.collectionId!!.toString()
-                }
-            }
-
-            val result = getProductInventoryUseCase.execute(queryParameters, headers)
+            val result = getProductInventoryUseCase.execute(buildQueryParametersMap(productAvailabilityItem), HttpHeaders.EMPTY)
 
             @Suppress("UNCHECKED_CAST")
-            val productDtos = result.dtoMapper?.data as List<ProductDto>?
+            val productDtos = result.dtoMapper.data as List<ProductDto>?
             val productDtoItem = productDtos?.firstOrNull {
                     productResultItem -> productResultItem.id == productAvailabilityItem.id
             }
 
-            val quantityAvailable = productDtoItem?.rates?.first()?.quantityAvailable?.toDouble()?.toInt()
+           updateAvailability(productAvailabilityItem, productDtoItem, productDtoItem?.rates?.first()?.quantityAvailable?.toDouble()?.toInt())
 
-            // Check that the stock level quantity for the requested quantity for given product is sufficient
-            when {
-                quantityAvailable != null -> if (quantityAvailable >= productAvailabilityItem.quantity) {
-                    productAvailabilityItem.availabilityState = AvailabilityStateType.AVAILABLE
-                    productAvailabilityItem.quantityAvailable = quantityAvailable
-                } else {
-                    productAvailabilityItem.availabilityState = AvailabilityStateType.NOT_AVAILABLE
-                    productAvailabilityItem.quantityAvailable = quantityAvailable
+            //Check the availability of provided accessories for the given product
+            productAvailabilityItem.accessories?.forEach { accessoriesAvailabilityItem->
+                val accessoriesResult = getProductInventoryUseCase.execute(buildQueryParametersMap(accessoriesAvailabilityItem, true), HttpHeaders.EMPTY)
+
+                @Suppress("UNCHECKED_CAST")
+                val accessoriesDtos = accessoriesResult.dtoMapper.data as List<ProductDto>?
+
+                val accessoryDtoItem = accessoriesDtos?.firstOrNull {
+                        accessoriesResultItem -> accessoriesResultItem.id == accessoriesAvailabilityItem.id
                 }
-                else -> {
-                    productAvailabilityItem.availabilityState = AvailabilityStateType.DELAYED
-                    productAvailabilityItem.quantityAvailable = 0
+
+                updateAvailability(accessoriesAvailabilityItem, accessoryDtoItem, accessoryDtoItem?.rates?.first()?.quantityAvailable?.toDouble()?.toInt())
+
+                // Restate the availability of the parent product
+                if (productAvailabilityItem.availabilityState == AvailabilityStateType.AVAILABLE) {
+
+                    if (accessoriesAvailabilityItem.availabilityState == AvailabilityStateType.NOT_AVAILABLE) {
+                        productAvailabilityItem.availabilityState = AvailabilityStateType.AVAILABLE_BUT_ACCESSORY_NOT_AVAILABLE
+                    }
+
+                    if (accessoriesAvailabilityItem.availabilityState == AvailabilityStateType.AVAILABLE_BUT_DELAYED) {
+                        productAvailabilityItem.availabilityState = AvailabilityStateType.AVAILABLE_BUT_DELAYED
+                    }
                 }
             }
         }
 
         return productItems
+    }
+
+    private fun buildQueryParametersMap(productAvailabilityItem: ProductAvailabilityItem, isAccessory: Boolean = false) : Map<String, String> {
+        val queryParameters = mutableMapOf<String, String>()
+
+        if (isAccessory) {
+            queryParameters["q[product_accessory_only_eq]"] = "true"
+        }
+
+        queryParameters["q[product_id_eq]"] = productAvailabilityItem.id.toString()
+
+        if (productAvailabilityItem.period?.start != null) {
+            queryParameters["starts_at"] = DateTimeUtil.toISO8601UTC(productAvailabilityItem.period?.start!!)
+        }
+
+        if (productAvailabilityItem.period?.end != null) {
+            queryParameters["ends_at"] = DateTimeUtil.toISO8601UTC(productAvailabilityItem.period?.end!!)
+        }
+
+        if (productAvailabilityItem.location != null) {
+            queryParameters["delivery_location_id"] = productAvailabilityItem.location?.delivery?.id.toString()
+
+            if (productAvailabilityItem.location?.collection?.id != null) {
+                queryParameters["collection_location_id"] = productAvailabilityItem.location?.collection?.id.toString()
+            }
+        }
+
+        return queryParameters
+    }
+
+    private fun updateAvailability(productAvailabilityItem: ProductAvailabilityItem, productDtoItem: ProductDto?, quantityAvailable: Int?) {
+        // Check that the stock level quantity for the requested quantity for given product is sufficient
+        when {
+            quantityAvailable != null -> if (quantityAvailable >= productAvailabilityItem.quantity) {
+                productAvailabilityItem.availabilityState = AvailabilityStateType.AVAILABLE
+                productAvailabilityItem.quantityAvailable = quantityAvailable
+            } else {
+                productAvailabilityItem.availabilityState = AvailabilityStateType.NOT_AVAILABLE
+                productAvailabilityItem.quantityAvailable = quantityAvailable
+            }
+            else -> {
+                productAvailabilityItem.availabilityState = AvailabilityStateType.AVAILABLE_BUT_DELAYED
+                productAvailabilityItem.quantityAvailable = 0
+            }
+        }
+
+        productAvailabilityItem.images = productDtoItem?.images
+        productAvailabilityItem.name = productDtoItem?.name
+        productAvailabilityItem.rates = productDtoItem?.rates
+        productAvailabilityItem.totalPrice = "%.2f".format(productAvailabilityItem.computeTotalPrice())
     }
 }
