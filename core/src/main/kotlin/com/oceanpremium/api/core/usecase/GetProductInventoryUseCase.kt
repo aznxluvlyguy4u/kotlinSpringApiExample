@@ -38,7 +38,6 @@ interface GetProductInventoryUseCase {
     fun execute(queryParameters: MutableMap<String, String>, headers: HttpHeaders): ResponseContainer
 }
 
-
 /** {@inheritDoc} */
 class GetProductInventoryUseCaseImpl(@Autowired private val locationStoreResolver: LocationStoreResolver,
                                      @Autowired private val productsApi: ProductsApiImpl) :
@@ -123,7 +122,10 @@ class GetProductInventoryUseCaseImpl(@Autowired private val locationStoreResolve
             }
         }
 
-        val filteredData: List<ProductDto>? = (combinedDto?.data as List<ProductDto>?)?.filter{ p -> p.rates.first().quantityAvailable?.toDouble()!! > 0 }
+        val filteredData: List<ProductDto>? = (combinedDto?.data as List<ProductDto>?)?.filter{ p ->
+            p.rates.first().quantityAvailable?.toDouble() != null && p.rates.first().quantityAvailable?.toDouble()!! > 0
+        }
+
         combinedDto?.data = filteredData
 
         return ResponseContainer(

@@ -1,6 +1,7 @@
 package com.oceanpremium.api.core.model
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.oceanpremium.api.core.enum.AvailabilityStateType
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class ProductAvailabilityItem(
@@ -13,4 +14,6 @@ class ProductAvailabilityItem(
 ) {
     var quantityAvailable: Int = 0
     var available: Boolean = false
+    var availabilityState: AvailabilityStateType? = null
+    var message: String? = null
 }
