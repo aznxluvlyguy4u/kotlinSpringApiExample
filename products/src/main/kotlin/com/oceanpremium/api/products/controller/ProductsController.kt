@@ -8,10 +8,10 @@ import com.oceanpremium.api.core.currentrms.response.dto.config.ConfigProperty
 import com.oceanpremium.api.core.currentrms.response.dto.config.ProductConfigOptionsResolverImpl
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductConfigsDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
-import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.messenger.Slogger
 import com.oceanpremium.api.core.model.ProductAvailabilityItem
 import com.oceanpremium.api.core.model.WrappedResponse
+import com.oceanpremium.api.core.usecase.CheckProductBatchAvailability
 import com.oceanpremium.api.core.usecase.GetProductInventoryUseCase
 import com.oceanpremium.api.core.util.Constants
 import com.oceanpremium.api.core.util.ObjectMapperConfig
@@ -22,18 +22,21 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import javax.servlet.http.HttpServletRequest
 
 @RestController
 @RequestMapping("api/v1/products")
 class ProductsController(
     @Autowired private val resourceLoader: ResourceLoader,
     @Autowired private val productsApi: ProductsApiImpl,
-    @Autowired private val getProductInventoryUseCase: GetProductInventoryUseCase
+    @Autowired private val getProductInventoryUseCase: GetProductInventoryUseCase,
+    @Autowired private val checkProductBatchAvailability: CheckProductBatchAvailability
 ) {
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
         private val mapper = ObjectMapperConfig.mapper
+        private const val REQUEST_FORWARD_HEADER = "X-FORWARDED-FOR"
     }
 
     @RequestMapping("docs")
@@ -102,13 +105,16 @@ class ProductsController(
             val accessoryDto = ProductDtoMapper(accessoryResponse?.code()!!, accessoryResponse)
             val accessoryData = accessoryDto.data as ProductDto?
 
-            accessoryData?.type = accessoryItem.type
-            accessoryData?.rates?.forEach { rates ->
-                rates.quantityAvailable = accessoryItem.quantity
-            }
-            accessoryDtos.add(accessoryData!!)
+            if (accessoryItem.quantity?.toDouble() != null && accessoryItem.quantity!!.toDouble() > 0.0) {
+                accessoryData?.type = accessoryItem.type
+                accessoryData?.rates?.forEach { rates ->
+                    rates.quantityAvailable = accessoryItem.quantity
+                }
+                accessoryDtos.add(accessoryData!!)
 
-            logger.debug("Retrieved accessory for product with id: ${productData.id}: - $accessoryDto")
+                logger.debug("Retrieved accessory for product with id: ${productData.id}: - $accessoryDto")
+            }
+
         }
         productData?.accessories = accessoryDtos
 
@@ -143,11 +149,16 @@ class ProductsController(
      */
     @RequestMapping("inventory")
     @ResponseBody
-    fun getProductsInventory(@RequestHeader headers: HttpHeaders, @RequestParam queryParameters: MutableMap<String, String>): ResponseEntity<*> {
+    fun getProductsInventory(
+        @RequestHeader headers: HttpHeaders,
+        @RequestParam queryParameters: MutableMap<String, String>,
+        request: HttpServletRequest
+    ): ResponseEntity<*> {
         val logMessage = "[API] - GET products inventories with request headers: $headers, parameters: $queryParameters"
         logger.debug(logMessage)
 
-        val logMessageSales = "[Sales analytics] GET products inventories - sales analytics: $queryParameters"
+        val logMessageSales = "[Sales analytics] GET products inventories by IP: " +
+                "${request.getHeader(REQUEST_FORWARD_HEADER)} - sales analytics: $queryParameters"
         logger.debug(logMessageSales)
         Slogger.send(messageBody = logMessage, salesLog = true, inDebugMode = true)
 
@@ -170,23 +181,9 @@ class ProductsController(
         val logMessage = "[API] - GET products availability for batch $productItems"
         logger.debug(logMessage)
 
-        if (productItems.isEmpty()) {
-            throw BadRequestException("Payload may not contain empty array")
-        }
+        val result= checkProductBatchAvailability.execute(productItems)
 
-        productItems.forEach {
-            if (it.quantity == 0) {
-                throw BadRequestException("Quantity supplied for product with id: ${it.id} may not be equal to 0")
-            }
-            logger.debug("check availability for product with id: ${it.id} on location collection: " +
-                    "${it.location?.collectionId} - dropOff: ${it.location?.dropOffId} " +
-                    "in period: ${it.period?.start} - ${it.period?.end}")
-        }
-
-        return ResponseEntity(
-            WrappedResponse(HttpStatus.CREATED.value(), productItems),
-            HttpStatus.CREATED
-        )
+        return ResponseEntity(WrappedResponse(HttpStatus.CREATED.value(), result), HttpStatus.CREATED)
     }
 }
 

@@ -188,7 +188,7 @@ class ProductsApiImpl(
      * @inherit
      */
     fun getProductsInventory(
-        queryParameters: MutableMap<String, String>,
+        queryParameters: Map<String, String>,
         headers: HttpHeaders,
         storeId: Int?
     ): Response<Any>? {

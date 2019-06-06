@@ -51,6 +51,7 @@ class QueryParametersResolverImpl : QueryParametersResolver {
         const val COLLECTION_LOCATION_KEY = "collection_location_id"
         const val DELIVERY_LOCATION_KEY = "delivery_location_id"
         private const val PRODUCT_TAGS_SEARCH_QUERY = "q[product_tags_name_cont]"
+        private const val PRODUCT_ID_SEARCH_QUERY = "q[product_id_eq]"
         private const val PRODUCT_GROUPS_ID_SEARCH_QUERY = "q[product_group_id_eq]"
         private const val NAME_NOT_EQ_QUERY = "q[name_not_eq]"
         private const val LOCALHOST = "localhost"
@@ -66,19 +67,37 @@ class QueryParametersResolverImpl : QueryParametersResolver {
      * see @link https://dudesoftechnology.atlassian.net/browse/OPP-184
      * see @link https://api.current-rms.com/doc#header-searching-with-the-query-engine
      *
-     * - q[product_accessory_only_eq]=false
-     * - q[active_eq]=true
-     * - filtermode[]=rental
-     * - store_id=5
-     * - start_date=yyyy-mm-dd or yyyy-MM-dd'T'HH:mm'Z'
-     * - end_date=yyyy-mm-dd or yyyy-MM-dd'T'HH:mm'Z'
-     * - q[product_product_group_name_not_eq]=PRODUCT_GROUP_SETUP_FOR_TESTING
-     * - delivery_location_id=3
-     * - collection_location_id=5
      *
      * Final result query outgoing to currentRMS NEEDS TO BE of the following MINIMAL form:
      *
+     * Search on TAG
      * 1  q[product_tags_name_cont]=SEARCH_KEY_STRING
+     * 2  q[active_eq]=true
+     * 3  filtermode[]=rental
+     * 4  store_id=STORE_ID_INT
+     * 5  q[product_accessory_only_eq]=false
+     * 6  starts_at=YYYY-MM-DD
+     * 7  ends_at=YYYY-MM-DD
+     * 8  q[product_product_group_name_not_eq]=FunctionalIntegrationTest
+     *
+     *  OR
+     *
+     * SEARCH on PRODUCT GROUP
+     *
+     * 1  q[product_group_id_eq]=19
+     * 2  q[active_eq]=true
+     * 3  filtermode[]=rental
+     * 4  store_id=STORE_ID_INT
+     * 5  q[product_accessory_only_eq]=false
+     * 6  starts_at=YYYY-MM-DD
+     * 7  ends_at=YYYY-MM-DD
+     * 8  q[product_product_group_name_not_eq]=FunctionalIntegrationTest
+     *
+     * OR
+     *
+     * SEARCH ON PRODUCT ID
+     *
+     * 1  q[product_id_eq]=247
      * 2  q[active_eq]=true
      * 3  filtermode[]=rental
      * 4  store_id=STORE_ID_INT
@@ -102,6 +121,10 @@ class QueryParametersResolverImpl : QueryParametersResolver {
                 map.containsKey(PRODUCT_GROUPS_ID_SEARCH_QUERY)-> {
                     validatedMap[PRODUCT_GROUPS_ID_SEARCH_QUERY] = map[PRODUCT_GROUPS_ID_SEARCH_QUERY] as String
                 }
+                // Only query product with group ids containing the search value
+                map.containsKey(PRODUCT_ID_SEARCH_QUERY)-> {
+                    validatedMap[PRODUCT_ID_SEARCH_QUERY] = map[PRODUCT_ID_SEARCH_QUERY] as String
+                }
                 // Cannot continue, the minimal input is a search keyword which is not present
                 else -> {
                     throw BadRequestException("Cannot continue search, need a search query")
@@ -118,7 +141,9 @@ class QueryParametersResolverImpl : QueryParametersResolver {
             validatedMap[FILTER_MODE_QUERY] = "rental"
 
             // Only query products and accessories that are rentable on it self (exclude non-rentable accessories)
-            validatedMap[ACCESSORY_ONLY_QUERY] = "false"
+            if (!map.containsKey(ACCESSORY_ONLY_QUERY)) {
+                validatedMap[ACCESSORY_ONLY_QUERY] = "false"
+            }
 
             /**
              * WARNING - DO NOT DELETE OR CHANGE THE FUNCTIONAL_INTEGRATION_GROUP_QUERY KEY / VALUE

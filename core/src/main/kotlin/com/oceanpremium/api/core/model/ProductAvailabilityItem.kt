@@ -1,6 +1,9 @@
 package com.oceanpremium.api.core.model
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.oceanpremium.api.core.currentrms.response.dto.product.ImageSource
+import com.oceanpremium.api.core.currentrms.response.dto.product.PricingDto
+import com.oceanpremium.api.core.enum.AvailabilityStateType
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class ProductAvailabilityItem(
@@ -12,5 +15,20 @@ class ProductAvailabilityItem(
     var accessories: List<ProductAvailabilityItem>? = null
 ) {
     var quantityAvailable: Int = 0
-    var available: Boolean = false
+    var availabilityState: AvailabilityStateType? = null
+    var message: String? = null
+    var name: String? = null
+    var rates: List<PricingDto>? = null
+    var images: List<ImageSource>? = null
+    var totalPrice: String? = null
+
+    fun computeTotalPrice(): Double {
+        var totalPrice = 0.0
+
+        if (rates?.first()?.price != null) {
+            totalPrice = quantity * rates?.first()?.price?.toDouble()!!
+        }
+
+        return totalPrice
+    }
 }
