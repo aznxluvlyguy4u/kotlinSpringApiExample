@@ -79,7 +79,7 @@ class CurrentRmsClient {
         private const val CURRENT_RMS_API_URL = "current_rms_api_url"
         private const val REQUEST_TIMEOUT: Long = 20
         // Set a constant for request throttling
-        private const val REQUEST_DELAY: Long = 0
+        private const val REQUEST_DELAY: Long = 1000
     }
 
     private var retrofitClient: Retrofit? = null
