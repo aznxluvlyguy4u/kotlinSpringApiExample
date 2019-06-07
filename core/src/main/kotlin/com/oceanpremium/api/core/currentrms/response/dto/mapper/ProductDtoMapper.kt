@@ -581,12 +581,13 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
      */
     private fun mapProductName(itemBody: Map<*, *>): String? {
         var productName: String? = null
+        val originalProductNameKey = "name"
+        val customProductName = "custom_product_description_seo_title"
 
         try {
-
             // Grab the default product name, as set in Current RMS
-            if (itemBody.containsKey("name")) {
-                productName = itemBody["name"] as String?
+            if (itemBody.containsKey(originalProductNameKey)) {
+                productName = itemBody[originalProductNameKey] as String?
             }
 
             // Override default product name
@@ -594,10 +595,10 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                 @Suppress("UNCHECKED_CAST")
                 val customFieldsBody = itemBody[CUSTOM_FIELDS_KEY] as Map<String, *>
 
-                if (customFieldsBody.containsKey("custom_product_description_seo_title")
-                    && (customFieldsBody["custom_product_description_seo_title"] as String).isNotEmpty()
+                if (customFieldsBody.containsKey(customProductName)
+                    && (customFieldsBody[customProductName] as String).isNotEmpty()
                 ) {
-                    productName = customFieldsBody["custom_product_description_seo_title"] as String
+                    productName = customFieldsBody[customProductName] as String
                 }
             }
         } catch (e: Exception) {
