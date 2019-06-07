@@ -22,7 +22,7 @@ class ProductAvailabilityItem(
     var rates: List<PricingDto>? = null
     var images: List<ImageSource>? = null
     var totalPrice: String? = null
-    var uuid: UUID = UUID.randomUUID()
+    val uuid: UUID = UUID.randomUUID()
 
     fun computeTotalPrice(): Double {
         var totalPrice = 0.0
