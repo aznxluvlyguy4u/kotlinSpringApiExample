@@ -12,9 +12,6 @@ import com.google.gson.reflect.TypeToken
 import com.oceanpremium.api.core.currentrms.response.dto.config.ConfigPropertyField
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.util.FileSizeFormatUtil
-import java.util.stream.Collectors
-
-
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class ErrorResponse {
@@ -131,8 +128,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
     @Throws(BadRequestException::class)
     private fun mapJsonObjectToDto(itemBody: Map<*, *>): ProductDto {
         var id: Int? = null
-        var name: String? = mapProductName(itemBody)
-        var description: String? = null
+        val name: String? = mapProductName(itemBody)
         var type: String? = null
         val productGroup: ProductGroupDto? = mapProductGroupToDto(itemBody)
         var customFields: ProductCustomFieldsDto? = null
@@ -148,14 +144,6 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                 id = (itemBody["id"] as Double?)?.toInt()
             }
 
-            if (itemBody.containsKey("name")) {
-                name = itemBody["name"] as String?
-            }
-
-            if (itemBody.containsKey("description")) {
-                description = itemBody["description"] as String?
-            }
-
             if (itemBody.containsKey("custom_fields")) {
                 customFields = mapCustomFieldsToDto(itemBody)
             }
@@ -164,7 +152,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                 type = itemBody["type"] as String?
             }
 
-            imageSources = mapImageSourcesToDto(itemBody, customFields)
+            imageSources = mapImageSourcesToDto(itemBody)
 
         } catch (e: Exception) {
             e.printStackTrace()
@@ -195,64 +183,74 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
      * Per default get the primary image fields, if custom fields are set, check if public image icon url is set
      */
     @Throws(BadRequestException::class)
-    private fun mapImageSourcesToDto(itemBody: Map<*, *>, customFieldsDto: ProductCustomFieldsDto?): ImageDto {
+    private fun mapImageSourcesToDto(itemBody: Map<*, *>): ImageDto {
         val imageSources: MutableList<ImageSource> = mutableListOf()
+        var imageSourceCandidate: ImageSource? = null
 
-        when {
-            !customFieldsDto?.publicIconUrl.isNullOrEmpty() -> {
-                val imageUrl = customFieldsDto!!.publicIconUrl
-                var imageThumbUrl: String? = imageUrl
-
-                if (!customFieldsDto.publicIconThumbUrl.isNullOrEmpty()) {
-                    imageThumbUrl = customFieldsDto.publicIconThumbUrl
-
-                }
-
-                if (imageUrl != null && imageThumbUrl != null) {
-                    customFieldsDto.publicIconUrl = null
-                    customFieldsDto.publicIconThumbUrl = null
-                    imageSources.add(ImageSource(imageUrl, imageThumbUrl))
-                }
-            }
-
-            itemBody.containsKey("icon") -> {
+        // Grab custom product image urls (public friendly images)
+        // otherwise, no public friendly images where found, thus revert to the product images set for a given product in currentRMS.
+        try {
+            if (itemBody.containsKey("icon")) {
                 val icon = itemBody["icon"] as Map<*, *>?
                 var imageUrl: String? = null
                 var thumbUrl: String? = null
 
-                try {
-                    if (icon != null) {
-                        if (icon.containsKey("url")) {
-                            imageUrl = icon["url"] as String?
+                when {
+                    icon != null -> {
+                        when {
+                            icon.containsKey("url") -> imageUrl = icon["url"] as String?
                         }
 
-                        if (icon.containsKey("thumb_url")) {
-                            thumbUrl = icon["thumb_url"] as String?
+                        when {
+                            icon.containsKey("thumb_url") -> thumbUrl = icon["thumb_url"] as String?
                         }
 
-                        if (imageUrl != null && thumbUrl != null) {
-                            imageSources.add(ImageSource(imageUrl, thumbUrl))
+                        when {
+                            imageUrl != null && thumbUrl != null -> imageSourceCandidate = ImageSource(imageUrl, thumbUrl)
                         }
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-
-                    val message = "Failed to map product response to Dto: ${e.message}"
-                    logger.error(message)
-
-                    throw BadRequestException(e.message)
                 }
-            }
-            else -> {
+            } else {
                 if (itemBody.containsKey("icon_thumb_url") && itemBody.containsKey("icon_url")) {
-                    imageSources.add(
-                        ImageSource(
-                            itemBody["icon_url"] as String?,
-                            itemBody["icon_thumb_url"] as String?
-                        )
-                    )
+                    imageSourceCandidate = ImageSource(itemBody["icon_url"] as String?, itemBody["icon_thumb_url"] as String?)
                 }
             }
+
+            if (itemBody.containsKey(CUSTOM_FIELDS_KEY)) {
+                @Suppress("UNCHECKED_CAST")
+                val customFieldsBody = itemBody[CUSTOM_FIELDS_KEY] as Map<String, *>
+                var imageUrl: String? = null
+                var thumbUrl: String? = null
+                val imageUrlKey = "custom_product_public_icon_url"
+                val imageThumbUrlKey = "custom_product_public_icon_thumb_url"
+
+                when {
+                    customFieldsBody.containsKey(imageUrlKey)
+                            && (customFieldsBody[imageUrlKey] as String?) != null
+                            && (customFieldsBody[imageUrlKey] as String).isNotEmpty() -> imageUrl = customFieldsBody[imageUrlKey] as String?
+                }
+
+                when {
+                    customFieldsBody.containsKey(imageThumbUrlKey)
+                            && (customFieldsBody[imageThumbUrlKey] as String?) != null
+                            && (customFieldsBody[imageThumbUrlKey] as String).isNotEmpty() -> thumbUrl = customFieldsBody[imageThumbUrlKey] as String?
+                }
+
+                when {
+                    imageUrl != null && thumbUrl != null -> imageSourceCandidate = ImageSource(imageUrl, thumbUrl)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+
+            val message = "Failed to map product images response to Dto: ${e.message}"
+            logger.error(message)
+
+            throw BadRequestException(e.message)
+        }
+
+        if (imageSourceCandidate != null) {
+            imageSources.add(imageSourceCandidate)
         }
 
         return ImageDto(imageSources)
@@ -346,9 +344,8 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
      * Map custom fields to dtoMapper
      */
     private fun mapCustomFieldsToDto(itemBody: Map<*, *>): ProductCustomFieldsDto? {
+        val storeIdKey = "store_id"
         var storeId: Int? = null
-        var publicIconThumbUrl: String? = null
-        var publicIconUrl: String? = null
 
         try {
             when {
@@ -356,32 +353,18 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                     val customFieldsBody = itemBody[CUSTOM_FIELDS_KEY] as Map<*, *>
 
                     when {
-                        customFieldsBody.containsKey("public_icon_url") -> publicIconUrl =
-                            customFieldsBody["public_icon_url"] as String?
-                    }
-
-                    when {
-                        customFieldsBody.containsKey("store_id") ->
-                            if ((customFieldsBody["store_id"] as String?)!!.isNotEmpty()) {
-                                storeId = (customFieldsBody["store_id"] as String?)!!.toInt()
+                        customFieldsBody.containsKey(storeIdKey) ->
+                            if ((customFieldsBody[storeIdKey] as String?)!!.isNotEmpty()) {
+                                storeId = (customFieldsBody[storeIdKey] as String?)!!.toInt()
                             }
-                    }
-
-                    when {
-                        customFieldsBody.containsKey("public_icon_thumb_url") -> publicIconThumbUrl =
-                            customFieldsBody["public_icon_thumb_url"] as String?
-                    }
-
-                    when {
-                        customFieldsBody.containsKey("public_icon_url") -> publicIconUrl =
-                            customFieldsBody["public_icon_url"] as String?
                     }
                 }
             }
 
-            if (storeId == null && publicIconThumbUrl.isNullOrEmpty() && publicIconUrl.isNullOrEmpty()) {
+            if (storeId == null) {
                 return null
             }
+
         } catch (e: Exception) {
             e.printStackTrace()
 
@@ -392,9 +375,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         }
 
         return ProductCustomFieldsDto(
-            storeId,
-            publicIconUrl,
-            publicIconThumbUrl
+            storeId
         )
     }
 
@@ -498,6 +479,9 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         return items
     }
 
+    /**
+     * Grab the product specific product attachments, for the given product.
+     */
     private fun mapAttachments(itemBody: Map<*, *>): List<AttachmentDto>? {
         val attachments: MutableList<AttachmentDto> = mutableListOf()
 
@@ -550,19 +534,36 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
      */
     private fun mapDescriptionText(itemBody: Map<*, *>): List<Map<String, String>> {
         val descriptions: MutableList<Map<String, String>> = mutableListOf()
+        val customProductDescriptionKey = "custom_product_description_"
+        val productDescriptionKey = "description"
 
         try {
+            // Grab the custom product description
+            when {
+                itemBody.contains(CUSTOM_FIELDS_KEY) -> {
+                    @Suppress("UNCHECKED_CAST")
+                    val customFieldsBody = itemBody[CUSTOM_FIELDS_KEY] as Map<String, *>
 
-           if (itemBody.contains(CUSTOM_FIELDS_KEY)) {
-               @Suppress("UNCHECKED_CAST")
-               val customFieldsBody = itemBody[CUSTOM_FIELDS_KEY] as Map<String, *>
+                    val mapEntry = customFieldsBody.entries.filter {
+                        it.key.contains(customProductDescriptionKey)
+                    }
 
-               val x = customFieldsBody.entries.filter { it.key.contains("custom_product_description_") }
-
-               x.forEach {
-                   descriptions.add(mapOf(it.key to it.value as String))
-               }
-           }
+                    mapEntry.forEach {
+                        if ((it.value as String).isNotEmpty()) {
+                            descriptions.add(mapOf(it.key to it.value as String))
+                        }
+                    }
+                }
+                else -> when {
+                    itemBody.containsKey(productDescriptionKey)
+                            && itemBody[productDescriptionKey] as String? != null
+                            && (itemBody[productDescriptionKey] as String).isEmpty() -> {
+                        descriptions.add(
+                            mapOf(customProductDescriptionKey + "head_1" to itemBody[productDescriptionKey] as String)
+                        )
+                    }
+                }
+            }
         } catch (e: Exception) {
             e.printStackTrace()
 
@@ -575,20 +576,27 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         return descriptions
     }
 
+    /**
+     * Grab the product name either the default product name, or the custom SEO friendly custom field for product name.
+     */
     private fun mapProductName(itemBody: Map<*, *>): String? {
         var productName: String? = null
 
         try {
+
+            // Grab the default product name, as set in Current RMS
             if (itemBody.containsKey("name")) {
                 productName = itemBody["name"] as String?
             }
 
+            // Override default product name
             if (itemBody.contains(CUSTOM_FIELDS_KEY)) {
                 @Suppress("UNCHECKED_CAST")
                 val customFieldsBody = itemBody[CUSTOM_FIELDS_KEY] as Map<String, *>
 
                 if (customFieldsBody.containsKey("custom_product_description_seo_title")
-                    && (customFieldsBody["custom_product_description_seo_title"] as String).isNotEmpty()) {
+                    && (customFieldsBody["custom_product_description_seo_title"] as String).isNotEmpty()
+                ) {
                     productName = customFieldsBody["custom_product_description_seo_title"] as String
                 }
             }
