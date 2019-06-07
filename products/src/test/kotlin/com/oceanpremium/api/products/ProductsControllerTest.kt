@@ -1,6 +1,7 @@
 package com.oceanpremium.api.products
 
 import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolverImpl.Companion.FUNCTIONAL_INTEGRATION_GROUP_NAME
+import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.model.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -15,23 +16,13 @@ import java.util.*
 
 class Errors(var errors: List<String>? = null)
 class ErrorResponse(var code: Int? = null, var message: Errors? = null)
-class ProductResponse(var code: Int? = null, var data: Products? = null)
-class ProductsResponse(var code: Int? = null, var data: List<Products>? = null)
+class ProductResponse(var code: Int? = null, var data: ProductDto? = null)
+class ProductsResponse(var code: Int? = null, var data: List<ProductDto>? = null)
 class ProductGroupsResponse(var code: Int?, var data: List<ProductGroup>? = null)
 class RateItem(var price: String? = null, var quantityAvailable: String? = null, var chargePeriod: String? = null)
 class Image(var fullImageUrl: String? = null, var thumbnailUrl: String? = null)
 class CustomFields(var publicIconUrl: String? = null, var publicIconThumbUrl: String? = null)
 class ProductGroup(var id: Int? = null, var name: String, var description: String?)
-
-class Products (
-    var id : Int? = null,
-    var name : String? = null,
-    var description : String? = null,
-    var productGroup: ProductGroup? = null,
-    var rates: List<RateItem>? = null,
-    var images: List<Image>? = null,
-    var customFields: CustomFields? = null
-)
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -219,7 +210,7 @@ class ProductsControllerTest {
         val productItems = productsResponse?.data
         assertThat(productItems).isNotEmpty
 
-        val testProduct: Products? = productItems?.find{ p -> p.id == testExistingProduct.id }
+        val testProduct: ProductDto? = productItems?.find{ p -> p.id == testExistingProduct.id }
         assertThat(testProduct?.rates?.first()?.quantityAvailable).isEqualTo("2.0")
 
         // Then query inventory with delivery_location_id set to port vendres
@@ -233,9 +224,8 @@ class ProductsControllerTest {
         val productItems2 = productsResponse2?.data
         assertThat(productItems2).isNotEmpty
 
-        val testProduct2: Products? = productItems2?.find{ p -> p.id == testExistingProduct.id }
+        val testProduct2: ProductDto? = productItems2?.find{ p -> p.id == testExistingProduct.id }
         assertThat(testProduct2?.rates?.first()?.quantityAvailable).isEqualTo("3.0")
-
     }
 
     /**
