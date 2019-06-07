@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.oceanpremium.api.core.currentrms.response.dto.product.ImageSource
 import com.oceanpremium.api.core.currentrms.response.dto.product.PricingDto
 import com.oceanpremium.api.core.enum.AvailabilityStateType
+import java.util.*
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class ProductAvailabilityItem(
@@ -21,6 +22,7 @@ class ProductAvailabilityItem(
     var rates: List<PricingDto>? = null
     var images: List<ImageSource>? = null
     var totalPrice: String? = null
+    var uuid: UUID = UUID.randomUUID()
 
     fun computeTotalPrice(): Double {
         var totalPrice = 0.0
