@@ -537,8 +537,8 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         val customProductDescriptionKey = "custom_product_description_"
         val productDescriptionKey = "description"
 
+        // Grab the custom product description
         try {
-            // Grab the custom product description
             when {
                 itemBody.contains(CUSTOM_FIELDS_KEY) -> {
                     @Suppress("UNCHECKED_CAST")
@@ -554,15 +554,16 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                         }
                     }
                 }
-                else -> when {
-                    itemBody.containsKey(productDescriptionKey)
-                            && itemBody[productDescriptionKey] as String? != null
-                            && (itemBody[productDescriptionKey] as String).isEmpty() -> {
-                        descriptions.add(
-                            mapOf(customProductDescriptionKey + "head_1" to itemBody[productDescriptionKey] as String)
-                        )
-                    }
-                }
+            }
+
+            // Revert to original product description, because custom product description either is not set or failed
+            // to parse
+            when {
+                descriptions.isEmpty()
+                        && itemBody.containsKey(productDescriptionKey)
+                        && itemBody[productDescriptionKey] as String? != null
+                        && (itemBody[productDescriptionKey] as String).isNotEmpty() ->
+                    descriptions.add(mapOf(customProductDescriptionKey + "head_1" to itemBody[productDescriptionKey] as String))
             }
         } catch (e: Exception) {
             e.printStackTrace()
