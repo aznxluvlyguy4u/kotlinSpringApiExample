@@ -15,6 +15,7 @@ import com.oceanpremium.api.core.currentrms.response.dto.config.ProductConfigOpt
 import com.oceanpremium.api.core.exception.handler.GlobalExceptionHandler
 import com.oceanpremium.api.core.usecase.CheckProductBatchAvailabilityUseCaseImpl
 import com.oceanpremium.api.core.usecase.GetProductInventoryUseCaseImpl
+import com.oceanpremium.api.core.usecase.OrderPlacementUseCaseImpl
 import io.sentry.spring.SentryServletContextInitializer
 import org.slf4j.LoggerFactory
 import org.springframework.boot.SpringApplication
@@ -49,7 +50,8 @@ import kotlin.jvm.java as java1
     ProductConfigOptionsResolverImpl::class,
     GlobalExceptionHandler::class,
     GetProductInventoryUseCaseImpl::class,
-    CheckProductBatchAvailabilityUseCaseImpl::class
+    CheckProductBatchAvailabilityUseCaseImpl::class,
+    OrderPlacementUseCaseImpl::class
 )
 class ProductsDriver : SpringBootServletInitializer() {
 

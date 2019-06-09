@@ -149,7 +149,11 @@ allprojects {
         compile ("com.squareup.retrofit2:converter-gson:${retrofitVersion}")
         compile ("com.squareup.okhttp3:logging-interceptor:${retrofitInterceptorVersion}")
 
+        // Slack - Message sender
         compile group: 'com.github.seratch', name: 'jslack', version: '1.5.4'
+        
+        // Java Mail
+        compile ("org.springframework.boot:spring-boot-starter-mail:${springBootVersion}")
     }
 
     /**
