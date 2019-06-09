@@ -1,11 +1,13 @@
 package com.oceanpremium.api.core.model
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import com.oceanpremium.api.core.currentrms.response.dto.product.ImageSource
 import com.oceanpremium.api.core.currentrms.response.dto.product.PricingDto
 import com.oceanpremium.api.core.enum.AvailabilityStateType
 import java.util.*
 
+@JsonPropertyOrder("id", "uuid", "name", "quantity", "quantityAvailable", "availabilityState", "totalPrice", "period", "location")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class ProductAvailabilityItem(
     val id: Int,
