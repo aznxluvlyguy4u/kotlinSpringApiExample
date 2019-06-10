@@ -67,6 +67,9 @@ functions:
       current_rms_token: ${file(properties.json):products.current_rms.token}
       current_rms_subdomain: ${file(properties.json):products.current_rms.subdomain}
       current_rms_api_url: ${file(properties.json):products.current_rms.api_url}
+      emailer_smtp_host: ${file(properties.json):products.emailer.smtp_host}
+      emailer_username: ${file(properties.json):products.emailer.username}
+      emailer_password: ${file(properties.json):products.emailer.password}
   get-products:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
@@ -90,6 +93,9 @@ functions:
       current_rms_token: ${file(properties.json):products.current_rms.token}
       current_rms_subdomain: ${file(properties.json):products.current_rms.subdomain}
       current_rms_api_url: ${file(properties.json):products.current_rms.api_url}
+      emailer_smtp_host: ${file(properties.json):products.emailer.smtp_host}
+      emailer_username: ${file(properties.json):products.emailer.username}
+      emailer_password: ${file(properties.json):products.emailer.password}
   get-product-by-id:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
@@ -117,6 +123,9 @@ functions:
       current_rms_token: ${file(properties.json):products.current_rms.token}
       current_rms_subdomain: ${file(properties.json):products.current_rms.subdomain}
       current_rms_api_url: ${file(properties.json):products.current_rms.api_url}
+      emailer_smtp_host: ${file(properties.json):products.emailer.smtp_host}
+      emailer_username: ${file(properties.json):products.emailer.username}
+      emailer_password: ${file(properties.json):products.emailer.password}
   get-product-groups:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
@@ -140,6 +149,9 @@ functions:
       current_rms_token: ${file(properties.json):products.current_rms.token}
       current_rms_subdomain: ${file(properties.json):products.current_rms.subdomain}
       current_rms_api_url: ${file(properties.json):products.current_rms.api_url}
+      emailer_smtp_host: ${file(properties.json):products.emailer.smtp_host}
+      emailer_username: ${file(properties.json):products.emailer.username}
+      emailer_password: ${file(properties.json):products.emailer.password}
   get-products-inventory:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
@@ -163,6 +175,9 @@ functions:
       current_rms_token: ${file(properties.json):products.current_rms.token}
       current_rms_subdomain: ${file(properties.json):products.current_rms.subdomain}
       current_rms_api_url: ${file(properties.json):products.current_rms.api_url}
+      emailer_smtp_host: ${file(properties.json):products.emailer.smtp_host}
+      emailer_username: ${file(properties.json):products.emailer.username}
+      emailer_password: ${file(properties.json):products.emailer.password}
   post-product-batch-availability:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
@@ -186,6 +201,9 @@ functions:
       current_rms_token: ${file(properties.json):products.current_rms.token}
       current_rms_subdomain: ${file(properties.json):products.current_rms.subdomain}
       current_rms_api_url: ${file(properties.json):products.current_rms.api_url}
+      emailer_smtp_host: ${file(properties.json):products.emailer.smtp_host}
+      emailer_username: ${file(properties.json):products.emailer.username}
+      emailer_password: ${file(properties.json):products.emailer.password}
   post-product-order-placement:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
@@ -193,7 +211,7 @@ functions:
     events:
       - http:
           # The URI of the endpoint
-          path: /${self:custom.apiPathPrefix}/products/order
+          path: /${self:custom.apiPathPrefix}/products/orders
           # The HTTP verb
           method: post
           # Additional endpoint configurations like enabling CORS
@@ -209,3 +227,6 @@ functions:
       current_rms_token: ${file(properties.json):products.current_rms.token}
       current_rms_subdomain: ${file(properties.json):products.current_rms.subdomain}
       current_rms_api_url: ${file(properties.json):products.current_rms.api_url}
+      emailer_smtp_host: ${file(properties.json):products.emailer.smtp_host}
+      emailer_username: ${file(properties.json):products.emailer.username}
+      emailer_password: ${file(properties.json):products.emailer.password}
