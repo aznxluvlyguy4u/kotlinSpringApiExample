@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import org.slf4j.LoggerFactory
 
 class ObjectMapperConfig {
@@ -41,6 +43,23 @@ class ObjectMapperConfig {
             }
 
             throw Exception("Could not create $classType object instantiation")
+        }
+
+        // Convert a data class to a map
+        fun serializeToMap(obj: Any): Map<String, Any> {
+            return convert(obj)
+        }
+
+        // Convert a map to a data class
+        fun <T> Map<String, Any>.toDataClass(obj: Any): T {
+            return convert(obj)
+        }
+
+        // Convert an object of type I to type O
+        private fun <I, O> I.convert(obj: Any): O {
+            val gson = Gson()
+            val json = gson.toJson(obj)
+            return gson.fromJson(json, object : TypeToken<O>() {}.type)
         }
     }
 }
