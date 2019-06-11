@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <title>Ocean Premium - BACK-OFFICE Order Confirmation</title>
+    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+    <link href='../css/styles.css' rel='stylesheet' type='text/css'>
+</head>
+<body>
+<table>
+    <tr>
+        <td align="center">
+            <table>
+                <tr>
+                    <td class="email-masthead">
+                        <a href="https://oceanpremium.com">
+                            <img src="https://www.oceanpremium.com/wp-content/uploads/2017/03/op-logo-blue.png" alt="Ocean Premium logo"/>
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <table>
+                            <tr>
+                                <td>
+                                    <h1 th:text="|Hi ${contactDetails.fullName}, |">Greetings placeholder</h1>
+                                    <p>Thank you for using Ocean Premium. This is an overview of your order.</p>
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <h3>Order ID</h3>
+                                                <p th:text="000123">Order ID placeholder</p>
+                                            </td>
+                                            <td>
+                                                <h3>Date</h3>
+                                                <p th:text="${#dates.format(#dates.createNow(),'YYYY/MM/dd HH:mm')}">
+                                                    Date placeholder</p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <h3>Contact details</h3>
+                                                <address>
+                                                    <span style="font-weight:bold">First name:</span>
+                                                    <p th:text="${contactDetails.firstName}">First name placeholder</p>
+                                                    <span style="font-weight:bold">Sur name:</span>
+                                                    <p th:text="${contactDetails.surName}">Surname placeholder</p>
+                                                    <span style="font-weight:bold">E-mail address:</span>
+                                                    <p th:text="${contactDetails.emailAddress}">E-mail address
+                                                        placeholder</p>
+                                                    <span style="font-weight:bold">Phone number:</span>
+                                                    <p th:text="${contactDetails.phoneNumber}">Phone number
+                                                        placeholder</p>
+                                                    <span style="font-weight:bold">Country:</span>
+                                                    <p th:text="${contactDetails.country}">Country placeholder</p>
+                                                    <span style="font-weight:bold">City:</span>
+                                                    <p th:text="${contactDetails.city}">City placeholder</p>
+                                                </address>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <h3>Message</h3>
+                                                <p th:text="${message}">Message placeholder</p>
+                                            </td>
+                                        </tr>
+                                        <table>
+                                            <tbody th:each="user : ${users}" th:remove="tag">
+                                            <tr>
+                                                <td th:text="${user.login}">...</td>
+                                                <td th:text="${user.name}">...</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2" th:text="${user.address}">...</td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                        <tr>
+                                            <td>
+                                                <table>
+                                                    <tr>
+                                                        <th>
+                                                            <p>Product name</p>
+                                                        </th>
+                                                        <th>
+                                                            <p>Unit price</p>
+                                                        </th>
+                                                    </tr>
+                                                    <tbody th:each="product : ${products}" th:remove="tag">
+                                                    <tr>
+                                                        <td th:text="|${product.quantity}x ${product.name}|">Product
+                                                            item name placeholder
+                                                        </td>
+                                                        <td th:text="${product.rates.get(0).price}">Product item unit
+                                                            price placeholder
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+                                                    <tr>
+                                                        <td>
+                                                            <p>Subtotal</p>
+                                                        </td>
+                                                        <td th:text="${totalPrice}">
+                                                            Subtotal placeholder
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <p>If you have any questions about this order, <br>reach out to our <a
+                                            href="https://oceanpremium.com">support team</a> for help.</p>
+                                    <br>
+                                    <p>The Ocean Premium Team</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <table>
+                            <tr>
+                                <td>
+                                    <p>&copy; 2019 Ocean Premium. All rights reserved.</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
