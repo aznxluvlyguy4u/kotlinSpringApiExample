@@ -9,10 +9,10 @@ import com.oceanpremium.api.core.currentrms.response.dto.config.ProductConfigOpt
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductConfigsDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.messenger.Slogger
-import com.oceanpremium.api.core.model.Order
-import com.oceanpremium.api.core.model.ProductAvailabilityItem
+import com.oceanpremium.api.core.model.OrderDto
+import com.oceanpremium.api.core.model.ProductAvailabilityItemDto
 import com.oceanpremium.api.core.model.WrappedResponse
-import com.oceanpremium.api.core.usecase.CheckProductBatchAvailability
+import com.oceanpremium.api.core.usecase.CheckProductBatchAvailabilityUseCase
 import com.oceanpremium.api.core.usecase.GetProductInventoryUseCase
 import com.oceanpremium.api.core.usecase.OrderPlacementUseCase
 import com.oceanpremium.api.core.util.Constants
@@ -32,7 +32,7 @@ class ProductsController(
     @Autowired private val resourceLoader: ResourceLoader,
     @Autowired private val productsApi: ProductsApiImpl,
     @Autowired private val getProductInventoryUseCase: GetProductInventoryUseCase,
-    @Autowired private val checkProductBatchAvailability: CheckProductBatchAvailability,
+    @Autowired private val checkProductBatchAvailabilityUseCase: CheckProductBatchAvailabilityUseCase,
     @Autowired private val orderPlacementUseCase: OrderPlacementUseCase
 ) {
 
@@ -175,28 +175,24 @@ class ProductsController(
 
     /**
      * Endpoint to get the availability of a batch of selected products.
-     *
-     *
      */
     @RequestMapping("availability")
     @ResponseBody
-    fun getProductBatchAvailability(@RequestBody productItems: List<ProductAvailabilityItem>): ResponseEntity<*> {
+    fun checkProductBatchAvailability(@RequestBody productItems: List<ProductAvailabilityItemDto>): ResponseEntity<*> {
         val logMessage = "[API] - GET products availability for batch $productItems"
         logger.debug(logMessage)
 
-        val result= checkProductBatchAvailability.execute(productItems)
+        val result= checkProductBatchAvailabilityUseCase.execute(productItems)
 
         return ResponseEntity(WrappedResponse(HttpStatus.CREATED.value(), result), HttpStatus.CREATED)
     }
 
     /**
      * Endpoint to get place order of selected products.
-     *
-     *
      */
-    @RequestMapping("order")
+    @RequestMapping("orders")
     @ResponseBody
-    fun createOrderPlacement(@RequestBody order: Order): ResponseEntity<*> {
+    fun createOrderPlacement(@RequestBody order: OrderDto): ResponseEntity<*> {
         val logMessage = "[API] - POST order: $order"
         logger.debug(logMessage)
 
