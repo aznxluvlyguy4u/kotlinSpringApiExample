@@ -20,7 +20,7 @@ class ProductAvailabilityItem(
     var quantityAvailable: Int = 0
     var availabilityState: AvailabilityStateType? = null
     var message: String? = null
-    var name: String? = null
+    var name: String? = "foobar"
     var rates: List<PricingDto>? = null
     var images: List<ImageSource>? = null
     var totalPrice: String? = null
