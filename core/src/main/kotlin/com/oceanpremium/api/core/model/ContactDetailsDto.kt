@@ -3,7 +3,7 @@ package com.oceanpremium.api.core.model
 import com.fasterxml.jackson.annotation.JsonInclude
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-class ContactDetails(
+class ContactDetailsDto(
     val firstName: String,
     val surName: String,
     val emailAddress: String,
@@ -15,9 +15,5 @@ class ContactDetails(
 
     init {
         fullName = "$firstName $surName"
-    }
-
-    override fun toString(): String {
-        return "firstName: $firstName, surName: $surName, fullName: $fullName, emailAddress: $emailAddress, phoneNumber: $phoneNumber, country: $country, city: $city"
     }
 }

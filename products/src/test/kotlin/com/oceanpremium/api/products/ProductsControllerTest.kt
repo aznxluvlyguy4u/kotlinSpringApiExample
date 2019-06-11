@@ -270,30 +270,30 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductBatchAvailability() {
-        val batch: MutableList<ProductAvailabilityItem> = mutableListOf()
+        val batch: MutableList<ProductAvailabilityItemDto> = mutableListOf()
 
-        val mockedItem1 = ProductAvailabilityItem(247, 1)
+        val mockedItem1 = ProductAvailabilityItemDto(247, 1)
         val rentalPeriod1 = RentalPeriod(Date(), Date())
         val rentalLocal1 = RentalLocation(Location("Foo", 1),Location("Bar", 13))
         mockedItem1.period = rentalPeriod1
         mockedItem1.location = rentalLocal1
         batch.add(mockedItem1)
 
-        val mockedItem2 = ProductAvailabilityItem(196, 2)
+        val mockedItem2 = ProductAvailabilityItemDto(196, 2)
         val rentalPeriod2 = RentalPeriod(Date(), Date())
         val rentalLocal2 = RentalLocation(Location("Foo", 1),Location("Bar", 13))
         mockedItem2.period = rentalPeriod2
         mockedItem2.location = rentalLocal2
         batch.add(mockedItem2)
 
-        val mockedItem3 = ProductAvailabilityItem(148, 2)
+        val mockedItem3 = ProductAvailabilityItemDto(148, 2)
         val rentalPeriod3 = RentalPeriod(Date(), Date())
         val rentalLocal3 = RentalLocation(Location("Foo", 1),Location("Bar", 13))
         mockedItem3.period = rentalPeriod3
         mockedItem3.location = rentalLocal3
         batch.add(mockedItem3)
 
-        val request = HttpEntity<List<ProductAvailabilityItem>>(batch)
+        val request = HttpEntity<List<ProductAvailabilityItemDto>>(batch)
         val productsResponse = restTemplate?.postForEntity("$endpoint/availability", request, Any::class.java)
 
         assertThat(productsResponse).isNotNull
@@ -305,9 +305,9 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductBatchAvailabilityEmptyArrayPayload() {
-        val batch: MutableList<ProductAvailabilityItem> = mutableListOf()
+        val batch: MutableList<ProductAvailabilityItemDto> = mutableListOf()
 
-        val request = HttpEntity<List<ProductAvailabilityItem>>(batch)
+        val request = HttpEntity<List<ProductAvailabilityItemDto>>(batch)
         val productsResponse = restTemplate?.postForEntity("$endpoint/availability", request, Any::class.java)
 
         assertThat(productsResponse).isNotNull
@@ -320,9 +320,9 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductBatchAvailabilityInvalidQuantity() {
-        val batch: MutableList<ProductAvailabilityItem> = mutableListOf()
+        val batch: MutableList<ProductAvailabilityItemDto> = mutableListOf()
 
-        val request = HttpEntity<List<ProductAvailabilityItem>>(batch)
+        val request = HttpEntity<List<ProductAvailabilityItemDto>>(batch)
         val productsResponse = restTemplate?.postForEntity("$endpoint/availability", request, Any::class.java)
 
         assertThat(productsResponse).isNotNull

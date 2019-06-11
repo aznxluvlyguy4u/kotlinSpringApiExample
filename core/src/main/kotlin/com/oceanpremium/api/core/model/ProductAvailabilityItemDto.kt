@@ -7,15 +7,25 @@ import com.oceanpremium.api.core.currentrms.response.dto.product.PricingDto
 import com.oceanpremium.api.core.enum.AvailabilityStateType
 import java.util.*
 
-@JsonPropertyOrder("id", "uuid", "name", "quantity", "quantityAvailable", "availabilityState", "totalPrice", "period", "location")
+@JsonPropertyOrder(
+    "id",
+    "uuid",
+    "name",
+    "quantity",
+    "quantityAvailable",
+    "availabilityState",
+    "totalPrice",
+    "period",
+    "location"
+)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-class ProductAvailabilityItem(
+class ProductAvailabilityItemDto(
     val id: Int,
     val quantity: Int,
     var period: RentalPeriod? = null,
     var location: RentalLocation? = null,
-    var configurations: List<Map<*,*>>? = null,
-    var accessories: List<ProductAvailabilityItem>? = null
+    var configurations: List<Map<*, *>>? = null,
+    var accessories: List<ProductAvailabilityItemDto>? = null
 ) {
     var quantityAvailable: Int = 0
     var availabilityState: AvailabilityStateType? = null
