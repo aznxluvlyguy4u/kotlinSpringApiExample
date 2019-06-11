@@ -99,7 +99,7 @@ functions:
       emailer_username: ${file(properties.json):products.emailer.username}
       emailer_password: ${file(properties.json):products.emailer.password}
       emailer_sender: ${file(properties.json):products.emailer.sender}
-      emailer_backoffice: ${file(properties.json):products.emailer.backoffice}
+      emailer_backoffice: ${file(properties.json):products.emailer.backOffice}
   get-product-by-id:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
