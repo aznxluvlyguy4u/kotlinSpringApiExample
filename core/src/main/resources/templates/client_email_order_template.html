@@ -16,7 +16,9 @@
                 <tr>
                     <td class="email-masthead">
                         <a href="https://oceanpremium.com">
-                            <img height="60px" class="responsive" src="https://www.oceanpremium.com/wp-content/uploads/2017/03/op-logo-blue.png" alt="Ocean Premium logo"/>
+                            <img height="60px" class="responsive"
+                                 src="https://www.oceanpremium.com/wp-content/uploads/2017/03/op-logo-blue.png"
+                                 alt="Ocean Premium logo"/>
                         </a>
                     </td>
                 </tr>
@@ -31,7 +33,7 @@
                                         <tr>
                                             <td>
                                                 <h3>Order ID</h3>
-                                                <p th:text="000123">Order ID placeholder</p>
+                                                <p th:text="${orderId}">Order ID placeholder</p>
                                             </td>
                                             <td>
                                                 <h3>Date</h3>
@@ -41,42 +43,86 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                                <hr>
                                                 <h3>Contact details</h3>
-                                                <address>
-                                                    <span style="font-weight:bold">First name:</span>
-                                                    <p th:text="${contactDetails.firstName}">First name placeholder</p>
-                                                    <span style="font-weight:bold">Surname:</span>
-                                                    <p th:text="${contactDetails.surName}">Surname placeholder</p>
-                                                    <span style="font-weight:bold">E-mail address:</span>
-                                                    <p th:text="${contactDetails.emailAddress}">E-mail address
-                                                        placeholder</p>
-                                                    <span style="font-weight:bold">Phone number:</span>
-                                                    <p th:text="${contactDetails.phoneNumber}">Phone number
-                                                        placeholder</p>
-                                                    <span style="font-weight:bold">Country:</span>
-                                                    <p th:text="${contactDetails.country}">Country placeholder</p>
-                                                    <span style="font-weight:bold">City:</span>
-                                                    <p th:text="${contactDetails.city}">City placeholder</p>
-                                                </address>
+                                                <table id="vertical-1">
+                                                    <tr>
+                                                        <th align="left">E-mail address:</th>
+                                                        <td>
+                                                            <a th:text="${contactDetails.emailAddress}">E-mail address placeholder</a><br>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th align="left">Phone number:</th>
+                                                        <td>
+                                                            <a th:text="${contactDetails.phoneNumber}">Phone number placeholder</a><br>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th align="left">First name:</th>
+                                                        <td>
+                                                            <a th:text="${contactDetails.firstName}">First name placeholder</a><br>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th align="left">Surname:</th>
+                                                        <td>
+                                                            <a th:text="${contactDetails.surName}">Surname placeholder</a><br>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th align="left">Street name:</th>
+                                                        <td>
+                                                            <a th:if="${contactDetails.address.streetName != null}"
+                                                               th:text="${contactDetails.address.streetName}">Street name placeholder</a><br>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th align="left">Street number:</th>
+                                                        <td>
+                                                            <a th:if="${contactDetails.address.streetNumber != null}"
+                                                               th:text="${contactDetails.address.streetNumber}">Street number placeholder</a><br>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th align="left">Street number block:</th>
+                                                        <td>
+                                                            <a th:if="${contactDetails.address.streetNumberBlock != null}"
+                                                               th:text="${contactDetails.address.streetNumberBlock}">-</a><br>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th align="left">Postal code:</th>
+                                                        <td>
+                                                            <a th:if="${contactDetails.address.streetNumber != null}"
+                                                               th:text="${contactDetails.address.postalCode}">Postal code placeholder</a><br>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th align="left">Country:</th>
+                                                        <td>
+                                                            <a th:if="${contactDetails.address.streetNumber != null}"
+                                                               th:text="${contactDetails.address.country}">Country placeholder</a><br>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th align="left">City:</th>
+                                                        <td>
+                                                            <a th:if="${contactDetails.address.streetNumber != null}"
+                                                               th:text="${contactDetails.address.city}">City placeholder</a><br>
+                                                        </td>
+                                                    </tr>
+                                                </table>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>
+                                                <hr>
                                                 <h3>Message</h3>
                                                 <p th:text="${message}">Message placeholder</p>
+                                                <hr>
                                             </td>
                                         </tr>
-                                        <table>
-                                            <tbody th:each="user : ${users}" th:remove="tag">
-                                            <tr>
-                                                <td th:text="${user.login}">...</td>
-                                                <td th:text="${user.name}">...</td>
-                                            </tr>
-                                            <tr>
-                                                <td colspan="2" th:text="${user.address}">...</td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
                                         <tr>
                                             <td>
                                                 <table>
@@ -88,32 +134,21 @@
                                                             <p>Unit price</p>
                                                         </th>
                                                     </tr>
-
                                                     <tr th:each="product : ${products}">
-                                                        <td th:text="|${product.quantity}x ${product.name}|">Product
-                                                            item name placeholder
-                                                        </td>
-                                                        <td th:text="${product.rates?.get(0)?.price}">Product item unit
-                                                            price placeholder
-                                                        </td>
+                                                        <td th:text="|${product.quantity}x ${product.name}|">Product item name placeholder</td>
+                                                        <td th:text="${product.rates?.get(0)?.price}">Product item unit price placeholder</td>
                                                     </tr>
-                                                    <tr th:each="product2 : ${products}">
-                                                        <td th:if="${not #lists.isEmpty(product2.accessories)}"
-                                                            th:text="|${product2.accessories.get(0).quantity}x ${product2.accessories.get(0).name}|">Acc
-                                                            item name placeholder
-                                                        </td>
-                                                        <td th:if="${not #lists.isEmpty(product2.accessories)}"
-                                                            th:text="${product2.accessories.get(0).rates.get(0).price}">Acc item unit
-                                                            price placeholder
-                                                        </td>
-                                                    </tr>
+                                                    <th:block th:each="product : ${products}">
+                                                        <tr th:each="accessory : ${product.accessories}">
+                                                            <td th:text="|${accessory.quantity}x ${accessory.name}|">Accessory item name placeholder</td>
+                                                            <td th:text="${accessory.rates?.get(0)?.price}">Accessory item unit price placeholder</td>
+                                                        </tr>
+                                                    </th:block>
                                                     <tr>
                                                         <td>
                                                             <p>Subtotal</p>
                                                         </td>
-                                                        <td th:text="${totalPrice}">
-                                                            Subtotal placeholder
-                                                        </td>
+                                                        <td th:text="${totalPrice}"></td>
                                                     </tr>
                                                 </table>
                                             </td>
