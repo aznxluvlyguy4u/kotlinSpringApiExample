@@ -356,20 +356,21 @@ class ProductsControllerTest {
      */
     @Test
     fun testCreateRentalOrder() {
+
+        val addressDto = AddressDto("ci street", "999", "9999 AZ", "CI city", "CI Country")
+
         val contactDetailsDto = ContactDetailsDto(
             "Circle",
             "CI",
             "steven@jongensvantechniek.nl",
             "+316123445678",
-            "Neverland",
-            "CI City"
+            addressDto
         )
 
         val products: MutableList<ProductAvailabilityItemDto> = mutableListOf()
         val location = Location("Bar", 13)
 
         val mockedItem1 = ProductAvailabilityItemDto(148, 1)
-        mockedItem1.accessories = listOf()
 
         val rentalPeriod1 = RentalPeriod(Date(), Date())
         val rentalLocal1 = RentalLocation(Location("Foo", 1), location)
@@ -378,7 +379,6 @@ class ProductsControllerTest {
         products.add(mockedItem1)
 
         val mockedItem2 = ProductAvailabilityItemDto(196, 2)
-        mockedItem2.accessories = listOf()
 
         val rentalPeriod2 = RentalPeriod(Date(), Date())
         val rentalLocal2 = RentalLocation(Location("Foo", 1), location)
@@ -387,7 +387,6 @@ class ProductsControllerTest {
         products.add(mockedItem2)
 
         val mockedItem3 = ProductAvailabilityItemDto(148, 2)
-        mockedItem3.accessories = listOf()
 
         val rentalPeriod3 = RentalPeriod(Date(), Date())
         val rentalLocal3 = RentalLocation(Location("Foo", 1), location)
