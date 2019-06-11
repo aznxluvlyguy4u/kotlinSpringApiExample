@@ -3,7 +3,7 @@ package com.oceanpremium.api.core.usecase
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.enum.AvailabilityStateType
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
-import com.oceanpremium.api.core.model.ProductAvailabilityItem
+import com.oceanpremium.api.core.model.ProductAvailabilityItemDto
 import com.oceanpremium.api.core.util.DateTimeUtil
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -13,21 +13,21 @@ import org.springframework.http.HttpHeaders
  * Get the availability for batch POSTED product items and check against the available quantity has sufficient stock levels compared to
  * the wanted quantity. This is can be used by, for example, for checking the availability of a basket where multiple products are added.
  */
-interface CheckProductBatchAvailability {
-    fun execute(productItems: List<ProductAvailabilityItem>): List<ProductAvailabilityItem>
+interface CheckProductBatchAvailabilityUseCase {
+    fun execute(productItems: List<ProductAvailabilityItemDto>): List<ProductAvailabilityItemDto>
 }
 
 /**
  * @inherit
  */
-class CheckProductBatchAvailabilityUseCaseImpl(
-    @Autowired private val getProductInventoryUseCase: GetProductInventoryUseCase) : CheckProductBatchAvailability {
+class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
+    @Autowired private val getProductInventoryUseCase: GetProductInventoryUseCase) : CheckProductBatchAvailabilityUseCase {
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
     }
 
-    override fun execute(productItems: List<ProductAvailabilityItem>): List<ProductAvailabilityItem> {
+    override fun execute(productItems: List<ProductAvailabilityItemDto>): List<ProductAvailabilityItemDto> {
 
         if (productItems.isEmpty()) {
             throw BadRequestException("Payload may not contain empty array")
@@ -85,7 +85,7 @@ class CheckProductBatchAvailabilityUseCaseImpl(
         return productItems
     }
 
-    private fun buildQueryParametersMap(productAvailabilityItem: ProductAvailabilityItem, isAccessory: Boolean = false) : Map<String, String> {
+    private fun buildQueryParametersMap(productAvailabilityItem: ProductAvailabilityItemDto, isAccessory: Boolean = false) : Map<String, String> {
         val queryParameters = mutableMapOf<String, String>()
 
         if (isAccessory) {
@@ -113,7 +113,7 @@ class CheckProductBatchAvailabilityUseCaseImpl(
         return queryParameters
     }
 
-    private fun updateAvailability(productAvailabilityItem: ProductAvailabilityItem, productDtoItem: ProductDto?, quantityAvailable: Int?) {
+    private fun updateAvailability(productAvailabilityItem: ProductAvailabilityItemDto, productDtoItem: ProductDto?, quantityAvailable: Int?) {
         // Check that the stock level quantity for the requested quantity for given product is sufficient
         when {
             quantityAvailable != null -> if (quantityAvailable >= productAvailabilityItem.quantity) {
