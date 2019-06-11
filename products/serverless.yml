@@ -71,7 +71,7 @@ functions:
       emailer_username: ${file(properties.json):products.emailer.username}
       emailer_password: ${file(properties.json):products.emailer.password}
       emailer_sender: ${file(properties.json):products.emailer.sender}
-      emailer_backoffice: ${file(properties.json):products.emailer.backoffice}
+      emailer_backoffice: ${file(properties.json):products.emailer.backOffice}
   get-products:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
@@ -131,7 +131,7 @@ functions:
       emailer_username: ${file(properties.json):products.emailer.username}
       emailer_password: ${file(properties.json):products.emailer.password}
       emailer_sender: ${file(properties.json):products.emailer.sender}
-      emailer_backoffice: ${file(properties.json):products.emailer.backoffice}
+      emailer_backoffice: ${file(properties.json):products.emailer.backOffice}
   get-product-groups:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
@@ -159,7 +159,7 @@ functions:
       emailer_username: ${file(properties.json):products.emailer.username}
       emailer_password: ${file(properties.json):products.emailer.password}
       emailer_sender: ${file(properties.json):products.emailer.sender}
-      emailer_backoffice: ${file(properties.json):products.emailer.backoffice}
+      emailer_backoffice: ${file(properties.json):products.emailer.backOffice}
   get-products-inventory:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
@@ -187,7 +187,7 @@ functions:
       emailer_username: ${file(properties.json):products.emailer.username}
       emailer_password: ${file(properties.json):products.emailer.password}
       emailer_sender: ${file(properties.json):products.emailer.sender}
-      emailer_backoffice: ${file(properties.json):products.emailer.backoffice}
+      emailer_backoffice: ${file(properties.json):products.emailer.backOffice}
   post-product-batch-availability:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
@@ -215,7 +215,7 @@ functions:
       emailer_username: ${file(properties.json):products.emailer.username}
       emailer_password: ${file(properties.json):products.emailer.password}
       emailer_sender: ${file(properties.json):products.emailer.sender}
-      emailer_backoffice: ${file(properties.json):products.emailer.backoffice}
+      emailer_backoffice: ${file(properties.json):products.emailer.backOffice}
   post-product-order-placement:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
@@ -243,5 +243,5 @@ functions:
       emailer_username: ${file(properties.json):products.emailer.username}
       emailer_password: ${file(properties.json):products.emailer.password}
       emailer_sender: ${file(properties.json):products.emailer.sender}
-      emailer_backoffice: ${file(properties.json):products.emailer.backoffice}
+      emailer_backoffice: ${file(properties.json):products.emailer.backOffice}
 
