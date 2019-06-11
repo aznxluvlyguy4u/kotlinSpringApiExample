@@ -6,7 +6,6 @@ import com.oceanpremium.api.core.model.OrderDto
 import com.oceanpremium.api.core.util.ObjectMapperConfig
 import com.sun.mail.smtp.SMTPAddressFailedException
 import io.sentry.Sentry
-import org.joda.time.DateTime
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.thymeleaf.context.Context
