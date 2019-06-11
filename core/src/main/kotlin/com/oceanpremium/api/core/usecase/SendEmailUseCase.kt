@@ -45,7 +45,7 @@ class SendEmailUseCaseImpl(
             private const val USERNAME_KEY = "emailer_username"
             private const val PASSWORD_KEY = "emailer_password"
             private const val SENDER_KEY = "emailer_sender"
-            private const val BACKOFFICE_KEY = "emailer_backOffice"
+            private const val BACK_OFFICE_KEY = "emailer_back_office"
         }
 
         init {
@@ -54,7 +54,7 @@ class SendEmailUseCaseImpl(
 
         @Throws(Exception::class)
         private fun getEmailConfig(): EmailServiceConfig {
-            backOffice = System.getenv(BACKOFFICE_KEY) ?: null ?: throw Exception("Env var: $BACKOFFICE_KEY not set")
+            backOffice = System.getenv(BACK_OFFICE_KEY) ?: null ?: throw Exception("Env var: $BACK_OFFICE_KEY not set")
             sender = System.getenv(SENDER_KEY) ?: null ?: throw Exception("Env var: $SENDER_KEY not set")
             host = System.getenv(HOST_KEY) ?: null ?: throw Exception("Env var: $HOST_KEY not set")
             userName = System.getenv(USERNAME_KEY) ?: null ?: throw Exception("Env var: $USERNAME_KEY not set")
