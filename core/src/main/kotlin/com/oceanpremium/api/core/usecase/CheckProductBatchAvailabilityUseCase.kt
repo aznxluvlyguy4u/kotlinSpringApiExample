@@ -56,7 +56,7 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
            updateAvailability(productAvailabilityItem, productDtoItem, productDtoItem?.rates?.first()?.quantityAvailable?.toDouble()?.toInt())
 
             //Check the availability of provided accessories for the given product
-            productAvailabilityItem.accessories?.forEach { accessoriesAvailabilityItem->
+            productAvailabilityItem.accessories.forEach { accessoriesAvailabilityItem->
                 val accessoriesResult = getProductInventoryUseCase.execute(buildQueryParametersMap(accessoriesAvailabilityItem, true), HttpHeaders.EMPTY)
 
                 @Suppress("UNCHECKED_CAST")

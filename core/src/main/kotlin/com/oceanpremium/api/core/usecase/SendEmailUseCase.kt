@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.thymeleaf.context.Context
 import org.thymeleaf.spring5.SpringTemplateEngine
 import java.io.IOException
+import java.net.ConnectException
 import java.util.*
 import javax.mail.*
 import javax.mail.internet.InternetAddress
@@ -81,8 +82,10 @@ class SendEmailUseCaseImpl(
         val props = Properties()
         props["mail.smtp.auth"] = "true"
         props["mail.smtp.starttls.enable"] = "true"
+//        props["mail.smtp.starttls.required"] = "true"
         props["mail.smtp.host"] = emailServiceConfig.host
         props["mail.smtp.port"] = "587"
+        props["mail.transport.protocol"]="smtp"
 
         session = Session.getInstance(props, object : javax.mail.Authenticator() {
             override fun getPasswordAuthentication(): PasswordAuthentication {
@@ -96,7 +99,7 @@ class SendEmailUseCaseImpl(
             from = emailServiceConfig.sender!!,
             to = listOf(order.contactDetails.emailAddress),
             bcc = listOf(emailServiceConfig.backOffice!!),
-            subject = "[${DateTime.now()}] - Rental order of ${order.contactDetails.fullName} ${order.contactDetails.phoneNumber}"
+            subject = "Rental order of ${order.contactDetails.fullName} ${order.contactDetails.phoneNumber}"
         )
 
         try {
@@ -106,7 +109,9 @@ class SendEmailUseCaseImpl(
             message.sender = InternetAddress(email.from)
             message.subject = email.subject
 
-            val orderMap = ObjectMapperConfig.serializeToMap(order)
+            val orderMap = ObjectMapperConfig.serializeToMap(order).toMutableMap()
+            orderMap["orderId"] = UUID.randomUUID().toString()
+
             context.setVariables(orderMap)
             val html = templateEngine.process(CLIENT_EMAIL_ORDER_TEMPLATE, context)
             message.setContent(html, "text/html")
@@ -126,6 +131,13 @@ class SendEmailUseCaseImpl(
 
             logger.error("Failed to send email: ${e.message}")
             throw BadRequestException("E-mail address: ${order.contactDetails.emailAddress} is not valid, please check the address or try with a different one")
+        } catch (e: ConnectException) {
+            e.printStackTrace()
+
+            Sentry.capture(e)
+
+            logger.error("Failed to send email: ${e.message}")
+            throw ServerErrorException("Failed to send email to address: ${order.contactDetails.emailAddress}")
         }
     }
 }

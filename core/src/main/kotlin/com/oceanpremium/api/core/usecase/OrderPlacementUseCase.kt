@@ -19,7 +19,7 @@ class OrderPlacementUseCaseImpl (
             val totalPriceUnitPriceProduct = productItem.totalPrice!!.toDouble()
             subTotal += totalPriceUnitPriceProduct
 
-            productItem.accessories?.forEach { accessoryItem ->
+            productItem.accessories.forEach { accessoryItem ->
                 val totalPricePerUnitAccessory = accessoryItem.totalPrice!!.toDouble()
                 subTotal += totalPricePerUnitAccessory
             }
