@@ -16,7 +16,7 @@
                 <tr>
                     <td class="email-masthead">
                         <a href="https://oceanpremium.com">
-                            <img src="https://www.oceanpremium.com/wp-content/uploads/2017/03/op-logo-blue.png" alt="Ocean Premium logo"/>
+                            <img height="60px" class="responsive" src="https://www.oceanpremium.com/wp-content/uploads/2017/03/op-logo-blue.png" alt="Ocean Premium logo"/>
                         </a>
                     </td>
                 </tr>
@@ -88,16 +88,25 @@
                                                             <p>Unit price</p>
                                                         </th>
                                                     </tr>
-                                                    <tbody th:each="product : ${products}" th:remove="tag">
-                                                    <tr>
+
+                                                    <tr th:each="product : ${products}">
                                                         <td th:text="|${product.quantity}x ${product.name}|">Product
                                                             item name placeholder
                                                         </td>
-                                                        <td th:text="${product.rates.get(0).price}">Product item unit
+                                                        <td th:text="${product.rates?.get(0)?.price}">Product item unit
                                                             price placeholder
                                                         </td>
                                                     </tr>
-                                                    </tbody>
+                                                    <tr th:each="product2 : ${products}">
+                                                        <td th:if="${not #lists.isEmpty(product2.accessories)}"
+                                                            th:text="|${product2.accessories.get(0).quantity}x ${product2.accessories.get(0).name}|">Acc
+                                                            item name placeholder
+                                                        </td>
+                                                        <td th:if="${not #lists.isEmpty(product2.accessories)}"
+                                                            th:text="${product2.accessories.get(0).rates.get(0).price}">Acc item unit
+                                                            price placeholder
+                                                        </td>
+                                                    </tr>
                                                     <tr>
                                                         <td>
                                                             <p>Subtotal</p>

@@ -68,6 +68,7 @@ class SendEmailUseCaseImpl(
         private val context = Context()
         private val emailServiceConfig = EmailServiceConfig()
         private var session: Session? = null
+        private const val CLIENT_EMAIL_ORDER_TEMPLATE = "client_email_order_template"
     }
 
     @Throws(MessagingException::class, IOException::class)
@@ -107,7 +108,7 @@ class SendEmailUseCaseImpl(
 
             val orderMap = ObjectMapperConfig.serializeToMap(order)
             context.setVariables(orderMap)
-            val html = templateEngine.process("client_email_template", context)
+            val html = templateEngine.process(CLIENT_EMAIL_ORDER_TEMPLATE, context)
             message.setContent(html, "text/html")
 
             Transport.send(message)

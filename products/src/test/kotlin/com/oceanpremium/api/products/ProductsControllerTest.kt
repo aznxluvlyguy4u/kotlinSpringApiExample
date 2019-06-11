@@ -357,12 +357,12 @@ class ProductsControllerTest {
     @Test
     fun testCreateRentalOrder() {
         val contactDetailsDto = ContactDetailsDto(
-            "Steven",
-            "Doe",
+            "Circle",
+            "CI",
             "steven@jongensvantechniek.nl",
             "+316123445678",
-            "Netherlands",
-            "The Hague"
+            "Neverland",
+            "CI City"
         )
 
         val products: MutableList<ProductAvailabilityItemDto> = mutableListOf()
