@@ -356,10 +356,16 @@ class ProductsControllerTest {
      */
     @Test
     fun testCreateRentalOrder() {
+        val addressDto = AddressDto(
+            "CI street",
+            "999",
+            "9999 AZ",
+            "CI city",
+            "CI Country"
+        )
 
-        val addressDto = AddressDto("ci street", "999", "9999 AZ", "CI city", "CI Country")
         addressDto.streetNumberBlock = "A"
-        
+
         val contactDetailsDto = ContactDetailsDto(
             "Circle",
             "CI",
