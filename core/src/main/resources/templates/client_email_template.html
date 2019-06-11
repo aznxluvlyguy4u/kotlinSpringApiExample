@@ -88,19 +88,22 @@
                                                             <p>Unit price</p>
                                                         </th>
                                                     </tr>
-                                                    <tr th:each="product, interator1 : ${products}">
+
+                                                    <tr th:each="product : ${products}">
                                                         <td th:text="|${product.quantity}x ${product.name}|">Product
                                                             item name placeholder
                                                         </td>
-                                                        <td th:text="${product.rates.get(0).price}">Product item unit
+                                                        <td th:text="${product.rates?.get(0)?.price}">Product item unit
                                                             price placeholder
                                                         </td>
                                                     </tr>
-                                                    <tr th:each="product2, iterator : ${products}">
-                                                        <td th:text="|${product2.accessories.get(0).quantity}x ${product2.accessories.get(0).name}|">Acc
+                                                    <tr th:each="product2 : ${products}">
+                                                        <td th:if="${not #lists.isEmpty(product2.accessories)}"
+                                                            th:text="|${product2.accessories.get(0).quantity}x ${product2.accessories.get(0).name}|">Acc
                                                             item name placeholder
                                                         </td>
-                                                        <td th:text="${product2.accessories.get(0).rates.get(0).price}">Acc item unit
+                                                        <td th:if="${not #lists.isEmpty(product2.accessories)}"
+                                                            th:text="${product2.accessories.get(0).rates.get(0).price}">Acc item unit
                                                             price placeholder
                                                         </td>
                                                     </tr>
