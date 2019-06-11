@@ -397,7 +397,7 @@ class ProductsControllerTest {
 
         val order = OrderDto(contactDetailsDto, products, "Test message from CI")
         val request: HttpEntity<OrderDto> = HttpEntity(order)
-        val productsResponse = restTemplate?.postForEntity("$endpoint/orders", request, OrderDto::class.java)
+        val productsResponse = restTemplate?.postForEntity("$endpoint/orders", request, Any::class.java)
 
         assertThat(productsResponse).isNotNull
         assertThat(productsResponse?.statusCode).isEqualTo(HttpStatus.CREATED)
