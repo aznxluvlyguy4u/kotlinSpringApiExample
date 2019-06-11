@@ -25,7 +25,7 @@ class ProductAvailabilityItemDto(
     var period: RentalPeriod? = null,
     var location: RentalLocation? = null,
     var configurations: List<Map<*, *>>? = null,
-    var accessories: List<ProductAvailabilityItemDto>? = null
+    var accessories: List<ProductAvailabilityItemDto> = listOf()
 ) {
     var quantityAvailable: Int = 0
     var availabilityState: AvailabilityStateType? = null
