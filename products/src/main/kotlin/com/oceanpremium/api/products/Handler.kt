@@ -8,6 +8,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler
 import com.oceanpremium.api.core.config.CorsConfig
 import com.oceanpremium.api.core.config.SentryConfig
+import com.oceanpremium.api.core.config.ThymeleafConfig
 import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.currentrms.builder.LocationBuilderImpl
 import com.oceanpremium.api.core.currentrms.builder.RegionBuilderImpl
@@ -48,7 +49,8 @@ import kotlin.jvm.java as java1
     OrderPlacementUseCaseImpl::class,
     SendEmailUseCaseImpl::class,
     CorsConfig::class,
-    SentryConfig::class
+    SentryConfig::class,
+    ThymeleafConfig::class
 )
 class ProductsDriver : SpringBootServletInitializer() {
     companion object {
