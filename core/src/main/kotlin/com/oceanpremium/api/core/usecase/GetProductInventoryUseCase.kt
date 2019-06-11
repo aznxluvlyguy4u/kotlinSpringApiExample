@@ -126,8 +126,11 @@ class GetProductInventoryUseCaseImpl(@Autowired private val locationStoreResolve
             p.rates.first().quantityAvailable?.toDouble() != null && p.rates.first().quantityAvailable?.toDouble()!! > 0
         }
 
-        combinedDto?.data = filteredData
-
+        if (filteredData == null || filteredData.isEmpty()) {
+            combinedDto?.data = combinedDto?.data as List<ProductDto>?
+        } else {
+            combinedDto?.data = filteredData
+        }
         return ResponseContainer(
             seedSuccessResponse,
             seedErrorResponse,
