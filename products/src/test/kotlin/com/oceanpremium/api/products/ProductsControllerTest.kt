@@ -9,6 +9,7 @@ import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
+import org.springframework.core.annotation.Order
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit4.SpringRunner
@@ -329,7 +330,7 @@ class ProductsControllerTest {
         assertThat(productsResponse?.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
     }
 
-    /*
+    /**
      * Get products inventory bad request for start date before end date.
      */
     @Test
@@ -347,5 +348,58 @@ class ProductsControllerTest {
         errorMessage?.errors?.forEach {
             assertThat(it.toLowerCase()).contains("bad request")
         }
+    }
+
+
+    /**
+     * Create rental order of products.
+     */
+    @Test
+    fun testCreateRentalOrder() {
+        val contactDetailsDto = ContactDetailsDto(
+            "Steven",
+            "Doe",
+            "steven@jongensvantechniek.nl",
+            "+316123445678",
+            "Netherlands",
+            "The Hague"
+        )
+
+        val products: MutableList<ProductAvailabilityItemDto> = mutableListOf()
+        val location = Location("Bar", 13)
+
+        val mockedItem1 = ProductAvailabilityItemDto(148, 1)
+        mockedItem1.accessories = listOf()
+
+        val rentalPeriod1 = RentalPeriod(Date(), Date())
+        val rentalLocal1 = RentalLocation(Location("Foo", 1), location)
+        mockedItem1.period = rentalPeriod1
+        mockedItem1.location = rentalLocal1
+        products.add(mockedItem1)
+
+        val mockedItem2 = ProductAvailabilityItemDto(196, 2)
+        mockedItem2.accessories = listOf()
+
+        val rentalPeriod2 = RentalPeriod(Date(), Date())
+        val rentalLocal2 = RentalLocation(Location("Foo", 1), location)
+        mockedItem2.period = rentalPeriod2
+        mockedItem2.location = rentalLocal2
+        products.add(mockedItem2)
+
+        val mockedItem3 = ProductAvailabilityItemDto(148, 2)
+        mockedItem3.accessories = listOf()
+
+        val rentalPeriod3 = RentalPeriod(Date(), Date())
+        val rentalLocal3 = RentalLocation(Location("Foo", 1), location)
+        mockedItem3.period = rentalPeriod3
+        mockedItem3.location = rentalLocal3
+        products.add(mockedItem3)
+
+        val order = OrderDto(contactDetailsDto, products, "Test message from CI")
+        val request: HttpEntity<OrderDto> = HttpEntity(order)
+        val productsResponse = restTemplate?.postForEntity("$endpoint/orders", request, OrderDto::class.java)
+
+        assertThat(productsResponse).isNotNull
+        assertThat(productsResponse?.statusCode).isEqualTo(HttpStatus.CREATED)
     }
 }
