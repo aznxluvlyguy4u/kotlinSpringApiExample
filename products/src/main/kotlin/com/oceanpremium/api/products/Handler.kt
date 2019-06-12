@@ -6,6 +6,9 @@ import com.amazonaws.serverless.proxy.model.AwsProxyResponse
 import com.amazonaws.serverless.proxy.spring.SpringBootLambdaContainerHandler
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler
+import com.oceanpremium.api.core.config.CorsConfig
+import com.oceanpremium.api.core.config.SentryConfig
+import com.oceanpremium.api.core.config.ThymeleafConfig
 import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.currentrms.builder.LocationBuilderImpl
 import com.oceanpremium.api.core.currentrms.builder.RegionBuilderImpl
@@ -17,26 +20,12 @@ import com.oceanpremium.api.core.usecase.CheckProductBatchAvailabilityUseCaseUse
 import com.oceanpremium.api.core.usecase.GetProductInventoryUseCaseImpl
 import com.oceanpremium.api.core.usecase.OrderPlacementUseCaseImpl
 import com.oceanpremium.api.core.usecase.SendEmailUseCaseImpl
-import io.sentry.spring.SentryServletContextInitializer
 import org.slf4j.LoggerFactory
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.web.servlet.FilterRegistrationBean
-import org.springframework.boot.web.servlet.ServletContextInitializer
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
-import org.springframework.core.Ordered
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.cors.CorsConfiguration
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource
-import org.springframework.web.filter.CorsFilter
-import org.springframework.web.servlet.HandlerExceptionResolver
-import org.thymeleaf.spring5.SpringTemplateEngine
-import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver
-import org.thymeleaf.spring5.view.ThymeleafViewResolver
-import org.thymeleaf.templatemode.TemplateMode
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -58,72 +47,16 @@ import kotlin.jvm.java as java1
     GetProductInventoryUseCaseImpl::class,
     CheckProductBatchAvailabilityUseCaseUseCaseImpl::class,
     OrderPlacementUseCaseImpl::class,
-    SendEmailUseCaseImpl::class
+    SendEmailUseCaseImpl::class,
+    CorsConfig::class,
+    SentryConfig::class,
+    ThymeleafConfig::class
 )
 class ProductsDriver : SpringBootServletInitializer() {
-
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
             SpringApplication.run(ProductsDriver::class.java1, *args)
-        }
-    }
-
-    @Bean
-    fun sentryExceptionResolver(): HandlerExceptionResolver {
-        return io.sentry.spring.SentryExceptionResolver()
-    }
-
-    /**
-     * This should only be necessary in Spring Boot applications. "Classic" Spring
-     * should automatically load the `io.sentry.servlet.SentryServletContainerInitializer`.
-     */
-    @Bean
-    fun sentryServletContextInitializer(): ServletContextInitializer {
-        return SentryServletContextInitializer()
-    }
-
-    @Bean
-    fun templateResolver(): SpringResourceTemplateResolver {
-        return SpringResourceTemplateResolver()
-            .apply { prefix = "classpath:/templates/" }
-            .apply { suffix = ".html"}
-            .apply { templateMode = TemplateMode.HTML }
-    }
-
-    @Bean
-    fun templateEngine(): SpringTemplateEngine {
-        return SpringTemplateEngine()
-            .apply { setTemplateResolver(templateResolver()) }
-    }
-
-    @Bean
-    fun viewResolver(): ThymeleafViewResolver {
-        return ThymeleafViewResolver()
-            .apply { templateEngine = templateEngine() }
-            .apply { characterEncoding = "UTF-8" }
-            .apply { order = 1 }
-    }
-
-    @Configuration
-    class CorsConfig {
-
-        @Bean
-        fun simpleCorsFilter(): FilterRegistrationBean<CorsFilter> {
-            val source = UrlBasedCorsConfigurationSource()
-            val config = CorsConfiguration()
-            config.allowCredentials = true
-            config.allowedOrigins = listOf("*")
-            config.allowedMethods = listOf("POST", "GET", "PUT", "DELETE")
-            config.allowedHeaders = listOf("*")
-            config.maxAge = 3600
-
-            source.registerCorsConfiguration("/**", config)
-
-            val bean = FilterRegistrationBean(CorsFilter(source))
-            bean.order = Ordered.HIGHEST_PRECEDENCE
-
-            return bean
         }
     }
 }
