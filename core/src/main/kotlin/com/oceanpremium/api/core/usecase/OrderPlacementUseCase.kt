@@ -16,15 +16,15 @@ class OrderPlacementUseCaseImpl (
 
 
     override fun execute(order: OrderDto): OrderDto {
-        order.products = checkProductBatchAvailabilityUseCase.execute(order.products)
+        order.products = checkProductBatchAvailabilityUseCase.execute(order.products).products
         var subTotal = 0.0
 
         order.products.forEach { productItem ->
-            val totalPriceUnitPriceProduct = productItem.totalPrice!!.toDouble()
+            val totalPriceUnitPriceProduct = productItem.totalPriceProducts!!.toDouble()
             subTotal += totalPriceUnitPriceProduct
 
             productItem.accessories.forEach { accessoryItem ->
-                val totalPricePerUnitAccessory = accessoryItem.totalPrice!!.toDouble()
+                val totalPricePerUnitAccessory = accessoryItem.totalPriceProducts!!.toDouble()
                 subTotal += totalPricePerUnitAccessory
             }
         }
