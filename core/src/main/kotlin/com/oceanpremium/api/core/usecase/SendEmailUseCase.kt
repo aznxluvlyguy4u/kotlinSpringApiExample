@@ -17,6 +17,9 @@ import javax.mail.*
 import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeMessage
 
+/**
+ * Build MimeMessage, set mail details, send mail.
+ */
 interface SendEmailUseCase {
     fun execute(order: OrderDto)
 }
