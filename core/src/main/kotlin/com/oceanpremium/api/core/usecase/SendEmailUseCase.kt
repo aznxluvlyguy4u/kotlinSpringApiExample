@@ -101,7 +101,7 @@ class SendEmailUseCaseImpl(
             from = emailServiceConfig.sender!!,
             to = listOf(order.contactDetails.emailAddress),
             bcc = listOf(emailServiceConfig.backOffice!!),
-            subject = "Rental order of ${order.contactDetails.fullName} ${order.contactDetails.phoneNumber}"
+            subject = "Request for reservation from ${order.contactDetails.fullName} ${order.contactDetails.phoneNumber}"
         )
 
         try {

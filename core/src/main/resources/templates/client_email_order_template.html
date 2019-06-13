@@ -28,7 +28,7 @@
                             <tr>
                                 <td>
                                     <h1 th:text="|Hi ${contactDetails.fullName}, |">Greetings placeholder</h1>
-                                    <p>Thank you for using Ocean Premium. This is an overview of your order.</p>
+                                    <p>Thank you for using Ocean Premium. This is an overview of your request for reservation.</p>
                                     <table>
                                         <tr>
                                             <td>
@@ -47,6 +47,12 @@
                                                 <h3>Contact details</h3>
                                                 <table id="vertical-1">
                                                     <tr>
+                                                        <th align="left">Yacht name:</th>
+                                                        <td>
+                                                            <a th:text="${yachtName}">Yacht name</a><br>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
                                                         <th align="left">E-mail address:</th>
                                                         <td>
                                                             <a th:text="${contactDetails.emailAddress}">E-mail address placeholder</a><br>
@@ -59,6 +65,12 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
+                                                        <th align="left">Role:</th>
+                                                        <td>
+                                                            <a th:text="${contactDetails.role}">Role placeholder</a><br>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
                                                         <th align="left">First name:</th>
                                                         <td>
                                                             <a th:text="${contactDetails.firstName}">First name placeholder</a><br>
@@ -68,48 +80,6 @@
                                                         <th align="left">Surname:</th>
                                                         <td>
                                                             <a th:text="${contactDetails.surName}">Surname placeholder</a><br>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th align="left">Street name:</th>
-                                                        <td>
-                                                            <a th:if="${contactDetails.address.streetName != null}"
-                                                               th:text="${contactDetails.address.streetName}">Street name placeholder</a><br>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th align="left">Street number:</th>
-                                                        <td>
-                                                            <a th:if="${contactDetails.address.streetNumber != null}"
-                                                               th:text="${contactDetails.address.streetNumber}">Street number placeholder</a><br>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th align="left">Street number block:</th>
-                                                        <td>
-                                                            <a th:if="${contactDetails.address.streetNumberBlock != null}"
-                                                               th:text="${contactDetails.address.streetNumberBlock}">-</a><br>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th align="left">Postal code:</th>
-                                                        <td>
-                                                            <a th:if="${contactDetails.address.streetNumber != null}"
-                                                               th:text="${contactDetails.address.postalCode}">Postal code placeholder</a><br>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th align="left">Country:</th>
-                                                        <td>
-                                                            <a th:if="${contactDetails.address.streetNumber != null}"
-                                                               th:text="${contactDetails.address.country}">Country placeholder</a><br>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th align="left">City:</th>
-                                                        <td>
-                                                            <a th:if="${contactDetails.address.streetNumber != null}"
-                                                               th:text="${contactDetails.address.city}">City placeholder</a><br>
                                                         </td>
                                                     </tr>
                                                 </table>

@@ -2,6 +2,7 @@ package com.oceanpremium.api.products
 
 import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolverImpl.Companion.FUNCTIONAL_INTEGRATION_GROUP_NAME
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
+import com.oceanpremium.api.core.enum.ClientRoleType
 import com.oceanpremium.api.core.model.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -355,22 +356,12 @@ class ProductsControllerTest {
      */
     @Test
     fun testCreateRentalOrder() {
-        val addressDto = AddressDto(
-            "CI street",
-            "999",
-            "9999 AZ",
-            "CI city",
-            "CI Country"
-        )
-
-        addressDto.streetNumberBlock = "A"
-
         val contactDetailsDto = ContactDetailsDto(
+            ClientRoleType.OTHER,
             "Circle",
             "CI",
             "steven@jongensvantechniek.nl",
-            "+316123445678",
-            addressDto
+            "+316123445678"
         )
 
         val products: MutableList<ProductAvailabilityItemDto> = mutableListOf()
