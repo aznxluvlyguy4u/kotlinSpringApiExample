@@ -5,6 +5,7 @@ import com.oceanpremium.api.core.currentrms.response.dto.mapper.CurrentRmsBaseDt
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.parameter.LocationStoreResolver
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
@@ -14,7 +15,8 @@ import retrofit2.Response
 class ResponseContainer(
     private val successResponse: Response<Any>?,
     private val errorResponse: Response<Any>?,
-    val dtoMapper: CurrentRmsBaseDtoMapper) {
+    val dtoMapper: CurrentRmsBaseDtoMapper
+) {
 
     fun getRawResponse(): Response<Any>? {
 
@@ -39,13 +41,16 @@ interface GetProductInventoryUseCase {
 }
 
 /** {@inheritDoc} */
-class GetProductInventoryUseCaseImpl(@Autowired private val locationStoreResolver: LocationStoreResolver,
-                                     @Autowired private val productsApi: ProductsApiImpl) :
+class GetProductInventoryUseCaseImpl(
+    @Autowired private val locationStoreResolver: LocationStoreResolver,
+    @Autowired private val productsApi: ProductsApiImpl
+) :
     GetProductInventoryUseCase {
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
     }
+
 
     @Suppress("UNCHECKED_CAST")
     override fun execute(queryParameters: Map<String, String>, headers: HttpHeaders): ResponseContainer {
@@ -54,28 +59,28 @@ class GetProductInventoryUseCaseImpl(@Autowired private val locationStoreResolve
         val storeIds = locationStoreResolver.resolveStoreByLocation(queryParameters)
         var seedSuccessResponse: Response<Any>? = null
         var seedErrorResponse: Response<Any>? = null
-        val responses: MutableList<Response<Any>> = mutableListOf()
+//        val responses: MutableList<Response<Any>> = mutableListOf()
         val dtos: MutableList<CurrentRmsBaseDtoMapper> = mutableListOf()
         var combinedDto: CurrentRmsBaseDtoMapper? = null
 
-        storeIds?.forEach { storeId ->
-            val response = productsApi.getProductsInventory(queryParameters, headers, storeId)
+//        storeIds?.forEach { storeId ->
+        val responses = productsApi.getProductsInventory(queryParameters, headers, storeIds!!)
 
-            logger.debug("Response code for query on storeId: $storeId - ${response?.code()}")
-
-            if (response != null) {
-
-                when {
-                    !response.isSuccessful && seedErrorResponse == null -> seedErrorResponse = response
-                }
-
-                when {
-                    response.isSuccessful && seedSuccessResponse == null -> seedSuccessResponse = response
-                }
-
-                responses.add(response)
-            }
-        }
+//            logger.debug("Response code for query on storeId: $storeId - ${response?.code()}")
+//
+//            if (response != null) {
+//
+//                when {
+//                    !response.isSuccessful && seedErrorResponse == null -> seedErrorResponse = response
+//                }
+//
+//                when {
+//                    response.isSuccessful && seedSuccessResponse == null -> seedSuccessResponse = response
+//                }
+//
+//                responses.add(response)
+//            }
+//        }
 
         responses.forEach {
             dtos.add(ProductDtoMapper(it.code(), it))
@@ -122,15 +127,6 @@ class GetProductInventoryUseCaseImpl(@Autowired private val locationStoreResolve
             }
         }
 
-        val filteredData: List<ProductDto>? = (combinedDto?.data as List<ProductDto>?)?.filter{ p ->
-            p.rates.first().quantityAvailable?.toDouble() != null && p.rates.first().quantityAvailable?.toDouble()!! > 0
-        }
-
-        if (filteredData == null || filteredData.isEmpty()) {
-            combinedDto?.data = combinedDto?.data as List<ProductDto>?
-        } else {
-            combinedDto?.data = filteredData
-        }
         return ResponseContainer(
             seedSuccessResponse,
             seedErrorResponse,

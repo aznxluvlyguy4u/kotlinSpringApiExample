@@ -38,6 +38,8 @@ class ProductAvailabilityItemDto(
     var totalPriceProducts: String? = null
     var totalPriceAccessories: String? = null
     val uuid: UUID = UUID.randomUUID()
+    var unavailableAccessories: List<ProductAvailabilityItemDto> = listOf()
+
 
     fun computeTotalParentProductPrice() {
         var totalProductPrice = 0.0

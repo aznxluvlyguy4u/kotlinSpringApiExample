@@ -95,10 +95,11 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                                <h3>Available products</h3>
                                                 <table>
                                                     <tr>
                                                         <th>
-                                                            <p>Product name</p>
+                                                            <p align="left">Product name</p>
                                                         </th>
                                                         <th>
                                                             <p>Unit price</p>
@@ -119,6 +120,33 @@
                                                             <p>Subtotal</p>
                                                         </td>
                                                         <td th:text="${totalPrice}"></td>
+                                                    </tr>
+                                                </table>
+                                                <h3>Unavailable products</h3>
+                                                <table>
+                                                    <tr>
+                                                        <th>
+                                                            <p align="left">Product name</p>
+                                                        </th>
+                                                        <th>
+                                                            <p>Unit price</p>
+                                                        </th>
+                                                    </tr>
+                                                    <tr th:each="product : ${unavailableProducts}">
+                                                        <td th:text="|${product.quantity}x ${product.name}|">Product item name placeholder</td>
+                                                        <td th:text="${product.rates?.get(0)?.price}">Product item unit price placeholder</td>
+                                                    </tr>
+                                                    <th:block th:each="product : ${products}">
+                                                        <tr th:each="accessory : ${product.accessories}">
+                                                            <td th:text="|${accessory.quantity}x ${accessory.name}|">Accessory item name placeholder</td>
+                                                            <td th:text="${accessory.rates?.get(0)?.price}">Accessory item unit price placeholder</td>
+                                                        </tr>
+                                                    </th:block>
+                                                    <tr>
+                                                        <td>
+                                                            <p>Subtotal</p>
+                                                        </td>
+                                                        <td th:text="${totalPriceUnavailableProducts}"></td>
                                                     </tr>
                                                 </table>
                                             </td>

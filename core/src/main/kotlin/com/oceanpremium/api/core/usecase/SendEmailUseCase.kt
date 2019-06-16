@@ -21,7 +21,7 @@ import javax.mail.internet.MimeMessage
  * Build MimeMessage, set mail details, send mail.
  */
 interface SendEmailUseCase {
-    fun execute(order: OrderDto)
+    fun execute(order: OrderDto): OrderDto
 }
 
 class SendEmailUseCaseImpl(
@@ -75,9 +75,11 @@ class SendEmailUseCaseImpl(
     }
 
     @Throws(MessagingException::class, IOException::class)
-    override fun execute(order: OrderDto) {
+    override fun execute(order: OrderDto): OrderDto {
         setupMailClient()
         sendEmail(order)
+
+        return order
     }
 
     private fun setupMailClient() {
@@ -96,12 +98,12 @@ class SendEmailUseCaseImpl(
         })
     }
 
-    private fun sendEmail(order: OrderDto) {
+    private fun sendEmail(order: OrderDto) : OrderDto {
         val email = EmailDto(
             from = emailServiceConfig.sender!!,
             to = listOf(order.contactDetails.emailAddress),
             bcc = listOf(emailServiceConfig.backOffice!!),
-            subject = "Request for reservation from ${order.contactDetails.fullName} ${order.contactDetails.phoneNumber}"
+            subject = "Request for reservation by ${order.contactDetails.fullName} ${order.contactDetails.phoneNumber}"
         )
 
         try {
@@ -141,5 +143,7 @@ class SendEmailUseCaseImpl(
             logger.error("Failed to send email: ${e.message}")
             throw ServerErrorException("Failed to send email to address: ${order.contactDetails.emailAddress}")
         }
+
+        return order
     }
 }

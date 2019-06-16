@@ -6,14 +6,17 @@ import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParamete
 import com.oceanpremium.api.core.enum.AuthorizationType
 import com.oceanpremium.api.core.exception.throwable.*
 import io.sentry.Sentry
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import retrofit2.Call
+import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.QueryMap
+import ru.gildor.coroutines.retrofit.awaitResponse
 
 /**
  * Interface for Products API, used by Retrofit to create API call service.
@@ -187,38 +190,50 @@ class ProductsApiImpl(
     /**
      * @inherit
      */
+
     fun getProductsInventory(
         queryParameters: Map<String, String>,
         headers: HttpHeaders,
-        storeId: Int?
-    ): Response<Any>? {
-        val validatedMap = queryParametersResolver.resolveGetProductsInventory(queryParameters, headers, storeId)
-        val retrofitCall = productsApi.getProductsInventory(map = validatedMap)
-        lateinit var response: Response<Any>
+        storeIds: List<Int>
+    ): List<Response<Any>> {
+        val responses : MutableList<Response<Any>> = mutableListOf()
 
-        try {
-            response = retrofitCall.execute()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            logger.error("Request to Current RMS API api/v1/products/inventory failed: ${e.message}")
-            Sentry.capture(e)
+        storeIds.parallelStream().forEach { storeId ->
+            val validatedMap = queryParametersResolver.resolveGetProductsInventory(queryParameters, headers, storeId)
+            val retrofitCall = productsApi.getProductsInventory(map = validatedMap)
 
-            throw CurrentRmsAPIException(e.message)
+            // You can use retrofit suspended extension inside any coroutine block
+             val x = runBlocking {
+                try {
+                    val response = retrofitCall.awaitResponse()
+
+                    logger.debug("Current RMS API call: api/v1/products/inventory HTTP status: ${response.code()}")
+
+                    when {
+                        response.isSuccessful -> {
+                            logger.debug("Current RMS API api/v1/products/inventory response body: ${response.body()}")
+                            responses.add(response)
+                        }
+                        else -> {
+                            logger.debug("Request to Current RMS API api/v1/products/inventory failed: ${response.message()}")
+                            handleException(response)
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    logger.error("Request to Current RMS API api/v1/products/inventory failed: ${e.message}")
+                    Sentry.capture(e)
+
+                    throw CurrentRmsAPIException(e.message)
+                }
+            }
+
+
+
+
         }
 
-        logger.debug("Current RMS API call: api/v1/products/inventory HTTP status: ${response.code()}")
-
-        when {
-            response.isSuccessful -> {
-                logger.debug("Current RMS API api/v1/products/inventory response body: ${response.body()}")
-            }
-            else -> {
-                logger.debug("Request to Current RMS API api/v1/products/inventory failed: ${response.message()}")
-                handleException(response)
-            }
-        }
-
-        return response
+        return responses.toList()
     }
 
     /**

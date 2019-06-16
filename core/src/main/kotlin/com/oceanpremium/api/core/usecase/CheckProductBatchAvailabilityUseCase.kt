@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 
-class ProductAvailabilityResponse(val totalPrice: String, val products: List<ProductAvailabilityItemDto>)
+class ProductAvailabilityResponse(val totalPrice: String, val totalPriceUnavailableProducts:String, val products: List<ProductAvailabilityItemDto>)
 
 /**
  * Get the availability for batch POSTED product items and check against the available quantity has sufficient stock levels compared to
@@ -47,10 +47,11 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
                     "${productAvailabilityItem.location?.collection?.id} - dropOff: ${productAvailabilityItem.location?.delivery?.id} " +
                     "in period: ${productAvailabilityItem.period?.start} - ${productAvailabilityItem.period?.end}")
 
+            buildQueryParametersMap(productAvailabilityItem, false)
             val result = getProductInventoryUseCase.execute(buildQueryParametersMap(productAvailabilityItem), HttpHeaders.EMPTY)
 
             @Suppress("UNCHECKED_CAST")
-            val productDtos = result.dtoMapper.data as List<ProductDto>?
+            val productDtos = result.dtoMapper?.data as List<ProductDto>?
             val productDtoItem = productDtos?.firstOrNull {
                     productResultItem -> productResultItem.id == productAvailabilityItem.id
             }
@@ -67,7 +68,7 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
                 val accessoriesResult = getProductInventoryUseCase.execute(buildQueryParametersMap(accessoriesAvailabilityItem, true), HttpHeaders.EMPTY)
 
                 @Suppress("UNCHECKED_CAST")
-                val accessoriesDtos = accessoriesResult.dtoMapper.data as List<ProductDto>?
+                val accessoriesDtos = accessoriesResult.dtoMapper?.data as List<ProductDto>?
 
                 val accessoryDtoItem = accessoriesDtos?.firstOrNull {
                         accessoriesResultItem -> accessoriesResultItem.id == accessoriesAvailabilityItem.id
@@ -94,7 +95,7 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
             }
         }
 
-        return ProductAvailabilityResponse("%.2f".format(computeTotalPrice(productItems)), productItems)
+        return ProductAvailabilityResponse("%.2f".format(computeTotalPrice(productItems)), "123", productItems)
     }
 
     private fun buildQueryParametersMap(productAvailabilityItem: ProductAvailabilityItemDto, isAccessory: Boolean = false) : Map<String, String> {

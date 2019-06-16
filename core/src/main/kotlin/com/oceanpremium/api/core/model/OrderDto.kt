@@ -10,4 +10,7 @@ class OrderDto(
     val message: String? = null,
     var totalPrice: String? = null,
     var yachtName: String? = null
-)
+) {
+    var totalPriceUnavailableProducts: String? = null
+    var unavailableProducts: List<ProductAvailabilityItemDto> = listOf()
+}
