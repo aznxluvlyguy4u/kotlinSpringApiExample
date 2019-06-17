@@ -16,10 +16,8 @@ import com.oceanpremium.api.core.currentrms.builder.StoreBuilderImpl
 import com.oceanpremium.api.core.currentrms.response.dto.parameter.LocationStoreResolverImpl
 import com.oceanpremium.api.core.currentrms.response.dto.config.ProductConfigOptionsResolverImpl
 import com.oceanpremium.api.core.exception.handler.GlobalExceptionHandler
-import com.oceanpremium.api.core.usecase.CheckProductBatchAvailabilityUseCaseUseCaseImpl
-import com.oceanpremium.api.core.usecase.GetProductInventoryUseCaseImpl
-import com.oceanpremium.api.core.usecase.OrderPlacementUseCaseImpl
-import com.oceanpremium.api.core.usecase.SendEmailUseCaseImpl
+import com.oceanpremium.api.core.ipdata.IPDataApiImpl
+import com.oceanpremium.api.core.usecase.*
 import org.slf4j.LoggerFactory
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -50,7 +48,9 @@ import kotlin.jvm.java as java1
     SendEmailUseCaseImpl::class,
     CorsConfig::class,
     SentryConfig::class,
-    ThymeleafConfig::class
+    ThymeleafConfig::class,
+    GetGeoLocationDetailsUseCaseImpl::class,
+    IPDataApiImpl::class
 )
 class ProductsDriver : SpringBootServletInitializer() {
     companion object {

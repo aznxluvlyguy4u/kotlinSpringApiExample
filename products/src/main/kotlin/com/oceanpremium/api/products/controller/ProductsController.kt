@@ -13,6 +13,7 @@ import com.oceanpremium.api.core.model.OrderDto
 import com.oceanpremium.api.core.model.ProductAvailabilityItemDto
 import com.oceanpremium.api.core.model.WrappedResponse
 import com.oceanpremium.api.core.usecase.CheckProductBatchAvailabilityUseCase
+import com.oceanpremium.api.core.usecase.GetGeoLocationDetailsUseCase
 import com.oceanpremium.api.core.usecase.GetProductInventoryUseCase
 import com.oceanpremium.api.core.usecase.OrderPlacementUseCase
 import com.oceanpremium.api.core.util.Constants
@@ -24,6 +25,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDateTime
 import javax.servlet.http.HttpServletRequest
 
 @RestController
@@ -33,13 +35,13 @@ class ProductsController(
     @Autowired private val productsApi: ProductsApiImpl,
     @Autowired private val getProductInventoryUseCase: GetProductInventoryUseCase,
     @Autowired private val checkProductBatchAvailabilityUseCase: CheckProductBatchAvailabilityUseCase,
-    @Autowired private val orderPlacementUseCase: OrderPlacementUseCase
+    @Autowired private val orderPlacementUseCase: OrderPlacementUseCase,
+    @Autowired private val getGeoLocationDetailsUseCase: GetGeoLocationDetailsUseCase
 ) {
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
         private val mapper = ObjectMapperConfig.mapper
-        private const val REQUEST_FORWARD_HEADER = "X-FORWARDED-FOR"
     }
 
     @RequestMapping("docs")
@@ -157,13 +159,20 @@ class ProductsController(
         @RequestParam queryParameters: MutableMap<String, String>,
         request: HttpServletRequest
     ): ResponseEntity<*> {
-        val logMessage = "[API] - GET products inventories with request headers: $headers, parameters: $queryParameters"
-        logger.debug(logMessage)
+        val geoIpDetails = getGeoLocationDetailsUseCase.execute(request)
 
-        val logMessageSales = "[Sales analytics] GET products inventories by IP: " +
-                "${request.getHeader(REQUEST_FORWARD_HEADER)} - sales analytics: $queryParameters"
+        var searchQuery = "_Search Parameters:_ \n"
+        searchQuery += "\n```"
+        queryParameters.forEach { (k, v) ->
+            searchQuery += "$k=$v\n"
+        }
+        searchQuery += "```\n_Search Words:_ \n```\n${queryParameters["q[product_tags_name_cont]"]}\n```"
+
+        val logMessageSales = "*OP - Sales Analytics* \n_Request Date:_ `${LocalDateTime.now()}`" +
+                "\n\n_Origin:_\n\n```$geoIpDetails```\n$searchQuery```"
+
         logger.debug(logMessageSales)
-        Slogger.send(messageBody = logMessage, salesLog = true, inDebugMode = true)
+        Slogger.send(messageBody = logMessageSales, salesLog = true, inDebugMode = true)
 
         val result =  getProductInventoryUseCase.execute(queryParameters, headers)
 

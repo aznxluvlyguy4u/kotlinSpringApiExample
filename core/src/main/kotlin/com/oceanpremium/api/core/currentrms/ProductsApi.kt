@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import retrofit2.Call
-import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -203,7 +202,7 @@ class ProductsApiImpl(
             val retrofitCall = productsApi.getProductsInventory(map = validatedMap)
 
             // You can use retrofit suspended extension inside any coroutine block
-             val x = runBlocking {
+             runBlocking {
                 try {
                     val response = retrofitCall.awaitResponse()
 
@@ -224,13 +223,9 @@ class ProductsApiImpl(
                     logger.error("Request to Current RMS API api/v1/products/inventory failed: ${e.message}")
                     Sentry.capture(e)
 
-                    throw CurrentRmsAPIException(e.message)
+                    throw e
                 }
             }
-
-
-
-
         }
 
         return responses.toList()
