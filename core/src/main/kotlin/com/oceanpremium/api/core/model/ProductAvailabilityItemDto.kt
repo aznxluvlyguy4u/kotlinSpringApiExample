@@ -1,6 +1,7 @@
 package com.oceanpremium.api.core.model
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import com.oceanpremium.api.core.currentrms.response.dto.product.ImageSource
 import com.oceanpremium.api.core.currentrms.response.dto.product.PricingDto
@@ -12,11 +13,12 @@ import java.util.*
     "uuid",
     "name",
     "quantity",
+    "rates",
     "quantityAvailable",
     "availabilityState",
-    "totalPriceProducts",
-    "totalPriceAccessories",
     "totalPrice",
+    "totalCostProducts",
+    "totalCostAccessories",
     "period",
     "location"
 )
@@ -35,19 +37,9 @@ class ProductAvailabilityItemDto(
     var name: String? = null
     var rates: List<PricingDto>? = null
     var images: List<ImageSource>? = null
-    var totalPriceProducts: String? = null
-    var totalPriceAccessories: String? = null
+    @JsonProperty("totalPrice")
+    var totalCost: String? = null
+    var totalCostProducts: String? = null
+    var totalCostAccessories: String? = null
     val uuid: UUID = UUID.randomUUID()
-    var unavailableAccessories: List<ProductAvailabilityItemDto> = listOf()
-
-
-    fun computeTotalParentProductPrice() {
-        var totalProductPrice = 0.0
-
-        if (rates?.first()?.price != null) {
-            totalProductPrice = quantity * rates?.first()?.price?.toDouble()!!
-        }
-
-        totalPriceProducts = "%.2f".format(totalProductPrice)
-    }
 }

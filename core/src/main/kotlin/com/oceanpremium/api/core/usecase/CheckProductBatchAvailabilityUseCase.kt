@@ -4,12 +4,11 @@ import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.enum.AvailabilityStateType
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.model.ProductAvailabilityItemDto
+import com.oceanpremium.api.core.model.ProductAvailabilityResponse
 import com.oceanpremium.api.core.util.DateTimeUtil
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
-
-class ProductAvailabilityResponse(val totalPrice: String, val totalPriceUnavailableProducts:String, val products: List<ProductAvailabilityItemDto>)
 
 /**
  * Get the availability for batch POSTED product items and check against the available quantity has sufficient stock levels compared to
@@ -27,12 +26,18 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
+        private const val PAYLOAD_EMPTY_ERROR_MESSAGE = "Payload may not contain empty array"
     }
 
+    /**
+     * var totalCost: String? = null
+     * var totalCostProducts: String? = null
+     * var totalCostAccessories: String? = null
+     */
     override fun execute(productItems: List<ProductAvailabilityItemDto>): ProductAvailabilityResponse {
 
         if (productItems.isEmpty()) {
-            throw BadRequestException("Payload may not contain empty array")
+            throw BadRequestException(PAYLOAD_EMPTY_ERROR_MESSAGE)
         }
 
         productItems.forEach { productAvailabilityItem ->
@@ -47,11 +52,10 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
                     "${productAvailabilityItem.location?.collection?.id} - dropOff: ${productAvailabilityItem.location?.delivery?.id} " +
                     "in period: ${productAvailabilityItem.period?.start} - ${productAvailabilityItem.period?.end}")
 
-            buildQueryParametersMap(productAvailabilityItem, false)
-            val result = getProductInventoryUseCase.execute(buildQueryParametersMap(productAvailabilityItem), HttpHeaders.EMPTY)
+            val result = getProductInventoryUseCase.execute(buildQueryParametersMap(productAvailabilityItem, false), HttpHeaders.EMPTY)
 
             @Suppress("UNCHECKED_CAST")
-            val productDtos = result.dtoMapper?.data as List<ProductDto>?
+            val productDtos = result.dtoMapper.data as List<ProductDto>?
             val productDtoItem = productDtos?.firstOrNull {
                     productResultItem -> productResultItem.id == productAvailabilityItem.id
             }
@@ -63,12 +67,14 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
                false
            )
 
-            //Check the availability of provided accessories for the given product
+            //Check the availability of provided accessories for the given product, adjust the parent product
+            // to reflect a state that matched the availability of both the parent product and accessory.
             productAvailabilityItem.accessories.forEach { accessoriesAvailabilityItem->
-                val accessoriesResult = getProductInventoryUseCase.execute(buildQueryParametersMap(accessoriesAvailabilityItem, true), HttpHeaders.EMPTY)
+                val accessoriesResult
+                        = getProductInventoryUseCase.execute(buildQueryParametersMap(accessoriesAvailabilityItem, true), HttpHeaders.EMPTY)
 
                 @Suppress("UNCHECKED_CAST")
-                val accessoriesDtos = accessoriesResult.dtoMapper?.data as List<ProductDto>?
+                val accessoriesDtos = accessoriesResult.dtoMapper.data as List<ProductDto>?
 
                 val accessoryDtoItem = accessoriesDtos?.firstOrNull {
                         accessoriesResultItem -> accessoriesResultItem.id == accessoriesAvailabilityItem.id
@@ -83,7 +89,6 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
 
                 // Restate the availability of the parent product
                 if (productAvailabilityItem.availabilityState == AvailabilityStateType.AVAILABLE) {
-
                     if (accessoriesAvailabilityItem.availabilityState == AvailabilityStateType.NOT_AVAILABLE) {
                         productAvailabilityItem.availabilityState = AvailabilityStateType.AVAILABLE_BUT_ACCESSORY_NOT_AVAILABLE
                     }
@@ -95,10 +100,18 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
             }
         }
 
-        return ProductAvailabilityResponse("%.2f".format(computeTotalPrice(productItems)), "123", productItems)
+        val total = computeTotalPrices(productItems)
+
+        val result = ProductAvailabilityResponse(
+            "%.2f".format(total),
+            productItems
+        )
+
+        return result
     }
 
-    private fun buildQueryParametersMap(productAvailabilityItem: ProductAvailabilityItemDto, isAccessory: Boolean = false) : Map<String, String> {
+    private fun buildQueryParametersMap(productAvailabilityItem: ProductAvailabilityItemDto,
+                                        isAccessory: Boolean = false) : Map<String, String> {
         val queryParameters = mutableMapOf<String, String>()
 
         if (isAccessory) {
@@ -129,7 +142,8 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
     private fun updateAvailability(
         productAvailabilityItem: ProductAvailabilityItemDto,
         productDtoItem: ProductDto?, quantityAvailable: Int?,
-        isAccessory: Boolean) {
+        isAccessory: Boolean
+    ) {
         // Check that the stock level quantity for the requested quantity for given product is sufficient
         when {
             quantityAvailable != null -> if (quantityAvailable >= productAvailabilityItem.quantity) {
@@ -148,31 +162,65 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
         productAvailabilityItem.images = productDtoItem?.images
         productAvailabilityItem.name = productDtoItem?.name
         productAvailabilityItem.rates = productDtoItem?.rates
-        productAvailabilityItem.computeTotalParentProductPrice()
+
+        computeItemTotalPrices(productAvailabilityItem, isAccessory)
 
         // If it is an accessory, do not show the parent total, or accessories total, thus only show that on parent node
         if (isAccessory) {
-            productAvailabilityItem.totalPriceAccessories = null
+            productAvailabilityItem.totalCostAccessories = null
         }
     }
 
-    private fun computeTotalPrice(productItems: List<ProductAvailabilityItemDto>): Double {
+    private fun computeTotalPrices(productItems: List<ProductAvailabilityItemDto>) : Double {
         var totalPrice = 0.0
 
-        productItems.forEach { productItem ->
-            var totalAccessoriesPrice = 0.0
+        productItems.forEach {
+            totalPrice += it.totalCost?.toDouble()!!
 
-            productItem.accessories.forEach { accessoryItem ->
-                if (accessoryItem.totalPriceProducts != null ) {
-                    totalAccessoriesPrice +=  accessoryItem.totalPriceProducts!!.toDouble()
+            it.accessories.forEach { accessoryItem ->
+
+                if (accessoryItem.availabilityState == AvailabilityStateType.AVAILABLE) {
+                    val accessoryItem  =accessoryItem.totalCost?.toDouble()!!
+                    totalPrice += accessoryItem
                 }
             }
-
-            productItem.totalPriceAccessories = "%.2f".format(totalAccessoriesPrice)
-
-            totalPrice += productItem.totalPriceProducts!!.toDouble() + productItem.totalPriceAccessories!!.toDouble()
         }
 
         return totalPrice
+    }
+
+    private fun computeItemTotalPrices(productAvailabilityItem: ProductAvailabilityItemDto, isAccessory: Boolean) {
+        logger.debug("computePrices")
+
+        // product type
+        if (!isAccessory) {
+            if (productAvailabilityItem.rates?.first() != null) {
+                val totalProductItemCost
+                        = productAvailabilityItem.quantity * productAvailabilityItem.rates!!.first().price?.toDouble()!!
+                productAvailabilityItem.totalCostProducts = "%.2f".format(totalProductItemCost)
+
+                var totalAccessoriesCost = 0.0
+                productAvailabilityItem.accessories.forEach { accessoryItem ->
+
+                    when {
+                        accessoryItem.rates?.first() != null -> {
+                            totalAccessoriesCost += accessoryItem.rates!!.first().price?.toDouble()!!
+                        }
+                    }
+                }
+
+                productAvailabilityItem.totalCostAccessories = "%.2f".format(totalAccessoriesCost)
+
+                val totalCost = totalProductItemCost + totalAccessoriesCost
+                productAvailabilityItem.totalCost = "%.2f".format(totalCost)
+            }
+        } else { // product of type accessory
+            if (productAvailabilityItem.rates?.first() != null) {
+                val totalProductItemCost
+                        = productAvailabilityItem.quantity * productAvailabilityItem.rates!!.first().price?.toDouble()!!
+                productAvailabilityItem.totalCostProducts = "%.2f".format(totalProductItemCost)
+                productAvailabilityItem.totalCost = productAvailabilityItem.totalCostProducts
+            }
+        }
     }
 }

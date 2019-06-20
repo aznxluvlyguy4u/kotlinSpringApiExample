@@ -274,7 +274,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                     @Suppress("UNCHECKED_CAST")
                     val rentalRate = (itemBody["rental_rates"] as List<Map<*, *>>).first()
 
-                    val rentalPrice = rentalRate["price"] as String?
+                    val rentalPrice = rentalRate["cost"] as String?
                     val rentalLeadChargePeriodName = rentalRate["rate_definition_name"] as String?
 
                     when {
