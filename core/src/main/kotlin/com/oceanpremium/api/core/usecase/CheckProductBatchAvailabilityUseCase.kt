@@ -102,12 +102,10 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
 
         val total = computeTotalPrices(productItems)
 
-        val result = ProductAvailabilityResponse(
+        return ProductAvailabilityResponse(
             "%.2f".format(total),
             productItems
         )
-
-        return result
     }
 
     private fun buildQueryParametersMap(productAvailabilityItem: ProductAvailabilityItemDto,
@@ -171,17 +169,24 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
         }
     }
 
+    /**
+     * Compute total price of available products.
+     */
     private fun computeTotalPrices(productItems: List<ProductAvailabilityItemDto>) : Double {
         var totalPrice = 0.0
 
-        productItems.forEach {
-            totalPrice += it.totalCost?.toDouble()!!
+        // Calculate parent cost
+        productItems.forEach { productItem ->
 
-            it.accessories.forEach { accessoryItem ->
+            if (productItem.availabilityState != AvailabilityStateType.NOT_AVAILABLE) {
+                totalPrice += productItem.totalCost?.toDouble()!!
+            }
 
+
+            //Calculate child cost
+            productItem.accessories.forEach { accessoryItem ->
                 if (accessoryItem.availabilityState == AvailabilityStateType.AVAILABLE) {
-                    val accessoryItem  =accessoryItem.totalCost?.toDouble()!!
-                    totalPrice += accessoryItem
+                    totalPrice += accessoryItem.totalCost?.toDouble()!!
                 }
             }
         }
