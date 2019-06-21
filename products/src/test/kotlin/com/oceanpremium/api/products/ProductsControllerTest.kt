@@ -19,6 +19,8 @@ class Errors(var errors: List<String>? = null)
 class ErrorResponse(var code: Int? = null, var message: Errors? = null)
 class ProductResponse(var code: Int? = null, var data: ProductDto? = null)
 class ProductsResponse(var code: Int? = null, var data: List<ProductDto>? = null)
+class ProductAvailabilityResponse(val totalPrice: String, val products: List<ProductAvailabilityItemDto>? = null )
+class CheckAvailabilityResponse(var code: Int? = null, var data: ProductAvailabilityResponse)
 class ProductGroupsResponse(var code: Int?, var data: List<ProductGroup>? = null)
 class ProductGroup(var id: Int? = null, var name: String, var description: String?)
 
@@ -116,6 +118,8 @@ class ProductsControllerTest {
         val productItem = productsResponse?.data
         assertThat(productItem).isNotNull
         assertThat(productItem?.id).isEqualTo(testProduct.id)
+        assertThat(productItem?.rates).isNotNull
+        assertThat(productItem?.rates).isNotEmpty
     }
 
     /**
@@ -188,6 +192,8 @@ class ProductsControllerTest {
         assertThat(productItems).isNotEmpty
 
         productItems?.forEach {
+            assertThat(it.rates).isNotNull
+            assertThat(it.rates).isNotEmpty
             assertThat(it.name).containsIgnoringCase("f5")
         }
     }
@@ -209,6 +215,8 @@ class ProductsControllerTest {
         assertThat(productItems).isNotEmpty
 
         val testProduct: ProductDto? = productItems?.find{ p -> p.id == testExistingProduct.id }
+        assertThat(testProduct?.rates).isNotNull
+        assertThat(testProduct?.rates).isNotEmpty
         assertThat(testProduct?.rates?.first()?.quantityAvailable).isEqualTo("2.0")
 
         // Then query inventory with delivery_location_id set to port vendres
@@ -223,6 +231,8 @@ class ProductsControllerTest {
         assertThat(productItems2).isNotEmpty
 
         val testProduct2: ProductDto? = productItems2?.find{ p -> p.id == testExistingProduct.id }
+        assertThat(testProduct2?.rates).isNotNull
+        assertThat(testProduct2?.rates).isNotEmpty
         assertThat(testProduct2?.rates?.first()?.quantityAvailable).isEqualTo("3.0")
     }
 
@@ -295,10 +305,20 @@ class ProductsControllerTest {
         batch.add(mockedItem3)
 
         val request = HttpEntity<List<ProductAvailabilityItemDto>>(batch)
-        val productsResponse = restTemplate?.postForEntity("$endpoint/availability", request, Any::class.java)
+        val response = restTemplate?.postForObject("$endpoint/availability", request, CheckAvailabilityResponse::class.java)
 
-        assertThat(productsResponse).isNotNull
-        assertThat(productsResponse?.statusCode).isEqualTo(HttpStatus.CREATED)
+        assertThat(response).isNotNull
+        assertThat(response?.code).isEqualTo(HttpStatus.CREATED.value())
+        assertThat(response?.data).isNotNull
+
+        val availability = response?.data
+        assertThat(availability?.products).isNotNull
+        assertThat(availability?.products).isNotEmpty
+
+        availability?.products?.forEach {
+            assertThat(it.rates).isNotNull
+            assertThat(it.rates).isNotEmpty
+        }
     }
 
     /**
