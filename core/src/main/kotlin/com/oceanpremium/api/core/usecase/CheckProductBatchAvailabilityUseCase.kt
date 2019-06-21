@@ -71,7 +71,10 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
             // to reflect a state that matched the availability of both the parent product and accessory.
             productAvailabilityItem.accessories.forEach { accessoriesAvailabilityItem->
                 val accessoriesResult
-                        = getProductInventoryUseCase.execute(buildQueryParametersMap(accessoriesAvailabilityItem, true), HttpHeaders.EMPTY)
+                        = getProductInventoryUseCase.execute(
+                    buildQueryParametersMap(accessoriesAvailabilityItem, true),
+                    HttpHeaders.EMPTY
+                )
 
                 @Suppress("UNCHECKED_CAST")
                 val accessoriesDtos = accessoriesResult.dtoMapper.data as List<ProductDto>?
@@ -98,12 +101,13 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
                     }
                 }
             }
+
         }
 
-        val total = computeTotalPrices(productItems)
+        val totalCost = computeTotalCostOfAllItems(productItems)
 
         return ProductAvailabilityResponse(
-            "%.2f".format(total),
+            "%.2f".format(totalCost),
             productItems
         )
     }
@@ -161,70 +165,59 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
         productAvailabilityItem.name = productDtoItem?.name
         productAvailabilityItem.rates = productDtoItem?.rates
 
-        computeItemTotalPrices(productAvailabilityItem, isAccessory)
-
         // If it is an accessory, do not show the parent total, or accessories total, thus only show that on parent node
         if (isAccessory) {
             productAvailabilityItem.totalCostAccessories = null
         }
     }
 
-    /**
-     * Compute total price of available products.
-     */
-    private fun computeTotalPrices(productItems: List<ProductAvailabilityItemDto>) : Double {
-        var totalPrice = 0.0
+    private fun computeTotalCostOfAllItems(productItems: List<ProductAvailabilityItemDto>) : Double {
+        logger.debug("computePrices")
 
-        // Calculate parent cost
-        productItems.forEach { productItem ->
+        computeTotalCostsPerItem(productItems)
 
-            if (productItem.availabilityState != AvailabilityStateType.NOT_AVAILABLE) {
-                totalPrice += productItem.totalCost?.toDouble()!!
-            }
+        var totalCost = 0.0
+        productItems.forEach {
 
-
-            //Calculate child cost
-            productItem.accessories.forEach { accessoryItem ->
-                if (accessoryItem.availabilityState == AvailabilityStateType.AVAILABLE) {
-                    totalPrice += accessoryItem.totalCost?.toDouble()!!
-                }
+            if (it.totalCost != null) {
+                totalCost += it.totalCost!!.toDouble()
             }
         }
 
-        return totalPrice
+        return totalCost
     }
 
-    private fun computeItemTotalPrices(productAvailabilityItem: ProductAvailabilityItemDto, isAccessory: Boolean) {
-        logger.debug("computePrices")
+    /**
+     * Compute total price of available products.
+     */
+    private fun computeTotalCostsPerItem(productItems: List<ProductAvailabilityItemDto>) {
 
-        // product type
-        if (!isAccessory) {
-            if (productAvailabilityItem.rates?.first() != null) {
-                val totalProductItemCost
-                        = productAvailabilityItem.quantity * productAvailabilityItem.rates!!.first().price?.toDouble()!!
-                productAvailabilityItem.totalCostProducts = "%.2f".format(totalProductItemCost)
+        // Calculate parent cost
+        productItems.forEach { productItem ->
+            var totalProductItemCost = 0.0
+            var totalAccessoriesCost = 0.0
 
-                var totalAccessoriesCost = 0.0
-                productAvailabilityItem.accessories.forEach { accessoryItem ->
+            if (productItem.rates?.first() != null) {
 
+                productItem.totalCostProducts = "%.2f".format(totalProductItemCost)
+                productItem.accessories.forEach { accessoryItem ->
                     when {
                         accessoryItem.rates?.first() != null -> {
-                            totalAccessoriesCost += accessoryItem.rates!!.first().price?.toDouble()!!
+                            if (accessoryItem.availabilityState == AvailabilityStateType.AVAILABLE) {
+                                val itemCost =  accessoryItem.quantity * accessoryItem.rates!!.first().price?.toDouble()!!
+                                accessoryItem.totalCostProducts = "%.2f".format(itemCost)
+                                totalAccessoriesCost += itemCost
+                            }
                         }
                     }
                 }
 
-                productAvailabilityItem.totalCostAccessories = "%.2f".format(totalAccessoriesCost)
+                productItem.totalCostAccessories = "%.2f".format(totalAccessoriesCost)
 
-                val totalCost = totalProductItemCost + totalAccessoriesCost
-                productAvailabilityItem.totalCost = "%.2f".format(totalCost)
-            }
-        } else { // product of type accessory
-            if (productAvailabilityItem.rates?.first() != null) {
-                val totalProductItemCost
-                        = productAvailabilityItem.quantity * productAvailabilityItem.rates!!.first().price?.toDouble()!!
-                productAvailabilityItem.totalCostProducts = "%.2f".format(totalProductItemCost)
-                productAvailabilityItem.totalCost = productAvailabilityItem.totalCostProducts
+                val parentItemCost =  productItem.quantity * productItem.rates!!.first().price?.toDouble()!!
+                productItem.totalCostProducts = "%.2f".format(parentItemCost)
+                productItem.totalCost = "%.2f".format(parentItemCost + totalAccessoriesCost)
+
             }
         }
     }
