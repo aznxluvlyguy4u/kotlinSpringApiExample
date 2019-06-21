@@ -104,11 +104,25 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
 
         }
 
+        val unavailableProductItems = productItems.filter {
+            it.availabilityState == AvailabilityStateType.NOT_AVAILABLE
+        }
+
+        val unavailableAcccessoryItems = productItems.flatMap { it.accessories }.filter {
+            it.availabilityState == AvailabilityStateType.NOT_AVAILABLE
+
+        }
+
+        val allUnavailableProducts: MutableList<ProductAvailabilityItemDto> = mutableListOf()
+        allUnavailableProducts.addAll(unavailableProductItems)
+        allUnavailableProducts.addAll(unavailableAcccessoryItems)
+
         val totalCost = computeTotalCostOfAllItems(productItems)
 
         return ProductAvailabilityResponse(
             "%.2f".format(totalCost),
-            productItems
+            productItems,
+            allUnavailableProducts
         )
     }
 

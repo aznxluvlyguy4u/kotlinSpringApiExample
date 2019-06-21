@@ -20,8 +20,7 @@ class OrderPlacementUseCaseImpl (
 
         order.products = productsAvailabilityResponse.products
         order.totalCost = productsAvailabilityResponse.totalPrice
-//        order.unavailableProducts = productsAvailabilityResponse.unavailableProducts
-//        order.totalCostUnavailableProducts = productsAvailabilityResponse.totalPriceUnavailableProducts
+        order.unavailableProducts = productsAvailabilityResponse.unavailableProducts
 
         sendEmailUseCase.execute(order, true)
 
