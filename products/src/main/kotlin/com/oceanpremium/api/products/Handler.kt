@@ -16,7 +16,6 @@ import com.oceanpremium.api.core.currentrms.builder.StoreBuilderImpl
 import com.oceanpremium.api.core.currentrms.response.dto.parameter.LocationStoreResolverImpl
 import com.oceanpremium.api.core.currentrms.response.dto.config.ProductConfigOptionsResolverImpl
 import com.oceanpremium.api.core.exception.handler.GlobalExceptionHandler
-import com.oceanpremium.api.core.ipdata.IPDataApiImpl
 import com.oceanpremium.api.core.usecase.*
 import org.slf4j.LoggerFactory
 import org.springframework.boot.SpringApplication
@@ -33,7 +32,6 @@ import kotlin.jvm.java as java1
 /**
  * The main application entry point that spins up the API.
  */
-@SpringBootApplication
 @Import(
     ProductsApiImpl::class,
     LocationStoreResolverImpl::class,
@@ -48,10 +46,9 @@ import kotlin.jvm.java as java1
     SendEmailUseCaseImpl::class,
     CorsConfig::class,
     SentryConfig::class,
-    ThymeleafConfig::class,
-    GetGeoLocationDetailsUseCaseImpl::class,
-    IPDataApiImpl::class
+    ThymeleafConfig::class
 )
+@SpringBootApplication
 class ProductsDriver : SpringBootServletInitializer() {
     companion object {
         @JvmStatic

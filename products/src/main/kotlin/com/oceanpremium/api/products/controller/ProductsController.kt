@@ -13,7 +13,6 @@ import com.oceanpremium.api.core.model.OrderDto
 import com.oceanpremium.api.core.model.ProductAvailabilityItemDto
 import com.oceanpremium.api.core.model.WrappedResponse
 import com.oceanpremium.api.core.usecase.CheckProductBatchAvailabilityUseCase
-import com.oceanpremium.api.core.usecase.GetGeoLocationDetailsUseCase
 import com.oceanpremium.api.core.usecase.GetProductInventoryUseCase
 import com.oceanpremium.api.core.usecase.OrderPlacementUseCase
 import com.oceanpremium.api.core.util.Constants
@@ -35,13 +34,13 @@ class ProductsController(
     @Autowired private val productsApi: ProductsApiImpl,
     @Autowired private val getProductInventoryUseCase: GetProductInventoryUseCase,
     @Autowired private val checkProductBatchAvailabilityUseCase: CheckProductBatchAvailabilityUseCase,
-    @Autowired private val orderPlacementUseCase: OrderPlacementUseCase,
-    @Autowired private val getGeoLocationDetailsUseCase: GetGeoLocationDetailsUseCase
+    @Autowired private val orderPlacementUseCase: OrderPlacementUseCase
 ) {
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
         private val mapper = ObjectMapperConfig.mapper
+        private const val REQUEST_FORWARD_HEADER = "X-FORWARDED-FOR"
     }
 
     @RequestMapping("docs")
@@ -159,7 +158,15 @@ class ProductsController(
         @RequestParam queryParameters: MutableMap<String, String>,
         request: HttpServletRequest
     ): ResponseEntity<*> {
-        val geoIpDetails = getGeoLocationDetailsUseCase.execute(request)
+
+        val originIp =  when {
+            request.getHeader(REQUEST_FORWARD_HEADER) != null -> {
+                request.getHeader(REQUEST_FORWARD_HEADER)
+            }
+            else -> {
+                request.remoteAddr
+            }
+        }
 
         var searchQuery = "_Search Parameters:_ \n"
         searchQuery += "\n```"
@@ -169,7 +176,7 @@ class ProductsController(
         searchQuery += "```\n_Search Words:_ \n```\n${queryParameters["q[product_tags_name_cont]"]}\n```"
 
         val logMessageSales = "*OP - Sales Analytics* \n_Request Date:_ `${LocalDateTime.now()}`" +
-                "\n\n_Origin:_\n\n```$geoIpDetails```\n$searchQuery```"
+                "\n\n_Origin:_\n\n```$originIp```\n$searchQuery```"
 
         logger.debug(logMessageSales)
         Slogger.send(messageBody = logMessageSales, salesLog = true, inDebugMode = true)
