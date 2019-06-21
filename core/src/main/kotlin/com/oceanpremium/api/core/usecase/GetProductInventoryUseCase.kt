@@ -5,7 +5,6 @@ import com.oceanpremium.api.core.currentrms.response.dto.mapper.CurrentRmsBaseDt
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.parameter.LocationStoreResolver
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
-import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
@@ -51,7 +50,6 @@ class GetProductInventoryUseCaseImpl(
         private val logger = LoggerFactory.getLogger(this::class.java)
     }
 
-
     @Suppress("UNCHECKED_CAST")
     override fun execute(queryParameters: Map<String, String>, headers: HttpHeaders): ResponseContainer {
         // List of mapped store ids for the given input location(s), for which we need to query each store,
@@ -59,28 +57,10 @@ class GetProductInventoryUseCaseImpl(
         val storeIds = locationStoreResolver.resolveStoreByLocation(queryParameters)
         var seedSuccessResponse: Response<Any>? = null
         var seedErrorResponse: Response<Any>? = null
-//        val responses: MutableList<Response<Any>> = mutableListOf()
         val dtos: MutableList<CurrentRmsBaseDtoMapper> = mutableListOf()
         var combinedDto: CurrentRmsBaseDtoMapper? = null
 
-//        storeIds?.forEach { storeId ->
         val responses = productsApi.getProductsInventory(queryParameters, headers, storeIds!!)
-
-//            logger.debug("Response code for query on storeId: $storeId - ${response?.code()}")
-//
-//            if (response != null) {
-//
-//                when {
-//                    !response.isSuccessful && seedErrorResponse == null -> seedErrorResponse = response
-//                }
-//
-//                when {
-//                    response.isSuccessful && seedSuccessResponse == null -> seedSuccessResponse = response
-//                }
-//
-//                responses.add(response)
-//            }
-//        }
 
         responses.forEach {
             dtos.add(ProductDtoMapper(it.code(), it))
