@@ -19,7 +19,7 @@ class Errors(var errors: List<String>? = null)
 class ErrorResponse(var code: Int? = null, var message: Errors? = null)
 class ProductResponse(var code: Int? = null, var data: ProductDto? = null)
 class ProductsResponse(var code: Int? = null, var data: List<ProductDto>? = null)
-class ProductAvailabilityResponse(val totalPrice: String, val products: List<ProductAvailabilityItemDto>? = null )
+class ProductAvailabilityResponse(val totalPrice: String, val products: List<ProductAvailabilityItemDto>? = null)
 class CheckAvailabilityResponse(var code: Int? = null, var data: ProductAvailabilityResponse)
 class ProductGroupsResponse(var code: Int?, var data: List<ProductGroup>? = null)
 class ProductGroup(var id: Int? = null, var name: String, var description: String?)
@@ -148,7 +148,8 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductGroups() {
-        val productGroupsResponse = restTemplate?.getForObject("$endpoint/groups?page=1&per_page=100", ProductGroupsResponse::class.java)
+        val productGroupsResponse =
+            restTemplate?.getForObject("$endpoint/groups?page=1&per_page=100", ProductGroupsResponse::class.java)
 
         assertThat(productGroupsResponse).isNotNull
         assertThat(productGroupsResponse?.code).isEqualTo(HttpStatus.OK.value())
@@ -157,7 +158,7 @@ class ProductsControllerTest {
         val productGroupItem = productGroupsResponse?.data
         assertThat(productGroupItem).isNotNull
 
-        val filteredGroups  = productGroupItem?.filter { item -> item.name.contains(testProduct.group)}
+        val filteredGroups = productGroupItem?.filter { item -> item.name.contains(testProduct.group) }
 
         assertThat(filteredGroups).isNotNull
         assertThat(filteredGroups?.size).isEqualTo(1)
@@ -194,6 +195,7 @@ class ProductsControllerTest {
         productItems?.forEach {
             assertThat(it.rates).isNotNull
             assertThat(it.rates).isNotEmpty
+
             assertThat(it.name).containsIgnoringCase("f5")
         }
     }
@@ -214,7 +216,7 @@ class ProductsControllerTest {
         val productItems = productsResponse?.data
         assertThat(productItems).isNotEmpty
 
-        val testProduct: ProductDto? = productItems?.find{ p -> p.id == testExistingProduct.id }
+        val testProduct: ProductDto? = productItems?.find { p -> p.id == testExistingProduct.id }
         assertThat(testProduct?.rates).isNotNull
         assertThat(testProduct?.rates).isNotEmpty
         assertThat(testProduct?.rates?.first()?.quantityAvailable).isEqualTo("2.0")
@@ -230,7 +232,7 @@ class ProductsControllerTest {
         val productItems2 = productsResponse2?.data
         assertThat(productItems2).isNotEmpty
 
-        val testProduct2: ProductDto? = productItems2?.find{ p -> p.id == testExistingProduct.id }
+        val testProduct2: ProductDto? = productItems2?.find { p -> p.id == testExistingProduct.id }
         assertThat(testProduct2?.rates).isNotNull
         assertThat(testProduct2?.rates).isNotEmpty
         assertThat(testProduct2?.rates?.first()?.quantityAvailable).isEqualTo("3.0")
@@ -285,27 +287,28 @@ class ProductsControllerTest {
 
         val mockedItem1 = ProductAvailabilityItemDto(247, 1)
         val rentalPeriod1 = RentalPeriod(Date(), Date())
-        val rentalLocal1 = RentalLocation(Location("Foo", 1),Location("Bar", 13))
+        val rentalLocal1 = RentalLocation(Location("Foo", 1), Location("Bar", 13))
         mockedItem1.period = rentalPeriod1
         mockedItem1.location = rentalLocal1
         batch.add(mockedItem1)
 
         val mockedItem2 = ProductAvailabilityItemDto(196, 2)
         val rentalPeriod2 = RentalPeriod(Date(), Date())
-        val rentalLocal2 = RentalLocation(Location("Foo", 1),Location("Bar", 13))
+        val rentalLocal2 = RentalLocation(Location("Foo", 1), Location("Bar", 13))
         mockedItem2.period = rentalPeriod2
         mockedItem2.location = rentalLocal2
         batch.add(mockedItem2)
 
         val mockedItem3 = ProductAvailabilityItemDto(148, 2)
         val rentalPeriod3 = RentalPeriod(Date(), Date())
-        val rentalLocal3 = RentalLocation(Location("Foo", 1),Location("Bar", 13))
+        val rentalLocal3 = RentalLocation(Location("Foo", 1), Location("Bar", 13))
         mockedItem3.period = rentalPeriod3
         mockedItem3.location = rentalLocal3
         batch.add(mockedItem3)
 
         val request = HttpEntity<List<ProductAvailabilityItemDto>>(batch)
-        val response = restTemplate?.postForObject("$endpoint/availability", request, CheckAvailabilityResponse::class.java)
+        val response =
+            restTemplate?.postForObject("$endpoint/availability", request, CheckAvailabilityResponse::class.java)
 
         assertThat(response).isNotNull
         assertThat(response?.code).isEqualTo(HttpStatus.CREATED.value())
