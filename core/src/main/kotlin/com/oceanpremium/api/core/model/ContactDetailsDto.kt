@@ -1,6 +1,7 @@
 package com.oceanpremium.api.core.model
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.oceanpremium.api.core.enum.ClientRoleType
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class AddressDto(
@@ -14,11 +15,11 @@ class AddressDto(
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class ContactDetailsDto(
+    var role: ClientRoleType = ClientRoleType.OTHER,
     val firstName: String,
     val surName: String,
     val emailAddress: String,
-    val phoneNumber: String,
-    var address: AddressDto = AddressDto()
+    val phoneNumber: String
 ) {
     var fullName: String? = null
 
