@@ -8,7 +8,7 @@ apply plugin: 'org.springframework.boot'
 
 buildscript {
     ext {
-        kotlinVersion = '1.3.31'
+        kotlinVersion = '1.3.40'
         springBootVersion = '2.1.3.RELEASE'
         shadowVersion = '2.0.4' // Keep it to version 2.0.4 as this works on CI, lower/ higher (thus) other versions don't
         springCloudStarterVersion = '2.0.1.RELEASE'
@@ -223,15 +223,15 @@ allprojects {
      * it is used ONLY for LOCAL development.
      */
     //FIXME For now manually uncomment this block on manual deployment
-    configurations {
-        runtime.exclude module: "spring-boot-starter-web"
-        runtime.exclude module: "spring-boot-starter-test"
-        runtime.exclude module: "spring-boot-devtools"
-        runtime.exclude module: "spring-boot-starter-jetty"
-        runtime.exclude module: "junit"
-        runtime.exclude module: "kotlintest"
-        runtime.exclude module: "sonarqube-gradle-plugin"
-    }
+//    configurations {
+//        runtime.exclude module: "spring-boot-starter-web"
+//        runtime.exclude module: "spring-boot-starter-test"
+//        runtime.exclude module: "spring-boot-devtools"
+//        runtime.exclude module: "spring-boot-starter-jetty"
+//        runtime.exclude module: "junit"
+//        runtime.exclude module: "kotlintest"
+//        runtime.exclude module: "sonarqube-gradle-plugin"
+//    }
 
     jacocoTestReport {
         group = "Reporting"
@@ -281,7 +281,7 @@ allprojects {
         def deployRegion = "eu-west-1"
         def stagePropertyName = "stage"
         def profilePropertyName = "profile"
-        def stageToDeployTo = "staging"
+        def stageToDeployTo = "dev"
         def deployProfileName = "oceanpremium-serverless-publisher"
         def awsProfileToUse = deployProfileName
         def awsProfileConfigLink = "https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html"
