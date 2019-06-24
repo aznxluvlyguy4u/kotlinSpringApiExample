@@ -168,18 +168,20 @@ class ProductsController(
             }
         }
 
-        var searchQuery = "_Search Parameters:_ \n"
-        searchQuery += "\n```"
-        queryParameters.forEach { (k, v) ->
-            searchQuery += "$k=$v\n"
+        if (queryParameters.containsKey("q[product_tags_name_cont]")) {
+            var searchQuery = "_Search Parameters:_ \n"
+            searchQuery += "\n```"
+            queryParameters.forEach { (k, v) ->
+                searchQuery += "$k=$v\n"
+            }
+            searchQuery += "```\n_Search Words:_ \n```\n${queryParameters["q[product_tags_name_cont]"]}\n```"
+
+            val logMessageSales = "*OP - Sales Analytics* \n_Request Date:_ `${LocalDateTime.now()}`" +
+                    "\n\n_Origin:_\n\n```$originIp```\n$searchQuery```"
+
+            logger.debug(logMessageSales)
+            Slogger.send(messageBody = logMessageSales, salesLog = true, inDebugMode = true)
         }
-        searchQuery += "```\n_Search Words:_ \n```\n${queryParameters["q[product_tags_name_cont]"]}\n```"
-
-        val logMessageSales = "*OP - Sales Analytics* \n_Request Date:_ `${LocalDateTime.now()}`" +
-                "\n\n_Origin:_\n\n```$originIp```\n$searchQuery```"
-
-        logger.debug(logMessageSales)
-        Slogger.send(messageBody = logMessageSales, salesLog = true, inDebugMode = true)
 
         val result =  getProductInventoryUseCase.execute(queryParameters, headers)
 
