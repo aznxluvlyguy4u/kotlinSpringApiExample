@@ -230,7 +230,7 @@ class ProductsControllerTest {
     /**
      * Get products by not providing a search keyword.
      */
-    @Test(expected = BadRequestException::class)
+    @Test
     fun testGetProductsInventoryFailedByNotProvidingMandatoryParameters() {
         val params = "$PRODUCT_TAGS_SEARCH_EQ_QUERY=$KEYWORDLESS_TAG"
 
