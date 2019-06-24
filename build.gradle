@@ -8,7 +8,7 @@ apply plugin: 'org.springframework.boot'
 
 buildscript {
     ext {
-        kotlinVersion = '1.3.40'
+        kotlinVersion = '1.3.31'
         springBootVersion = '2.1.3.RELEASE'
         shadowVersion = '2.0.4' // Keep it to version 2.0.4 as this works on CI, lower/ higher (thus) other versions don't
         springCloudStarterVersion = '2.0.1.RELEASE'

@@ -18,9 +18,11 @@ class OrderPlacementUseCaseImpl (
         val productsAvailabilityResponse=
             checkProductBatchAvailabilityUseCase.execute(order.products)
 
-        order.products = productsAvailabilityResponse.products
         order.totalCost = productsAvailabilityResponse.totalPrice
+        order.products = productsAvailabilityResponse.products
+        order.availableProducts = productsAvailabilityResponse.availableProducts
         order.unavailableProducts = productsAvailabilityResponse.unavailableProducts
+        order.totalCostUnavailableProducts = productsAvailabilityResponse.totalPriceUnavailableProducts
 
         sendEmailUseCase.execute(order, false)
 

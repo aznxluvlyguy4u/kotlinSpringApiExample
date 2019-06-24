@@ -22,5 +22,6 @@ class OrderDto(
     var yachtName: String? = null
 ) {
     var unavailableProducts: List<ProductAvailabilityItemDto> = listOf()
+    var availableProducts: List<ProductAvailabilityItemDto> = listOf()
     var totalCostUnavailableProducts: String? = null
 }
