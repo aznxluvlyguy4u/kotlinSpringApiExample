@@ -1,8 +1,12 @@
 package com.oceanpremium.api.products
 
+import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolverImpl.Companion.DELIVERY_LOCATION_KEY
 import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolverImpl.Companion.FUNCTIONAL_INTEGRATION_GROUP_NAME
+import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolverImpl.Companion.KEYWORDLESS_TAG
+import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolverImpl.Companion.PRODUCT_TAGS_SEARCH_EQ_QUERY
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.enum.ClientRoleType
+import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.model.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -198,6 +202,43 @@ class ProductsControllerTest {
 
             assertThat(it.name).containsIgnoringCase("f5")
         }
+    }
+
+    @Test
+    fun testGetProductsInventoryByNoKeyword() {
+        val keywordLessParameter = "$PRODUCT_TAGS_SEARCH_EQ_QUERY=$KEYWORDLESS_TAG"
+        val deliveryParameter = "$DELIVERY_LOCATION_KEY=13"
+        val params = "$keywordLessParameter&$deliveryParameter"
+
+        val productsResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ProductsResponse::class.java)
+
+        assertThat(productsResponse).isNotNull
+        assertThat(productsResponse?.code).isEqualTo(HttpStatus.OK.value())
+        assertThat(productsResponse?.data).isNotNull
+
+        val productItems = productsResponse?.data
+        assertThat(productItems).isNotEmpty
+
+        productItems?.forEach {
+            assertThat(it.rates).isNotNull
+            assertThat(it.rates).isNotEmpty
+
+            assertThat(it.name).containsIgnoringCase("jvt")
+        }
+    }
+
+    /**
+     * Get products by not providing a search keyword.
+     */
+    @Test(expected = BadRequestException::class)
+    fun testGetProductsInventoryFailedByNotProvidingMandatoryParameters() {
+        val params = "$PRODUCT_TAGS_SEARCH_EQ_QUERY=$KEYWORDLESS_TAG"
+
+        val productsResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ProductsResponse::class.java)
+
+        assertThat(productsResponse).isNotNull
+        assertThat(productsResponse?.code).isEqualTo(HttpStatus.BAD_REQUEST.value())
+        assertThat(productsResponse?.data).isNull()
     }
 
     /**

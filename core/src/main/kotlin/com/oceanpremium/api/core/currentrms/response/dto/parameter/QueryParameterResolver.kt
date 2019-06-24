@@ -58,8 +58,8 @@ class QueryParametersResolverImpl : QueryParametersResolver {
         private const val PRODUCTS_TAG_SEARCH_QUERY = "tags"
         private const val PAGE_KEY = "page"
         private const val PER_PAGE_KEY = "per_page"
-        private const val KEYWORDLESS_TAG = "keywordless"
-        private const val PRODUCT_TAGS_SEARCH_EQ_QUERY = "q[product_tags_name_eq]"
+        const val KEYWORDLESS_TAG = "keywordless"
+        const val PRODUCT_TAGS_SEARCH_EQ_QUERY = "q[product_tags_name_eq]"
     }
 
     /**
