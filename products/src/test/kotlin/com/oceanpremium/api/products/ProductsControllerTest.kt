@@ -6,7 +6,6 @@ import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParamete
 import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolverImpl.Companion.PRODUCT_TAGS_SEARCH_EQ_QUERY
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.enum.ClientRoleType
-import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.model.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
