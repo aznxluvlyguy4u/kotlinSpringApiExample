@@ -16,7 +16,7 @@ class AccessoryItem(
 class ProductDto(
     val id: Int?,
     val name: String?,
-    val description: String?,
+    val description: List<Map<String, String>>,
     var type: String? = null,
     val productGroup: ProductGroupDto?,
     val rates: List<PricingDto>,

@@ -1,4 +1,4 @@
-package com.oceanpremium.api.locations.builder
+package com.oceanpremium.api.core.currentrms.builder
 
 import org.springframework.stereotype.Service
 
@@ -88,7 +88,7 @@ class RegionBuilderImpl: RegionBuilder {
             region.addStore(Store("M55", 5))
             region.addStore(Store("Croatia", 98))
             region.addStore(Store("AntiguaSxm", 14))
-            region.addStore(Store("FTL", 97))
+            region.addStore(Store("FTL", 13))
 
             region.locations.forEach { location ->
                 location.id = j
@@ -127,7 +127,7 @@ class RegionBuilderImpl: RegionBuilder {
             region.addStore(Store("M55", 5))
             region.addStore(Store("Croatia", 98))
             region.addStore(Store("AntiguaSxm", 14))
-            region.addStore(Store("FTL", 97))
+            region.addStore(Store("FTL", 13))
 
             region.locations.forEach { location ->
                 location.id = j
@@ -197,7 +197,7 @@ class RegionBuilderImpl: RegionBuilder {
             region.addStore(Store("Napoli", 15))
             region.addStore(Store("Croatia", 98))
             region.addStore(Store("AntiguaSxm", 14))
-            region.addStore(Store("FTL", 97))
+            region.addStore(Store("FTL", 13))
 
             region.locations.forEach { location ->
                 location.id = j
@@ -333,7 +333,7 @@ class RegionBuilderImpl: RegionBuilder {
             region.addStore(Store("Athene", 10))
             region.addStore(Store("Croatia", 98))
             region.addStore(Store("AntiguaSxm", 14))
-            region.addStore(Store("FTL", 97))
+            region.addStore(Store("FTL", 13))
 
             region.locations.forEach { location ->
                 location.id = j
@@ -386,7 +386,7 @@ class RegionBuilderImpl: RegionBuilder {
             region.addStore(Store("Athene", 10))
             region.addStore(Store("Croatia", 98))
             region.addStore(Store("AntiguaSxm", 14))
-            region.addStore(Store("FTL", 97))
+            region.addStore(Store("FTL", 13))
 
             region.locations.forEach { location ->
                 location.id = j
@@ -418,7 +418,7 @@ class RegionBuilderImpl: RegionBuilder {
             region.addStore(Store("Napoli", 15))
             region.addStore(Store("Croatia", 98))
             region.addStore(Store("AntiguaSxm", 14))
-            region.addStore(Store("FTL", 97))
+            region.addStore(Store("FTL", 13))
 
             region.locations.forEach { location ->
                 location.id = j
@@ -467,7 +467,7 @@ class RegionBuilderImpl: RegionBuilder {
             region.addStore(Store("Athene", 10))
             region.addStore(Store("Croatia", 98))
             region.addStore(Store("AntiguaSxm", 14))
-            region.addStore(Store("FTL", 97))
+            region.addStore(Store("FTL", 13))
 
             region.locations.forEach { location ->
                 location.id = j
@@ -536,7 +536,7 @@ class RegionBuilderImpl: RegionBuilder {
             region.addStore(Store("Athene", 10))
             region.addStore(Store("Croatia", 98))
             region.addStore(Store("AntiguaSxm", 14))
-            region.addStore(Store("FTL", 97))
+            region.addStore(Store("FTL", 13))
 
             region.locations.forEach { location ->
                 location.id = j
@@ -612,7 +612,7 @@ class RegionBuilderImpl: RegionBuilder {
             region.addStore(Store("Athene", 10))
             region.addStore(Store("Croatia", 98))
             region.addStore(Store("AntiguaSxm", 14))
-            region.addStore(Store("FTL", 97))
+            region.addStore(Store("FTL", 13))
 
             region.locations.forEach { location ->
                 location.id = j
@@ -640,7 +640,7 @@ class RegionBuilderImpl: RegionBuilder {
             region.addStore(Store("Athene", 10))
             region.addStore(Store("Croatia", 98))
             region.addStore(Store("AntiguaSxm", 14))
-            region.addStore(Store("FTL", 97))
+            region.addStore(Store("FTL", 13))
 
             region.locations.forEach { location ->
                 location.id = j
@@ -701,7 +701,7 @@ class RegionBuilderImpl: RegionBuilder {
             region.addStore(Store("Athene", 10))
             region.addStore(Store("Croatia", 98))
             region.addStore(Store("AntiguaSxm", 14))
-            region.addStore(Store("FTL", 97))
+            region.addStore(Store("FTL", 13))
 
             region.locations.forEach { location ->
                 location.id = j
@@ -741,7 +741,7 @@ class RegionBuilderImpl: RegionBuilder {
             region.addStore(Store("Athene", 10))
             region.addStore(Store("Croatia", 98))
             region.addStore(Store("AntiguaSxm", 14))
-            region.addStore(Store("FTL", 97))
+            region.addStore(Store("FTL", 13))
 
             region.locations.forEach { location ->
                 location.id = j
@@ -793,7 +793,7 @@ class RegionBuilderImpl: RegionBuilder {
 
             region.addStore(Store("M55", 5))
             region.addStore(Store("AntiguaSxm", 14))
-            region.addStore(Store("FTL", 97))
+            region.addStore(Store("FTL", 13))
 
             region.locations.forEach { location ->
                 location.id = j
@@ -829,7 +829,7 @@ class RegionBuilderImpl: RegionBuilder {
 
             region.addStore(Store("M55", 5))
             region.addStore(Store("AntiguaSxm", 14))
-            region.addStore(Store("FTL", 97))
+            region.addStore(Store("FTL", 13))
 
             region.locations.forEach { location ->
                 location.id = j
@@ -853,7 +853,7 @@ class RegionBuilderImpl: RegionBuilder {
 
             region.addStore(Store("M55", 5))
             region.addStore(Store("AntiguaSxm", 14))
-            region.addStore(Store("FTL", 97))
+            region.addStore(Store("FTL", 13))
 
             region.locations.forEach { location ->
                 location.id = j

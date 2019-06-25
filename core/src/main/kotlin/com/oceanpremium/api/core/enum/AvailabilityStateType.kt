@@ -1,0 +1,8 @@
+package com.oceanpremium.api.core.enum
+
+enum class AvailabilityStateType(val state: String) {
+    AVAILABLE("AVAILABLE"),
+    NOT_AVAILABLE("NOT AVAILABLE"),
+    AVAILABLE_BUT_DELAYED("AVAILABLE BUT DELAYED"),
+    AVAILABLE_BUT_ACCESSORY_NOT_AVAILABLE("AVAILABLE BUT ACCESSORY NOT AVAILABLE")
+}

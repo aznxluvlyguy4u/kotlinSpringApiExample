@@ -136,7 +136,7 @@ class ProductConfigsDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsB
                 name = itemBody["name"] as String?
 
                 when {
-                    // Build a consumer friendly field name value for the concerning configuration
+                    // Build a consumer friendly field name value for the concerning configurations
                     name != null && name.contains(PRODUCT_CONFIG_OPTION_PREFIX) -> {
                         logger.debug("Found config: $name")
                     }

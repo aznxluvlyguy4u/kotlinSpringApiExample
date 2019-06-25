@@ -1,6 +1,5 @@
 package com.oceanpremium.api.core.currentrms.response
 
-import com.fasterxml.jackson.annotation.JsonInclude
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.CurrentRmsBaseDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ErrorResponse
 import com.oceanpremium.api.core.enum.HTTPStatusCodeRange
@@ -8,6 +7,7 @@ import com.oceanpremium.api.core.exception.handler.ApiError
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.exception.throwable.NotFoundException
 import com.oceanpremium.api.core.exception.throwable.UnauthorizedException
+import com.oceanpremium.api.core.model.WrappedResponse
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -47,13 +47,6 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
     companion object {
         inline fun build(block: Builder.() -> Unit) = Builder().apply(block).build()
     }
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    internal class WrappedResponse(
-        val code: Int,
-        var data: Any? = null,
-        var meta: Any? = null
-    )
 
     /**
      * Builder for creating a ApiGatewayResponse.
@@ -124,11 +117,11 @@ class CurrentRmsApiResponse(body: Any?, status: HttpStatus) : ResponseEntity<Any
 
                                 val errorResponse = ErrorResponse()
                                 errorResponse.errors.add(statusCode.reasonPhrase)
-                                val error = ApiError(code = statusCode.value(), exception = NotFoundException(), message = errorResponse)
+                                val apiError = ApiError(code = statusCode.value(), exception = NotFoundException(), message = errorResponse)
 
                                 buildErrorResponse(
                                     statusCode = statusCode,
-                                    error = error,
+                                    error = apiError,
                                     rawResponse = null
                                 )
                             }
