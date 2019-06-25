@@ -222,8 +222,6 @@ class ProductsControllerTest {
         productItems?.forEach {
             assertThat(it.rates).isNotNull
             assertThat(it.rates).isNotEmpty
-
-            assertThat(it.name).containsIgnoringCase("jvt")
         }
     }
 
