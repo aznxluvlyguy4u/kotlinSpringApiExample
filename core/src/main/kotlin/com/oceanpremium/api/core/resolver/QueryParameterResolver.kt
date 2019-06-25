@@ -1,4 +1,4 @@
-package com.oceanpremium.api.core.currentrms.response.dto.parameter
+package com.oceanpremium.api.core.resolver
 
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.util.DateTimeUtil
@@ -134,7 +134,8 @@ class QueryParametersResolverImpl : QueryParametersResolver {
                     if (!map.containsKey(DELIVERY_LOCATION_KEY)) {
                         throw BadRequestException("Cannot continue search, need at minimum, either a search keyword or a delivery location.")
                     } else {
-                        validatedMap[PRODUCT_TAGS_SEARCH_EQ_QUERY] = KEYWORD_LESS_TAG
+                        validatedMap[PRODUCT_TAGS_SEARCH_EQ_QUERY] =
+                            KEYWORD_LESS_TAG
                     }
                 }
             }
@@ -178,7 +179,9 @@ class QueryParametersResolverImpl : QueryParametersResolver {
              */
 
             // A time interval with boundaries is supplied, validate if boundaries are valid
-            if (map.containsKey(START_DATE_QUERY) && map.containsKey(END_DATE_QUERY)) {
+            if (map.containsKey(START_DATE_QUERY) && map.containsKey(
+                    END_DATE_QUERY
+                )) {
                 val startDate = DateTimeUtil.fromISO8601UTC(map[START_DATE_QUERY] as String, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)
                 val endDate = DateTimeUtil.fromISO8601UTC(map[END_DATE_QUERY] as String, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)
 
@@ -194,7 +197,9 @@ class QueryParametersResolverImpl : QueryParametersResolver {
             }
 
             // No time interval boundaries supplied, create an interval of ONE day
-            if (!map.containsKey(START_DATE_QUERY) && !map.containsKey(END_DATE_QUERY) ) {
+            if (!map.containsKey(START_DATE_QUERY) && !map.containsKey(
+                    END_DATE_QUERY
+                ) ) {
                 val todayAtNoon = LocalDateTime.of(LocalDate.now(), LocalTime.NOON)
                 val todayAtNoonStr = DateTimeUtil.toISO8601UTC(todayAtNoon, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)!!
                 validatedMap[START_DATE_QUERY] = todayAtNoonStr
@@ -205,7 +210,9 @@ class QueryParametersResolverImpl : QueryParametersResolver {
             }
 
             // Only a start date is supplied
-            if (map.containsKey(START_DATE_QUERY) && !map.containsKey(END_DATE_QUERY)) {
+            if (map.containsKey(START_DATE_QUERY) && !map.containsKey(
+                    END_DATE_QUERY
+                )) {
                 val startDate = DateTimeUtil.fromISO8601UTC(map[START_DATE_QUERY] as String, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)
 
                 when {
@@ -218,7 +225,9 @@ class QueryParametersResolverImpl : QueryParametersResolver {
             }
 
             // Only an end date is supplied
-            if (!map.containsKey(START_DATE_QUERY) && map.containsKey(END_DATE_QUERY)) {
+            if (!map.containsKey(START_DATE_QUERY) && map.containsKey(
+                    END_DATE_QUERY
+                )) {
                 val endDate = DateTimeUtil.fromISO8601UTC(map[END_DATE_QUERY] as String, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)
 
                 when {
@@ -359,7 +368,8 @@ class QueryParametersResolverImpl : QueryParametersResolver {
             logger.debug("Running other then localhost, disable functional integration test product querying")
 
             when {
-                !map.containsKey(NAME_NOT_EQ_QUERY) -> validatedMap[NAME_NOT_EQ_QUERY] = FUNCTIONAL_INTEGRATION_GROUP_NAME
+                !map.containsKey(NAME_NOT_EQ_QUERY) -> validatedMap[NAME_NOT_EQ_QUERY] =
+                    FUNCTIONAL_INTEGRATION_GROUP_NAME
             }
         }
 

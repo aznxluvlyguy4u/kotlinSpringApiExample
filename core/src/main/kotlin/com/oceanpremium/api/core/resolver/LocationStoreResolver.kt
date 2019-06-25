@@ -1,4 +1,4 @@
-package com.oceanpremium.api.core.currentrms.response.dto.parameter
+package com.oceanpremium.api.core.resolver
 
 import com.oceanpremium.api.core.currentrms.builder.LocationBuilder
 import com.oceanpremium.api.core.currentrms.builder.StoreBuilder

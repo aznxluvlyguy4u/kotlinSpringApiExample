@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus
 import retrofit2.Response
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.oceanpremium.api.core.currentrms.response.dto.config.ConfigPropertyField
+import com.oceanpremium.api.core.model.ConfigPropertyField
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.util.FileSizeFormatUtil
 
@@ -458,7 +458,8 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
 
                         if (configName != null && preparedConfigIds.size > 0) {
                             logger.debug("HIT list:$configName: $preparedConfigIds")
-                            val configIds = ConfigPropertyField(configName, preparedConfigIds)
+                            val configIds =
+                                ConfigPropertyField(configName, preparedConfigIds)
                             items.add(configIds)
                         }
 

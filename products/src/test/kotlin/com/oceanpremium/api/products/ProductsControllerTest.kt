@@ -1,9 +1,9 @@
 package com.oceanpremium.api.products
 
-import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolverImpl.Companion.DELIVERY_LOCATION_KEY
-import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolverImpl.Companion.FUNCTIONAL_INTEGRATION_GROUP_NAME
-import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolverImpl.Companion.KEYWORD_LESS_TAG
-import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolverImpl.Companion.PRODUCT_TAGS_SEARCH_EQ_QUERY
+import com.oceanpremium.api.core.resolver.QueryParametersResolverImpl.Companion.DELIVERY_LOCATION_KEY
+import com.oceanpremium.api.core.resolver.QueryParametersResolverImpl.Companion.FUNCTIONAL_INTEGRATION_GROUP_NAME
+import com.oceanpremium.api.core.resolver.QueryParametersResolverImpl.Companion.KEYWORD_LESS_TAG
+import com.oceanpremium.api.core.resolver.QueryParametersResolverImpl.Companion.PRODUCT_TAGS_SEARCH_EQ_QUERY
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.enum.ClientRoleType
 import com.oceanpremium.api.core.model.*

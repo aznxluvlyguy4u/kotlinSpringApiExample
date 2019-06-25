@@ -3,7 +3,7 @@ package com.oceanpremium.api.core.usecase
 import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.CurrentRmsBaseDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductDtoMapper
-import com.oceanpremium.api.core.currentrms.response.dto.parameter.LocationStoreResolver
+import com.oceanpremium.api.core.resolver.LocationStoreResolver
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
