@@ -1,5 +1,7 @@
-package com.oceanpremium.api.core.currentrms.response.dto.config
+package com.oceanpremium.api.core.resolver
 
+import com.oceanpremium.api.core.model.ConfigProperty
+import com.oceanpremium.api.core.model.ConfigPropertyValue
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductConfigsDtoMapper.Companion.PRODUCT_CONFIG_OPTION_PREFIX
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import org.slf4j.LoggerFactory

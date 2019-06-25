@@ -1,4 +1,4 @@
-package com.oceanpremium.api.core.currentrms.response.dto.config
+package com.oceanpremium.api.core.model
 
 import com.fasterxml.jackson.annotation.JsonInclude
 

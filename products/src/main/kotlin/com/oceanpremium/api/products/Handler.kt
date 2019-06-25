@@ -13,8 +13,8 @@ import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.currentrms.builder.LocationBuilderImpl
 import com.oceanpremium.api.core.currentrms.builder.RegionBuilderImpl
 import com.oceanpremium.api.core.currentrms.builder.StoreBuilderImpl
-import com.oceanpremium.api.core.currentrms.response.dto.parameter.LocationStoreResolverImpl
-import com.oceanpremium.api.core.currentrms.response.dto.config.ProductConfigOptionsResolverImpl
+import com.oceanpremium.api.core.resolver.LocationStoreResolverImpl
+import com.oceanpremium.api.core.resolver.ProductConfigOptionsResolverImpl
 import com.oceanpremium.api.core.exception.handler.GlobalExceptionHandler
 import com.oceanpremium.api.core.usecase.*
 import org.slf4j.LoggerFactory

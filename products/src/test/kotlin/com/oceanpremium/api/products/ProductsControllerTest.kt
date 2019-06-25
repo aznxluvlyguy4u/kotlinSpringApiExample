@@ -1,12 +1,11 @@
 package com.oceanpremium.api.products
 
-import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolverImpl.Companion.DELIVERY_LOCATION_KEY
-import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolverImpl.Companion.FUNCTIONAL_INTEGRATION_GROUP_NAME
-import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolverImpl.Companion.KEYWORDLESS_TAG
-import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolverImpl.Companion.PRODUCT_TAGS_SEARCH_EQ_QUERY
+import com.oceanpremium.api.core.resolver.QueryParametersResolverImpl.Companion.DELIVERY_LOCATION_KEY
+import com.oceanpremium.api.core.resolver.QueryParametersResolverImpl.Companion.FUNCTIONAL_INTEGRATION_GROUP_NAME
+import com.oceanpremium.api.core.resolver.QueryParametersResolverImpl.Companion.KEYWORD_LESS_TAG
+import com.oceanpremium.api.core.resolver.QueryParametersResolverImpl.Companion.PRODUCT_TAGS_SEARCH_EQ_QUERY
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.enum.ClientRoleType
-import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.model.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -17,7 +16,9 @@ import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit4.SpringRunner
-import java.util.*
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 
 class Errors(var errors: List<String>? = null)
 class ErrorResponse(var code: Int? = null, var message: Errors? = null)
@@ -56,6 +57,8 @@ class ProductsControllerTest {
         private const val endpoint = "/api/v1/products"
         private val testProduct = TestProduct()
         private val testExistingProduct = TestExistingProduct()
+        private val todayAtNoon = LocalDateTime.of(LocalDate.now(), LocalTime.NOON)
+        private val tomorrowAtNoon = todayAtNoon.plusDays(1)
     }
 
     /**
@@ -206,7 +209,7 @@ class ProductsControllerTest {
 
     @Test
     fun testGetProductsInventoryByNoKeyword() {
-        val keywordLessParameter = "$PRODUCT_TAGS_SEARCH_EQ_QUERY=$KEYWORDLESS_TAG"
+        val keywordLessParameter = "$PRODUCT_TAGS_SEARCH_EQ_QUERY=$KEYWORD_LESS_TAG"
         val deliveryParameter = "$DELIVERY_LOCATION_KEY=13"
         val params = "$keywordLessParameter&$deliveryParameter"
 
@@ -230,7 +233,7 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductsInventoryFailedByNotProvidingMandatoryParameters() {
-        val params = "$PRODUCT_TAGS_SEARCH_EQ_QUERY=$KEYWORDLESS_TAG"
+        val params = "$PRODUCT_TAGS_SEARCH_EQ_QUERY=$KEYWORD_LESS_TAG"
 
         val productsResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ProductsResponse::class.java)
 
@@ -325,21 +328,21 @@ class ProductsControllerTest {
         val batch: MutableList<ProductAvailabilityItemDto> = mutableListOf()
 
         val mockedItem1 = ProductAvailabilityItemDto(247, 1)
-        val rentalPeriod1 = RentalPeriod(Date(), Date())
+        val rentalPeriod1 =  RentalPeriod(todayAtNoon, tomorrowAtNoon)
         val rentalLocal1 = RentalLocation(Location("Foo", 1), Location("Bar", 13))
         mockedItem1.period = rentalPeriod1
         mockedItem1.location = rentalLocal1
         batch.add(mockedItem1)
 
         val mockedItem2 = ProductAvailabilityItemDto(196, 2)
-        val rentalPeriod2 = RentalPeriod(Date(), Date())
+        val rentalPeriod2 =  RentalPeriod(todayAtNoon, tomorrowAtNoon)
         val rentalLocal2 = RentalLocation(Location("Foo", 1), Location("Bar", 13))
         mockedItem2.period = rentalPeriod2
         mockedItem2.location = rentalLocal2
         batch.add(mockedItem2)
 
         val mockedItem3 = ProductAvailabilityItemDto(148, 2)
-        val rentalPeriod3 = RentalPeriod(Date(), Date())
+        val rentalPeriod3 =  RentalPeriod(todayAtNoon, tomorrowAtNoon)
         val rentalLocal3 = RentalLocation(Location("Foo", 1), Location("Bar", 13))
         mockedItem3.period = rentalPeriod3
         mockedItem3.location = rentalLocal3
@@ -431,7 +434,7 @@ class ProductsControllerTest {
 
         val mockedItem1 = ProductAvailabilityItemDto(148, 1)
 
-        val rentalPeriod1 = RentalPeriod(Date(), Date())
+        val rentalPeriod1 = RentalPeriod(todayAtNoon, tomorrowAtNoon)
         val rentalLocal1 = RentalLocation(Location("Foo", 1), location)
         mockedItem1.period = rentalPeriod1
         mockedItem1.location = rentalLocal1
@@ -439,7 +442,7 @@ class ProductsControllerTest {
 
         val mockedItem2 = ProductAvailabilityItemDto(196, 2)
 
-        val rentalPeriod2 = RentalPeriod(Date(), Date())
+        val rentalPeriod2 = RentalPeriod(todayAtNoon, tomorrowAtNoon)
         val rentalLocal2 = RentalLocation(Location("Foo", 1), location)
         mockedItem2.period = rentalPeriod2
         mockedItem2.location = rentalLocal2
@@ -447,7 +450,7 @@ class ProductsControllerTest {
 
         val mockedItem3 = ProductAvailabilityItemDto(148, 2)
 
-        val rentalPeriod3 = RentalPeriod(Date(), Date())
+        val rentalPeriod3 = RentalPeriod(todayAtNoon, tomorrowAtNoon)
         val rentalLocal3 = RentalLocation(Location("Foo", 1), location)
         mockedItem3.period = rentalPeriod3
         mockedItem3.location = rentalLocal3

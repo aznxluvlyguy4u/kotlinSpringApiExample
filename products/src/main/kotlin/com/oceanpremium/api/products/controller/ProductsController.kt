@@ -4,8 +4,8 @@ import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductGroupDtoMapper
-import com.oceanpremium.api.core.currentrms.response.dto.config.ConfigProperty
-import com.oceanpremium.api.core.currentrms.response.dto.config.ProductConfigOptionsResolverImpl
+import com.oceanpremium.api.core.model.ConfigProperty
+import com.oceanpremium.api.core.resolver.ProductConfigOptionsResolverImpl
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductConfigsDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.messenger.Slogger
@@ -96,10 +96,11 @@ class ProductsController(
 
         // Resolve the product specific configurations
         @Suppress("UNCHECKED_CAST")
-        val resolvedProductConfigurationOptions = ProductConfigOptionsResolverImpl(
-            allConfigOptionsDto.data as List<ConfigProperty>,
-            productData
-        )
+        val resolvedProductConfigurationOptions =
+            ProductConfigOptionsResolverImpl(
+                allConfigOptionsDto.data as List<ConfigProperty>,
+                productData
+            )
         productData?.configurations = resolvedProductConfigurationOptions.data
 
         // Process product accessories

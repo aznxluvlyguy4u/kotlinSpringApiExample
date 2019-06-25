@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus
 import retrofit2.Response
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.oceanpremium.api.core.currentrms.response.dto.config.ConfigPropertyField
+import com.oceanpremium.api.core.model.ConfigPropertyField
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.util.FileSizeFormatUtil
 
@@ -206,13 +206,15 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                         }
 
                         when {
-                            imageUrl != null && thumbUrl != null -> imageSourceCandidate = ImageSource(imageUrl, thumbUrl)
+                            imageUrl != null && thumbUrl != null -> imageSourceCandidate =
+                                ImageSource(imageUrl, thumbUrl)
                         }
                     }
                 }
             } else {
                 if (itemBody.containsKey("icon_thumb_url") && itemBody.containsKey("icon_url")) {
-                    imageSourceCandidate = ImageSource(itemBody["icon_url"] as String?, itemBody["icon_thumb_url"] as String?)
+                    imageSourceCandidate =
+                        ImageSource(itemBody["icon_url"] as String?, itemBody["icon_thumb_url"] as String?)
                 }
             }
 
@@ -227,13 +229,15 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                 when {
                     customFieldsBody.containsKey(imageUrlKey)
                             && (customFieldsBody[imageUrlKey] as String?) != null
-                            && (customFieldsBody[imageUrlKey] as String).isNotEmpty() -> imageUrl = customFieldsBody[imageUrlKey] as String?
+                            && (customFieldsBody[imageUrlKey] as String).isNotEmpty() -> imageUrl =
+                        customFieldsBody[imageUrlKey] as String?
                 }
 
                 when {
                     customFieldsBody.containsKey(imageThumbUrlKey)
                             && (customFieldsBody[imageThumbUrlKey] as String?) != null
-                            && (customFieldsBody[imageThumbUrlKey] as String).isNotEmpty() -> thumbUrl = customFieldsBody[imageThumbUrlKey] as String?
+                            && (customFieldsBody[imageThumbUrlKey] as String).isNotEmpty() -> thumbUrl =
+                        customFieldsBody[imageThumbUrlKey] as String?
                 }
 
                 when {
@@ -458,7 +462,8 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
 
                         if (configName != null && preparedConfigIds.size > 0) {
                             logger.debug("HIT list:$configName: $preparedConfigIds")
-                            val configIds = ConfigPropertyField(configName, preparedConfigIds)
+                            val configIds =
+                                ConfigPropertyField(configName, preparedConfigIds)
                             items.add(configIds)
                         }
 
