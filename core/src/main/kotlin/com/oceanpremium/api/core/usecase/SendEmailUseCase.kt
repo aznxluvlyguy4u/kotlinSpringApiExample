@@ -21,7 +21,7 @@ import javax.mail.internet.MimeMessage
  * Build MimeMessage, set mail details, send mail.
  */
 interface SendEmailUseCase {
-    fun execute(order: OrderDto)
+    fun execute(order: OrderDto, inDebugMode: Boolean = false): OrderDto
 }
 
 class SendEmailUseCaseImpl(
@@ -75,9 +75,11 @@ class SendEmailUseCaseImpl(
     }
 
     @Throws(MessagingException::class, IOException::class)
-    override fun execute(order: OrderDto) {
+    override fun execute(order: OrderDto, inDebugMode: Boolean): OrderDto {
         setupMailClient()
-        sendEmail(order)
+        sendEmail(order, inDebugMode)
+
+        return order
     }
 
     private fun setupMailClient() {
@@ -96,12 +98,12 @@ class SendEmailUseCaseImpl(
         })
     }
 
-    private fun sendEmail(order: OrderDto) {
+    private fun sendEmail(order: OrderDto, inDebugMode: Boolean) : OrderDto {
         val email = EmailDto(
             from = emailServiceConfig.sender!!,
             to = listOf(order.contactDetails.emailAddress),
             bcc = listOf(emailServiceConfig.backOffice!!),
-            subject = "Request for reservation from ${order.contactDetails.fullName} ${order.contactDetails.phoneNumber}"
+            subject = "Request for reservation by ${order.contactDetails.fullName} ${order.contactDetails.phoneNumber}"
         )
 
         try {
@@ -118,7 +120,12 @@ class SendEmailUseCaseImpl(
             val html = templateEngine.process(CLIENT_EMAIL_ORDER_TEMPLATE, context)
             message.setContent(html, "text/html")
 
-            Transport.send(message)
+            if (inDebugMode) {
+                logger.info("Running e-mailer in DEBUG mode, therefore NOT SENDING out email")
+            } else {
+                logger.info("Running e-mailer in LIVE mode, therefore SENDING out email")
+                Transport.send(message)
+            }
         } catch (e: MessagingException) {
             e.printStackTrace()
 
@@ -141,5 +148,7 @@ class SendEmailUseCaseImpl(
             logger.error("Failed to send email: ${e.message}")
             throw ServerErrorException("Failed to send email to address: ${order.contactDetails.emailAddress}")
         }
+
+        return order
     }
 }

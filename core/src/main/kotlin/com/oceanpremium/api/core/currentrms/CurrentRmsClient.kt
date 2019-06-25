@@ -1,5 +1,6 @@
 package com.oceanpremium.api.core.currentrms
 
+import okhttp3.Dispatcher
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -9,6 +10,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import java.io.IOException
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.ThreadPoolExecutor
 
 class CurrentRmsConfig(val accessToken: String, val subDomain: String, val baseApiUrl: String)
 
@@ -80,6 +83,7 @@ class CurrentRmsClient {
         private const val REQUEST_TIMEOUT: Long = 20
         // Set a constant for request throttling
         private const val REQUEST_DELAY: Long = 0
+        private const val MAX_CONCURRENT_REQUESTS = 100
     }
 
     private var retrofitClient: Retrofit? = null
@@ -99,19 +103,24 @@ class CurrentRmsClient {
         val currentRmsConfigInterceptor =
             CurrentRmsConfigInterceptor(currentRmsConfig)
 
-        val httpClient = OkHttpClient.Builder()
-        httpClient.addInterceptor(logging)
+        val httpClientBuilder = OkHttpClient.Builder()
+        httpClientBuilder.connectTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
+        httpClientBuilder.readTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
+        httpClientBuilder.addInterceptor(logging)
+        httpClientBuilder.addInterceptor(currentRmsConfigInterceptor)
+        httpClientBuilder.addInterceptor(DelayInterceptor(DelayProvider(REQUEST_DELAY)))
 
-        httpClient.connectTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
-        httpClient.readTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
-        httpClient.addInterceptor(currentRmsConfigInterceptor)
-        httpClient.addInterceptor(DelayInterceptor(DelayProvider(REQUEST_DELAY)))
-        val okHttp = httpClient.build()
+        val threadPoolExecutor = ThreadPoolExecutor(MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_REQUESTS, 1, TimeUnit.MINUTES, LinkedBlockingQueue())
+        val dispatcher = Dispatcher(threadPoolExecutor)
+        httpClientBuilder.dispatcher(dispatcher)
+
+        val okHttpClient = httpClientBuilder.build()
+        okHttpClient.dispatcher().maxRequests = MAX_CONCURRENT_REQUESTS
 
         retrofitClient = Retrofit.Builder()
             .baseUrl(currentRmsConfig.baseApiUrl)
             .addConverterFactory(GsonConverterFactory.create())
-            .client(okHttp)
+            .client(okHttpClient)
             .build()
 
         return retrofitClient!!

@@ -14,24 +14,17 @@ class OrderPlacementUseCaseImpl (
     @Autowired private val checkProductBatchAvailabilityUseCase: CheckProductBatchAvailabilityUseCase,
     @Autowired private val sendEmailUseCase: SendEmailUseCase) : OrderPlacementUseCase {
 
-
     override fun execute(order: OrderDto): OrderDto {
-        order.products = checkProductBatchAvailabilityUseCase.execute(order.products).products
-        var subTotal = 0.0
+        val productsAvailabilityResponse=
+            checkProductBatchAvailabilityUseCase.execute(order.products)
 
-        order.products.forEach { productItem ->
-            val totalPriceUnitPriceProduct = productItem.totalPriceProducts!!.toDouble()
-            subTotal += totalPriceUnitPriceProduct
+        order.totalCost = productsAvailabilityResponse.totalPrice
+        order.products = productsAvailabilityResponse.products
+        order.availableProducts = productsAvailabilityResponse.availableProducts
+        order.unavailableProducts = productsAvailabilityResponse.unavailableProducts
+        order.totalCostUnavailableProducts = productsAvailabilityResponse.totalPriceUnavailableProducts
 
-            productItem.accessories.forEach { accessoryItem ->
-                val totalPricePerUnitAccessory = accessoryItem.totalPriceProducts!!.toDouble()
-                subTotal += totalPricePerUnitAccessory
-            }
-        }
-
-        order.totalPrice = "%.2f".format(subTotal)
-
-        sendEmailUseCase.execute(order)
+        sendEmailUseCase.execute(order, false)
 
         return order
     }

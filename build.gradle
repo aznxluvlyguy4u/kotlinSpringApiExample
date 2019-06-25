@@ -172,10 +172,13 @@ allprojects {
 
         // AWS - SES - SDK Mail service
         compile ("com.amazonaws:aws-java-sdk-ses:$sesSdkVersion")
-        
+
         // Thymeleaf - HTML templating
         compile ("org.thymeleaf:thymeleaf-spring5:$thymeleafVersion")
         compile ("org.thymeleaf:thymeleaf:$thymeleafVersion")
+
+        compile 'ru.gildor.coroutines:kotlin-coroutines-retrofit:1.1.0'
+
     }
 
     /**
