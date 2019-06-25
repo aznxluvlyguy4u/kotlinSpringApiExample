@@ -24,6 +24,12 @@ buildscript {
         springDependencyManagementVersion = '1.0.3.RELEASE'
         retrofitVersion = '2.4.0'
         retrofitInterceptorVersion = '3.14.1'
+        thymeleafVersion = '3.0.11.RELEASE'
+        thymeleafDialectVersion = '2.4.1'
+        springContextSupportVersion = '5.1.7.RELEASE'
+        springBootMailerVersion = '2.1.5.RELEASE'
+        sesSdkVersion = '1.11.568'
+        mailApiVersion = '1.6.2'
     }
 
     repositories {
@@ -98,11 +104,19 @@ allprojects {
     }
 
     dependencyManagement {
-        imports { mavenBom("org.springframework.boot:spring-boot-dependencies:${springBootVersion}") }
+        imports {
+            mavenBom 'com.amazonaws:aws-java-sdk-bom:1.11.394'
+        }
+    }
+    dependencyManagement {
+        imports {
+            mavenBom("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+            mavenBom("com.amazonaws:aws-java-sdk-bom:$sesSdkVersion")
+        }
     }
 
     springBoot { mainClassName = "com.oceanpremium.api.${project.name}.Driver" }
-        
+
     dependencies {
         // Spring Starter - Locally running the functions for local development - excluded from deploy-able jar
         compile ("org.springframework.boot:spring-boot-starter-web") {
@@ -144,12 +158,24 @@ allprojects {
         // Sentry.io - Error monitoring
         compile ("io.sentry:sentry-spring:$sentryVersion")
 
-        // Retrofit
+        // Retrofit - HTTP client
         compile ("com.squareup.retrofit2:retrofit:${retrofitVersion}")
         compile ("com.squareup.retrofit2:converter-gson:${retrofitVersion}")
         compile ("com.squareup.okhttp3:logging-interceptor:${retrofitInterceptorVersion}")
 
+        // JSlack - Slack Message sender
         compile group: 'com.github.seratch', name: 'jslack', version: '1.5.4'
+
+        // Javax Mail - Mail sender
+        compile ("javax.mail:javax.mail-api:$mailApiVersion")
+        compile ("com.sun.mail:javax.mail:$mailApiVersion")
+
+        // AWS - SES - SDK Mail service
+        compile ("com.amazonaws:aws-java-sdk-ses:$sesSdkVersion")
+        
+        // Thymeleaf - HTML templating
+        compile ("org.thymeleaf:thymeleaf-spring5:$thymeleafVersion")
+        compile ("org.thymeleaf:thymeleaf:$thymeleafVersion")
     }
 
     /**

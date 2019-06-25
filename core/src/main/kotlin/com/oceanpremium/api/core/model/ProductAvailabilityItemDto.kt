@@ -7,15 +7,27 @@ import com.oceanpremium.api.core.currentrms.response.dto.product.PricingDto
 import com.oceanpremium.api.core.enum.AvailabilityStateType
 import java.util.*
 
-@JsonPropertyOrder("id", "uuid", "name", "quantity", "quantityAvailable", "availabilityState", "totalPrice", "period", "location")
+@JsonPropertyOrder(
+    "id",
+    "uuid",
+    "name",
+    "quantity",
+    "quantityAvailable",
+    "availabilityState",
+    "totalPriceProducts",
+    "totalPriceAccessories",
+    "totalPrice",
+    "period",
+    "location"
+)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-class ProductAvailabilityItem(
+class ProductAvailabilityItemDto(
     val id: Int,
     val quantity: Int,
     var period: RentalPeriod? = null,
     var location: RentalLocation? = null,
-    var configurations: List<Map<*,*>>? = null,
-    var accessories: List<ProductAvailabilityItem>? = null
+    var configurations: List<Map<*, *>>? = null,
+    var accessories: List<ProductAvailabilityItemDto> = listOf()
 ) {
     var quantityAvailable: Int = 0
     var availabilityState: AvailabilityStateType? = null
@@ -23,16 +35,17 @@ class ProductAvailabilityItem(
     var name: String? = null
     var rates: List<PricingDto>? = null
     var images: List<ImageSource>? = null
-    var totalPrice: String? = null
+    var totalPriceProducts: String? = null
+    var totalPriceAccessories: String? = null
     val uuid: UUID = UUID.randomUUID()
 
-    fun computeTotalPrice(): Double {
-        var totalPrice = 0.0
+    fun computeTotalParentProductPrice() {
+        var totalProductPrice = 0.0
 
         if (rates?.first()?.price != null) {
-            totalPrice = quantity * rates?.first()?.price?.toDouble()!!
+            totalProductPrice = quantity * rates?.first()?.price?.toDouble()!!
         }
 
-        return totalPrice
+        totalPriceProducts = "%.2f".format(totalProductPrice)
     }
 }

@@ -2,6 +2,7 @@ package com.oceanpremium.api.products
 
 import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolverImpl.Companion.FUNCTIONAL_INTEGRATION_GROUP_NAME
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
+import com.oceanpremium.api.core.enum.ClientRoleType
 import com.oceanpremium.api.core.model.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -270,30 +271,30 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductBatchAvailability() {
-        val batch: MutableList<ProductAvailabilityItem> = mutableListOf()
+        val batch: MutableList<ProductAvailabilityItemDto> = mutableListOf()
 
-        val mockedItem1 = ProductAvailabilityItem(247, 1)
+        val mockedItem1 = ProductAvailabilityItemDto(247, 1)
         val rentalPeriod1 = RentalPeriod(Date(), Date())
         val rentalLocal1 = RentalLocation(Location("Foo", 1),Location("Bar", 13))
         mockedItem1.period = rentalPeriod1
         mockedItem1.location = rentalLocal1
         batch.add(mockedItem1)
 
-        val mockedItem2 = ProductAvailabilityItem(196, 2)
+        val mockedItem2 = ProductAvailabilityItemDto(196, 2)
         val rentalPeriod2 = RentalPeriod(Date(), Date())
         val rentalLocal2 = RentalLocation(Location("Foo", 1),Location("Bar", 13))
         mockedItem2.period = rentalPeriod2
         mockedItem2.location = rentalLocal2
         batch.add(mockedItem2)
 
-        val mockedItem3 = ProductAvailabilityItem(148, 2)
+        val mockedItem3 = ProductAvailabilityItemDto(148, 2)
         val rentalPeriod3 = RentalPeriod(Date(), Date())
         val rentalLocal3 = RentalLocation(Location("Foo", 1),Location("Bar", 13))
         mockedItem3.period = rentalPeriod3
         mockedItem3.location = rentalLocal3
         batch.add(mockedItem3)
 
-        val request = HttpEntity<List<ProductAvailabilityItem>>(batch)
+        val request = HttpEntity<List<ProductAvailabilityItemDto>>(batch)
         val productsResponse = restTemplate?.postForEntity("$endpoint/availability", request, Any::class.java)
 
         assertThat(productsResponse).isNotNull
@@ -305,9 +306,9 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductBatchAvailabilityEmptyArrayPayload() {
-        val batch: MutableList<ProductAvailabilityItem> = mutableListOf()
+        val batch: MutableList<ProductAvailabilityItemDto> = mutableListOf()
 
-        val request = HttpEntity<List<ProductAvailabilityItem>>(batch)
+        val request = HttpEntity<List<ProductAvailabilityItemDto>>(batch)
         val productsResponse = restTemplate?.postForEntity("$endpoint/availability", request, Any::class.java)
 
         assertThat(productsResponse).isNotNull
@@ -320,16 +321,16 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductBatchAvailabilityInvalidQuantity() {
-        val batch: MutableList<ProductAvailabilityItem> = mutableListOf()
+        val batch: MutableList<ProductAvailabilityItemDto> = mutableListOf()
 
-        val request = HttpEntity<List<ProductAvailabilityItem>>(batch)
+        val request = HttpEntity<List<ProductAvailabilityItemDto>>(batch)
         val productsResponse = restTemplate?.postForEntity("$endpoint/availability", request, Any::class.java)
 
         assertThat(productsResponse).isNotNull
         assertThat(productsResponse?.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
     }
 
-    /*
+    /**
      * Get products inventory bad request for start date before end date.
      */
     @Test
@@ -347,5 +348,54 @@ class ProductsControllerTest {
         errorMessage?.errors?.forEach {
             assertThat(it.toLowerCase()).contains("bad request")
         }
+    }
+
+
+    /**
+     * Create rental order of products.
+     */
+    @Test
+    fun testCreateRentalOrder() {
+        val contactDetailsDto = ContactDetailsDto(
+            ClientRoleType.OTHER,
+            "Circle",
+            "CI",
+            "steven@jongensvantechniek.nl",
+            "+316123445678"
+        )
+
+        val products: MutableList<ProductAvailabilityItemDto> = mutableListOf()
+        val location = Location("Bar", 13)
+
+        val mockedItem1 = ProductAvailabilityItemDto(148, 1)
+
+        val rentalPeriod1 = RentalPeriod(Date(), Date())
+        val rentalLocal1 = RentalLocation(Location("Foo", 1), location)
+        mockedItem1.period = rentalPeriod1
+        mockedItem1.location = rentalLocal1
+        products.add(mockedItem1)
+
+        val mockedItem2 = ProductAvailabilityItemDto(196, 2)
+
+        val rentalPeriod2 = RentalPeriod(Date(), Date())
+        val rentalLocal2 = RentalLocation(Location("Foo", 1), location)
+        mockedItem2.period = rentalPeriod2
+        mockedItem2.location = rentalLocal2
+        products.add(mockedItem2)
+
+        val mockedItem3 = ProductAvailabilityItemDto(148, 2)
+
+        val rentalPeriod3 = RentalPeriod(Date(), Date())
+        val rentalLocal3 = RentalLocation(Location("Foo", 1), location)
+        mockedItem3.period = rentalPeriod3
+        mockedItem3.location = rentalLocal3
+        products.add(mockedItem3)
+
+        val order = OrderDto(contactDetailsDto, products, "Test message from CI")
+        val request: HttpEntity<OrderDto> = HttpEntity(order)
+        val productsResponse = restTemplate?.postForEntity("$endpoint/orders", request, Any::class.java)
+
+        assertThat(productsResponse).isNotNull
+        assertThat(productsResponse?.statusCode).isEqualTo(HttpStatus.CREATED)
     }
 }
