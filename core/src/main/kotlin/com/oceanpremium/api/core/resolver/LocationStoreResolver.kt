@@ -22,7 +22,7 @@ class LocationStoreResolverImpl(
      * If a location/collection id is given, grab it, resolve it to store id and append it to the map,
      * and remove the location/collection id from the map as current rms does not recognize those fields
      */
-    override fun resolveStoreByLocation(queryParameters: Map<*, *>) : List<Int>? {
+    override fun resolveStoreByLocation(queryParameters: Map<*, *>): List<Int>? {
 
         return when {
             // Both collection- & delivery location are given
@@ -31,12 +31,15 @@ class LocationStoreResolverImpl(
 
                 logger.debug("Both collection- & delivery location are given (only using delivery location)")
 
-                val deliveryLocationId = (queryParameters[QueryParametersResolverImpl.DELIVERY_LOCATION_KEY] as String).toInt()
+                val deliveryLocationId =
+                    (queryParameters[QueryParametersResolverImpl.DELIVERY_LOCATION_KEY] as String).toInt()
 
                 val deliveryLocation = locationBuilder.getAllLocations().find { location
-                    -> location.id == deliveryLocationId }
+                    ->
+                    location.id == deliveryLocationId
+                }
 
-                return  deliveryLocation?.storeIds?.toList()
+                return deliveryLocation?.storeIds?.toList()
             }
 
             // Only collection location is given
