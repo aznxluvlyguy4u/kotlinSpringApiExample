@@ -6,6 +6,7 @@ import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.model.ProductAvailabilityItemDto
 import com.oceanpremium.api.core.model.ProductAvailabilityResponse
 import com.oceanpremium.api.core.util.DateTimeUtil
+import com.oceanpremium.api.core.util.DateTimeUtil.CURRENT_RMS_API_DATE_ISO8601_FORMAT
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
@@ -160,12 +161,12 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
 
         if (productAvailabilityItem.period?.start != null) {
             val startDateAtNoon = productAvailabilityItem.period?.start!!.withTime(DateTimeUtil.NOON, 0,0,0)
-            queryParameters["starts_at"] = DateTimeUtil.toISO8601UTC(startDateAtNoon)!!
+            queryParameters["starts_at"] = DateTimeUtil.toISO8601UTC(startDateAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
         }
 
         if (productAvailabilityItem.period?.end != null) {
             val endDateAtNoon = productAvailabilityItem.period?.end!!.withTime(DateTimeUtil.NOON, 0,0,0)
-            queryParameters["ends_at"] = DateTimeUtil.toISO8601UTC(endDateAtNoon)!!
+            queryParameters["ends_at"] = DateTimeUtil.toISO8601UTC(endDateAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
         }
 
         if (productAvailabilityItem.location != null) {

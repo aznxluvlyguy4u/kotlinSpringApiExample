@@ -2,6 +2,7 @@ package com.oceanpremium.api.core.resolver
 
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.util.DateTimeUtil
+import com.oceanpremium.api.core.util.DateTimeUtil.CURRENT_RMS_API_DATE_ISO8601_FORMAT
 import org.joda.time.DateTime
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
@@ -167,8 +168,7 @@ class QueryParametersResolverImpl : QueryParametersResolver {
                 logger.debug("Running other then $LOCALHOST, DISABLE functional integration test product querying")
 
                 when {
-                    !map.containsKey(FUNCTIONAL_INTEGRATION_GROUP_QUERY) -> validatedMap[FUNCTIONAL_INTEGRATION_GROUP_QUERY] =
-                        FUNCTIONAL_INTEGRATION_GROUP_NAME
+                    !map.containsKey(FUNCTIONAL_INTEGRATION_GROUP_QUERY) -> validatedMap[FUNCTIONAL_INTEGRATION_GROUP_QUERY] = FUNCTIONAL_INTEGRATION_GROUP_NAME
                 }
             }
 
@@ -176,6 +176,11 @@ class QueryParametersResolverImpl : QueryParametersResolver {
              * Dynamic parameters, check if date interval boundaries (start- & end date) are given,
              * otherwise set query date interval to ONE day. If a start date is given but no end date,
              * set end date equal to start date.
+             *
+             * See also @link: https://api.current-rms.com/doc#header-dates
+             * for the needed format of DateTimes to properly consume CurrentRMS API.
+             *
+             * Format needs to be like the following: 2015-06-28T23:00:00.000Z
              */
 
             // A time interval with boundaries is supplied, validate if boundaries are valid
@@ -183,8 +188,8 @@ class QueryParametersResolverImpl : QueryParametersResolver {
                     END_DATE_QUERY
                 )
             ) {
-                val startDate = DateTimeUtil.fromISO8601UTC(map[START_DATE_QUERY] as String)
-                val endDate = DateTimeUtil.fromISO8601UTC(map[END_DATE_QUERY] as String)
+                val startDate = DateTimeUtil.fromISO8601UTC(map[START_DATE_QUERY] as String, CURRENT_RMS_API_DATE_ISO8601_FORMAT)
+                val endDate = DateTimeUtil.fromISO8601UTC(map[END_DATE_QUERY] as String, CURRENT_RMS_API_DATE_ISO8601_FORMAT)
 
                 when {
                     startDate != null && endDate != null -> when {
@@ -193,62 +198,53 @@ class QueryParametersResolverImpl : QueryParametersResolver {
                             val startDateAtNoon = startDate.withTime(DateTimeUtil.NOON, 0, 0, 0)
                             val endDateAtNoon = endDate.withTime(DateTimeUtil.NOON, 0, 0, 0)
 
-                            validatedMap[START_DATE_QUERY] = DateTimeUtil.toISO8601UTC(startDateAtNoon)!!
-                            validatedMap[END_DATE_QUERY] = DateTimeUtil.toISO8601UTC(endDateAtNoon)!!
+                            validatedMap[START_DATE_QUERY] = DateTimeUtil.toISO8601UTC(startDateAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
+                            validatedMap[END_DATE_QUERY] = DateTimeUtil.toISO8601UTC(endDateAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
                         }
                     }
                 }
             }
 
             // No time interval boundaries supplied, create an interval of ONE day
-            if (!map.containsKey(START_DATE_QUERY) && !map.containsKey(
-                    END_DATE_QUERY
-                )
-            ) {
+            if (!map.containsKey(START_DATE_QUERY) && !map.containsKey(END_DATE_QUERY)) {
                 val todayAtNoon = DateTime().withTime(DateTimeUtil.NOON, 0, 0, 0)
                 val todayAtNoonStr =
-                    DateTimeUtil.toISO8601UTC(todayAtNoon)!!
+                    DateTimeUtil.toISO8601UTC(todayAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
                 validatedMap[START_DATE_QUERY] = todayAtNoonStr
 
                 val tomorrowAtNoon = todayAtNoon.plusDays(1)
                 val tomorrowAtNoonStr =
-                    DateTimeUtil.toISO8601UTC(tomorrowAtNoon)!!
+                    DateTimeUtil.toISO8601UTC(tomorrowAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
                 validatedMap[END_DATE_QUERY] = tomorrowAtNoonStr
             }
 
             // Only a start date is supplied
-            if (map.containsKey(START_DATE_QUERY) && !map.containsKey(
-                    END_DATE_QUERY
-                )
-            ) {
-                val startDate = DateTimeUtil.fromISO8601UTC(map[START_DATE_QUERY] as String)
+            if (map.containsKey(START_DATE_QUERY) && !map.containsKey(END_DATE_QUERY)) {
+                val startDate = DateTimeUtil.fromISO8601UTC(map[START_DATE_QUERY] as String, CURRENT_RMS_API_DATE_ISO8601_FORMAT)
 
                 when {
                     startDate != null -> {
                         val startDateAtNoon = startDate.withTime(DateTimeUtil.NOON, 0, 0, 0)
                         val endDateAtNoon = startDate.plusDays(1)
 
-                        validatedMap[START_DATE_QUERY] = DateTimeUtil.toISO8601UTC(startDateAtNoon)!!
-                        validatedMap[END_DATE_QUERY] = DateTimeUtil.toISO8601UTC(endDateAtNoon)!!
+                        validatedMap[START_DATE_QUERY] = DateTimeUtil.toISO8601UTC(startDateAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
+                        validatedMap[END_DATE_QUERY] = DateTimeUtil.toISO8601UTC(endDateAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
                     }
                     else -> throw BadRequestException("Failed to parse delivery date: $startDate")
                 }
             }
 
             // Only an end date is supplied
-            if (!map.containsKey(START_DATE_QUERY) && map.containsKey(
-                    END_DATE_QUERY
-                )
-            ) {
-                val endDate = DateTimeUtil.fromISO8601UTC(map[END_DATE_QUERY] as String)
+            if (!map.containsKey(START_DATE_QUERY) && map.containsKey(END_DATE_QUERY)) {
+                val endDate = DateTimeUtil.fromISO8601UTC(map[END_DATE_QUERY] as String, CURRENT_RMS_API_DATE_ISO8601_FORMAT)
 
                 when {
                     endDate != null -> {
                         val endDateAtNoon = endDate.withTime(DateTimeUtil.NOON, 0, 0, 0)
                         val startDateAtNoon = endDateAtNoon.minusDays(1)
 
-                        validatedMap[START_DATE_QUERY] = DateTimeUtil.toISO8601UTC(startDateAtNoon)!!
-                        validatedMap[END_DATE_QUERY] = DateTimeUtil.toISO8601UTC(endDateAtNoon)!!
+                        validatedMap[START_DATE_QUERY] = DateTimeUtil.toISO8601UTC(startDateAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
+                        validatedMap[END_DATE_QUERY] = DateTimeUtil.toISO8601UTC(endDateAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
                     }
                     else -> throw BadRequestException("Failed to parse delivery date: $endDate")
                 }

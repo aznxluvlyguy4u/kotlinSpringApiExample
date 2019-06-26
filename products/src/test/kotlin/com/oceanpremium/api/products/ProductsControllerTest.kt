@@ -8,6 +8,7 @@ import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.enum.ClientRoleType
 import com.oceanpremium.api.core.model.*
 import com.oceanpremium.api.core.util.DateTimeUtil
+import com.oceanpremium.api.core.util.DateTimeUtil.CURRENT_RMS_API_DATE_ISO8601_FORMAT
 import org.assertj.core.api.Assertions.assertThat
 import org.joda.time.DateTime
 import org.junit.Test
@@ -402,7 +403,11 @@ class ProductsControllerTest {
      */
     @Test
     fun testBadRequestStartDateBeforeEndDateGetProductsInventory() {
-        val params = encodeValue("starts_at=2019-06-20T12:00:00.000+0100&ends_at=2019-06-21T12:00:00.000+0100&q[product_tags_name_cont]=seabob")
+        val now = DateTime.now()
+        val startDateStr = DateTimeUtil.toISO8601UTC(now.withHourOfDay(DateTimeUtil.NOON), CURRENT_RMS_API_DATE_ISO8601_FORMAT)
+        val endDateStr = DateTimeUtil.toISO8601UTC(now.plusDays(1), CURRENT_RMS_API_DATE_ISO8601_FORMAT)
+        val params = encodeValue("starts_at=$startDateStr&ends_at=$endDateStr&q[product_tags_name_cont]=seabob")
+
         val productsErrorResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ErrorResponse::class.java)
 
         assertThat(productsErrorResponse).isNotNull

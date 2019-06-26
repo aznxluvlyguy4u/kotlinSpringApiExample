@@ -17,18 +17,12 @@ import org.joda.time.DateTime
 class JacksonConfig {
 
     /**
-     *   // Setup an object mapper and provision it with additional modules, such as: Kotlin and LocalDate
-    val mapper: ObjectMapper = jacksonObjectMapper()
-    .registerModule(KotlinModule())
-    .registerModule(JavaTimeModule())
-
-    /**
+     * Setup an object mapper and provision it with additional modules, such as: Kotlin and JavaDateTime
+     *
      * See for more info:
      *
      * @link: https://stackoverflow.com/questions/28802544/java-8-localdate-jackson-format
-    **/
-    .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-     */
+    */
     @Bean
     fun objectMapper(): ObjectMapper {
         return ObjectMapper()
@@ -39,7 +33,6 @@ class JacksonConfig {
             .configure(MapperFeature.DEFAULT_VIEW_INCLUSION, true)
     }
 }
-
 
 class CustomDateSerializer : JsonSerializer<DateTime>() {
     @Throws(IOException::class, JsonProcessingException::class)
