@@ -8,6 +8,7 @@ import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.enum.ClientRoleType
 import com.oceanpremium.api.core.model.*
 import org.assertj.core.api.Assertions.assertThat
+import org.joda.time.LocalDateTime
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,9 +17,6 @@ import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit4.SpringRunner
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
 
 class Errors(var errors: List<String>? = null)
 class ErrorResponse(var code: Int? = null, var message: Errors? = null)
@@ -57,7 +55,7 @@ class ProductsControllerTest {
         private const val endpoint = "/api/v1/products"
         private val testProduct = TestProduct()
         private val testExistingProduct = TestExistingProduct()
-        private val todayAtNoon = LocalDateTime.of(LocalDate.now(), LocalTime.NOON)
+        private val todayAtNoon =  LocalDateTime().withTime(12, 0, 0, 0)
         private val tomorrowAtNoon = todayAtNoon.plusDays(1)
     }
 

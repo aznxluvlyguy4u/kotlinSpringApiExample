@@ -2,11 +2,12 @@ package com.oceanpremium.api.core.resolver
 
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.util.DateTimeUtil
+import org.joda.time.LocalDateTime
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
+import org.joda.time.DateTime
+import org.joda.time.LocalDate
+
 
 interface QueryParametersResolver {
 
@@ -214,7 +215,7 @@ class QueryParametersResolverImpl : QueryParametersResolver {
                     END_DATE_QUERY
                 )
             ) {
-                val todayAtNoon = LocalDateTime.of(LocalDate.now(), LocalTime.NOON)
+                val todayAtNoon = LocalDateTime().withTime(12, 0, 0, 0)
                 val todayAtNoonStr =
                     DateTimeUtil.toISO8601UTC(todayAtNoon, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)!!
                 validatedMap[START_DATE_QUERY] = todayAtNoonStr
