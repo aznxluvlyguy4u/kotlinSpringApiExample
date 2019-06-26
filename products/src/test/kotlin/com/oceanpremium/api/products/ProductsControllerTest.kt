@@ -7,8 +7,9 @@ import com.oceanpremium.api.core.resolver.QueryParametersResolverImpl.Companion.
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.enum.ClientRoleType
 import com.oceanpremium.api.core.model.*
+import com.oceanpremium.api.core.util.DateTimeUtil
 import org.assertj.core.api.Assertions.assertThat
-import org.joda.time.LocalDateTime
+import org.joda.time.DateTime
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,6 +18,9 @@ import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit4.SpringRunner
+import java.io.UnsupportedEncodingException
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 class Errors(var errors: List<String>? = null)
 class ErrorResponse(var code: Int? = null, var message: Errors? = null)
@@ -55,7 +59,7 @@ class ProductsControllerTest {
         private const val endpoint = "/api/v1/products"
         private val testProduct = TestProduct()
         private val testExistingProduct = TestExistingProduct()
-        private val todayAtNoon =  LocalDateTime().withTime(12, 0, 0, 0)
+        private val todayAtNoon =  DateTime().withTime(DateTimeUtil.NOON, 0, 0, 0)
         private val tomorrowAtNoon = todayAtNoon.plusDays(1)
     }
 
@@ -398,7 +402,7 @@ class ProductsControllerTest {
      */
     @Test
     fun testBadRequestStartDateBeforeEndDateGetProductsInventory() {
-        val params = "starts_at=2019-09-15&ends_at=2019-09-01&q[product_tags_name_cont]=seabob"
+        val params = encodeValue("starts_at=2019-06-20T12:00:00.000+0100&ends_at=2019-06-21T12:00:00.000+0100&q[product_tags_name_cont]=seabob")
         val productsErrorResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ErrorResponse::class.java)
 
         assertThat(productsErrorResponse).isNotNull
@@ -413,6 +417,15 @@ class ProductsControllerTest {
         }
     }
 
+    // Method to encode a string value using `UTF-8` encoding scheme
+    private fun encodeValue(value: String): String {
+        try {
+            return URLEncoder.encode(value, StandardCharsets.UTF_8.toString())
+        } catch (ex: UnsupportedEncodingException) {
+            throw RuntimeException(ex.cause)
+        }
+
+    }
 
     /**
      * Create rental order of products.

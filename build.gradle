@@ -138,6 +138,10 @@ allprojects {
         // Jackson - JSON Serialization / Deserialization
         compile ("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
         compile ("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+        compile ("joda-time:joda-time")
+        compile ("org.jadira.usertype:usertype.core:3.1.0.CR1")
+        compile ("com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.2.1")
+        compile ("com.fasterxml.jackson.datatype:jackson-datatype-joda")
 
         // Spring test - test framework
         testCompile ("org.springframework.boot:spring-boot-starter-test")
@@ -178,7 +182,6 @@ allprojects {
         compile ("org.thymeleaf:thymeleaf:$thymeleafVersion")
 
         compile 'ru.gildor.coroutines:kotlin-coroutines-retrofit:1.1.0'
-
     }
 
     /**

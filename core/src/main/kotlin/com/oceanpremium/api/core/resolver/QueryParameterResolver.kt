@@ -2,12 +2,9 @@ package com.oceanpremium.api.core.resolver
 
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.util.DateTimeUtil
-import org.joda.time.LocalDateTime
+import org.joda.time.DateTime
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
-import org.joda.time.DateTime
-import org.joda.time.LocalDate
-
 
 interface QueryParametersResolver {
 
@@ -120,7 +117,6 @@ class QueryParametersResolverImpl : QueryParametersResolver {
         val host = getHost(headers)
 
         try {
-
             when {
                 // Only query product with tags containing the search value
                 map.containsKey(PRODUCT_TAGS_SEARCH_QUERY) -> {
@@ -139,8 +135,7 @@ class QueryParametersResolverImpl : QueryParametersResolver {
                     if (!map.containsKey(DELIVERY_LOCATION_KEY)) {
                         throw BadRequestException("Cannot continue search, need at minimum, either a search keyword or a delivery location.")
                     } else {
-                        validatedMap[PRODUCT_TAGS_SEARCH_EQ_QUERY] =
-                            KEYWORD_LESS_TAG
+                        validatedMap[PRODUCT_TAGS_SEARCH_EQ_QUERY] = KEYWORD_LESS_TAG
                     }
                 }
             }
@@ -188,23 +183,18 @@ class QueryParametersResolverImpl : QueryParametersResolver {
                     END_DATE_QUERY
                 )
             ) {
-                val startDate = DateTimeUtil.fromISO8601UTC(
-                    map[START_DATE_QUERY] as String,
-                    format = DateTimeUtil.DEFAULT_API_DATE_FORMAT
-                )
-                val endDate = DateTimeUtil.fromISO8601UTC(
-                    map[END_DATE_QUERY] as String,
-                    format = DateTimeUtil.DEFAULT_API_DATE_FORMAT
-                )
+                val startDate = DateTimeUtil.fromISO8601UTC(map[START_DATE_QUERY] as String)
+                val endDate = DateTimeUtil.fromISO8601UTC(map[END_DATE_QUERY] as String)
 
                 when {
                     startDate != null && endDate != null -> when {
                         endDate.isBefore(startDate) -> throw BadRequestException("Collection date: $endDate may not be before delivery date: $startDate")
                         else -> {
-                            validatedMap[START_DATE_QUERY] =
-                                DateTimeUtil.toISO8601UTC(startDate, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)!!
-                            validatedMap[END_DATE_QUERY] =
-                                DateTimeUtil.toISO8601UTC(endDate, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)!!
+                            val startDateAtNoon = startDate.withTime(DateTimeUtil.NOON, 0, 0, 0)
+                            val endDateAtNoon = endDate.withTime(DateTimeUtil.NOON, 0, 0, 0)
+
+                            validatedMap[START_DATE_QUERY] = DateTimeUtil.toISO8601UTC(startDateAtNoon)!!
+                            validatedMap[END_DATE_QUERY] = DateTimeUtil.toISO8601UTC(endDateAtNoon)!!
                         }
                     }
                 }
@@ -215,14 +205,14 @@ class QueryParametersResolverImpl : QueryParametersResolver {
                     END_DATE_QUERY
                 )
             ) {
-                val todayAtNoon = LocalDateTime().withTime(12, 0, 0, 0)
+                val todayAtNoon = DateTime().withTime(DateTimeUtil.NOON, 0, 0, 0)
                 val todayAtNoonStr =
-                    DateTimeUtil.toISO8601UTC(todayAtNoon, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)!!
+                    DateTimeUtil.toISO8601UTC(todayAtNoon)!!
                 validatedMap[START_DATE_QUERY] = todayAtNoonStr
 
                 val tomorrowAtNoon = todayAtNoon.plusDays(1)
                 val tomorrowAtNoonStr =
-                    DateTimeUtil.toISO8601UTC(tomorrowAtNoon, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)!!
+                    DateTimeUtil.toISO8601UTC(tomorrowAtNoon)!!
                 validatedMap[END_DATE_QUERY] = tomorrowAtNoonStr
             }
 
@@ -231,17 +221,15 @@ class QueryParametersResolverImpl : QueryParametersResolver {
                     END_DATE_QUERY
                 )
             ) {
-                val startDate = DateTimeUtil.fromISO8601UTC(
-                    map[START_DATE_QUERY] as String,
-                    format = DateTimeUtil.DEFAULT_API_DATE_FORMAT
-                )
+                val startDate = DateTimeUtil.fromISO8601UTC(map[START_DATE_QUERY] as String)
 
                 when {
                     startDate != null -> {
-                        val startDateStr =
-                            DateTimeUtil.toISO8601UTC(startDate, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)!!
-                        validatedMap[START_DATE_QUERY] = startDateStr
-                        validatedMap[END_DATE_QUERY] = startDateStr
+                        val startDateAtNoon = startDate.withTime(DateTimeUtil.NOON, 0, 0, 0)
+                        val endDateAtNoon = startDate.plusDays(1)
+
+                        validatedMap[START_DATE_QUERY] = DateTimeUtil.toISO8601UTC(startDateAtNoon)!!
+                        validatedMap[END_DATE_QUERY] = DateTimeUtil.toISO8601UTC(endDateAtNoon)!!
                     }
                     else -> throw BadRequestException("Failed to parse delivery date: $startDate")
                 }
@@ -252,17 +240,15 @@ class QueryParametersResolverImpl : QueryParametersResolver {
                     END_DATE_QUERY
                 )
             ) {
-                val endDate = DateTimeUtil.fromISO8601UTC(
-                    map[END_DATE_QUERY] as String,
-                    format = DateTimeUtil.DEFAULT_API_DATE_FORMAT
-                )
+                val endDate = DateTimeUtil.fromISO8601UTC(map[END_DATE_QUERY] as String)
 
                 when {
                     endDate != null -> {
-                        val endDateStr =
-                            DateTimeUtil.toISO8601UTC(endDate, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)!!
-                        validatedMap[START_DATE_QUERY] = endDateStr
-                        validatedMap[END_DATE_QUERY] = endDateStr
+                        val endDateAtNoon = endDate.withTime(DateTimeUtil.NOON, 0, 0, 0)
+                        val startDateAtNoon = endDateAtNoon.minusDays(1)
+
+                        validatedMap[START_DATE_QUERY] = DateTimeUtil.toISO8601UTC(startDateAtNoon)!!
+                        validatedMap[END_DATE_QUERY] = DateTimeUtil.toISO8601UTC(endDateAtNoon)!!
                     }
                     else -> throw BadRequestException("Failed to parse delivery date: $endDate")
                 }

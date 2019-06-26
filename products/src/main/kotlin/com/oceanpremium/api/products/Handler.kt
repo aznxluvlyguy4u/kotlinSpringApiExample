@@ -7,6 +7,7 @@ import com.amazonaws.serverless.proxy.spring.SpringBootLambdaContainerHandler
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler
 import com.oceanpremium.api.core.config.CorsConfig
+import com.oceanpremium.api.core.config.JacksonConfig
 import com.oceanpremium.api.core.config.SentryConfig
 import com.oceanpremium.api.core.config.ThymeleafConfig
 import com.oceanpremium.api.core.currentrms.ProductsApiImpl
@@ -46,7 +47,8 @@ import kotlin.jvm.java as java1
     SendEmailUseCaseImpl::class,
     CorsConfig::class,
     SentryConfig::class,
-    ThymeleafConfig::class
+    ThymeleafConfig::class,
+    JacksonConfig::class
 )
 @SpringBootApplication
 class ProductsDriver : SpringBootServletInitializer() {

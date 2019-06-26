@@ -159,11 +159,13 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
         queryParameters["q[product_id_eq]"] = productAvailabilityItem.id.toString()
 
         if (productAvailabilityItem.period?.start != null) {
-            queryParameters["starts_at"] = DateTimeUtil.toISO8601UTC(productAvailabilityItem.period?.start!!)!!
+            val startDateAtNoon = productAvailabilityItem.period?.start!!.withTime(DateTimeUtil.NOON, 0,0,0)
+            queryParameters["starts_at"] = DateTimeUtil.toISO8601UTC(startDateAtNoon)!!
         }
 
         if (productAvailabilityItem.period?.end != null) {
-            queryParameters["ends_at"] = DateTimeUtil.toISO8601UTC(productAvailabilityItem.period?.end!!)!!
+            val endDateAtNoon = productAvailabilityItem.period?.end!!.withTime(DateTimeUtil.NOON, 0,0,0)
+            queryParameters["ends_at"] = DateTimeUtil.toISO8601UTC(endDateAtNoon)!!
         }
 
         if (productAvailabilityItem.location != null) {
