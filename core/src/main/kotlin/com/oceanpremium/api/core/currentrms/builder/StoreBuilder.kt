@@ -1,6 +1,5 @@
 package com.oceanpremium.api.core.currentrms.builder
 
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -13,118 +12,122 @@ interface StoreBuilder {
  * Source @link: https://docs.google.com/spreadsheets/d/1Jpx59haz_8cZw0uGUBSZX47mQDPv0V3OvgJUtr--JzA/edit#gid=0
  */
 @Service
-class StoreBuilderImpl(@Autowired private val regionBuilder: RegionBuilder): StoreBuilder {
+class StoreBuilderImpl: StoreBuilder {
 
-    fun buildM55(): Store {
-        return Store("M55", 5)
+    fun buildM55(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("M55", 5, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildAntibes(): Store {
-        return Store("Antibes", 18)
+    fun buildAntibes(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Antibes", 18, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildPalmaED(): Store {
-        return Store("Palma de Mallorca (ED)", 19)
+    fun buildPalmaED(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Palma de Mallorca (ED)", 19, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildPalmaNG(): Store {
-        return Store("Palma de Mallorca (NG)", 3)
+    fun buildPalmaNG(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Palma de Mallorca (NG)", 3, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildIbiza(): Store {
-        return Store("Ibiza (Rodriquez)", 20)
+    fun buildIbiza(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Ibiza (Rodriquez)", 20, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildOlbiaNA(): Store {
-        return Store("Olbia (NA)", 11)
+    fun buildOlbiaNA(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Olbia (NA)", 11, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildGenova(): Store {
-        return Store("Genova (Maremoto)", 16)
+    fun buildOlbiaSYS(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Olbia (SYS)", 21, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildNapoli(): Store {
-        return Store("Napoli (MLF)", 15)
+    fun buildGenova(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Genova (Maremoto)", 16, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildPalermo(): Store {
-        return Store("Palermo (Artemis)", 23)
+    fun buildNapoli(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Napoli (MLF)", 15, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildRiposto(): Store {
-        return Store("Riposto (Artemis)", 24)
+    fun buildPalermo(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Palermo (Artemis)", 23, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildMalta(): Store {
-        return Store("Malta", 25)
+    fun buildRiposto(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Riposto (Artemis)", 24, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildAthensSotiris(): Store {
-        return Store("Athens (Sotiris)", 26)
+    fun buildMalta(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Malta", 25, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildAthensH360(): Store {
-        return Store("Athens (H360)", 10)
+    fun buildAthensSotiris(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Athens (Sotiris)", 26, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildCorfu(): Store {
-        return Store("Corfu", 27)
+    fun buildAthensH360(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Athens (H360)", 10, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildKosA1(): Store {
-        return Store("Kos (A1)", 28)
+    fun buildCorfu(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Corfu", 27, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildRhodes(): Store {
-        return Store("Rhodes (Roditis)", 29)
+    fun buildKosA1(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Kos (A1)", 28, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildVenice(): Store {
-        return Store("Venice (Katarina)", 30)
+    fun buildRhodes(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Rhodes (Roditis)", 29, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildZadar(): Store {
-        return Store("Zadar (Alessia)", 31)
+    fun buildVenice(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Venice (Katarina)", 30, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildSplit(): Store {
-        return Store("Split (Luka)", 32)
+    fun buildZadar(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Zadar (Alessia)", 31, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildDubrovnikKristijan(): Store {
-        return Store("Dubrovnik (Kristijan)", 33)
+    fun buildSplit(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Split (Luka)", 32, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildDubrovnikBWA(): Store {
-        return Store("Dubrovnik (BWA)", 24)
+    fun buildDubrovnikKristijan(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Dubrovnik (Kristijan)", 33, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildBCM(): Store {
-        return Store("BCM (Kotor)", 35)
+    fun buildDubrovnikBWA(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Dubrovnik (BWA)", 24, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildTivat(): Store {
-        return Store("Tivat (BWA)", 36)
+    fun buildBCM(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("BCM (Kotor)", 35, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildAntigua(): Store {
-        return Store("Antigua (AC)", 14)
+    fun buildTivat(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Tivat (BWA)", 36, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildStMaarten(): Store {
-        return Store("St. Maarten (DSM)", 9)
+    fun buildAntigua(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Antigua (AC)", 14, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildFortLauderdale(): Store {
-        return Store("Fort Lauderdale (YC)", 13)
+    fun buildStMaarten(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("St. Maarten (DSM)", 9, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildMale(): Store {
-        return Store("Male", 37)
+    fun buildFortLauderdale(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Fort Lauderdale (YC)", 13, delayInHours, deliveryCostInEuro)
     }
 
-    fun buildNewItemsStore(): Store {
-        return Store("New Items Store", 22)
+    fun buildMale(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("Male", 37, delayInHours, deliveryCostInEuro)
+    }
+
+    fun buildNewItemsStore(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
+        return Store("New Items Store", 22, delayInHours, deliveryCostInEuro)
     }
 
     override fun getAllStores(): List<Store> {
@@ -136,6 +139,7 @@ class StoreBuilderImpl(@Autowired private val regionBuilder: RegionBuilder): Sto
         allStores.add(buildPalmaNG())
         allStores.add(buildIbiza())
         allStores.add(buildOlbiaNA())
+        allStores.add(buildOlbiaSYS())
         allStores.add(buildGenova())
         allStores.add(buildNapoli())
         allStores.add(buildPalermo())
