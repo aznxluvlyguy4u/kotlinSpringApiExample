@@ -32,9 +32,7 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
     }
 
     /**
-     * var totalCost: String? = null
-     * var totalCostProducts: String? = null
-     * var totalCostAccessories: String? = null
+     * For each item check it's availability.
      */
     override fun execute(productItems: List<ProductAvailabilityItemDto>): ProductAvailabilityResponse {
 
@@ -49,6 +47,8 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
                     "Quantity supplied for product: ${productAvailabilityItem.id} must be greater then 0."
                 productAvailabilityItem.availabilityState = AvailabilityStateType.NOT_AVAILABLE
                 productAvailabilityItem.quantityAvailable = productAvailabilityItem.quantity
+
+                throw BadRequestException(productAvailabilityItem.message)
             }
 
             logger.debug(
