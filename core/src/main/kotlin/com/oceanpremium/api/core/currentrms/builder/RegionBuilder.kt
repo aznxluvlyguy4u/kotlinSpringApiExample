@@ -470,38 +470,164 @@ class RegionBuilderImpl(@Autowired private val storeBuilder: StoreBuilderImpl): 
     override fun buildBaleraicsIslands(): List<Region> {
         val regions: MutableList<Region> = mutableListOf()
 
-        //Balearic's Islands
+        // Ibiza
         val ibiza = Region("Ibiza",10)
-        ibiza.addLocation(Location("Ibiza Island"))
-        ibiza.addLocation(Location("Formentera island"))
+
+        val ibizaIslandLoc = Location("Ibiza Island")
+        val formenteraIslandLoc = Location("Formentera Island")
+
+        ibizaIslandLoc.addNativeStore(storeBuilder.buildIbiza(1, 50))
+        ibizaIslandLoc.addAlternativeStore(storeBuilder.buildPalmaED(5, 200))
+        ibizaIslandLoc.addAlternativeStore(storeBuilder.buildPalmaNG(5, 200))
+
+        ibizaIslandLoc.addGrayStore(storeBuilder.buildM55(168))
+        ibizaIslandLoc.addGrayStore(storeBuilder.buildAntibes(19))
+        ibizaIslandLoc.addGrayStore(storeBuilder.buildOlbiaNA(168))
+        ibizaIslandLoc.addGrayStore(storeBuilder.buildOlbiaSYS(168))
+        ibizaIslandLoc.addGrayStore(storeBuilder.buildGenova(120))
+        ibizaIslandLoc.addGrayStore(storeBuilder.buildNapoli(168))
+        ibizaIslandLoc.addGrayStore(storeBuilder.buildPalermo(216))
+        ibizaIslandLoc.addGrayStore(storeBuilder.buildRiposto(216))
+        ibizaIslandLoc.addGrayStore(storeBuilder.buildMalta(216))
+        ibizaIslandLoc.addGrayStore(storeBuilder.buildAthensSotiris(216))
+        ibizaIslandLoc.addGrayStore(storeBuilder.buildAthensH360(216))
+        ibizaIslandLoc.addGrayStore(storeBuilder.buildCorfu(216))
+        ibizaIslandLoc.addGrayStore(storeBuilder.buildKosA1(216))
+        ibizaIslandLoc.addGrayStore(storeBuilder.buildRhodes(216))
+        ibizaIslandLoc.addGrayStore(storeBuilder.buildVenice(96))
+        ibizaIslandLoc.addGrayStore(storeBuilder.buildZadar(120))
+        ibizaIslandLoc.addGrayStore(storeBuilder.buildSplit(120))
+        ibizaIslandLoc.addGrayStore(storeBuilder.buildDubrovnikKristijan(120))
+        ibizaIslandLoc.addGrayStore(storeBuilder.buildDubrovnikBWA(120))
+        ibizaIslandLoc.addGrayStore(storeBuilder.buildBCM(216))
+        ibizaIslandLoc.addGrayStore(storeBuilder.buildTivat(216))
+        ibizaIslandLoc.addNewItemsStore(storeBuilder.buildNewItemsStore(72))
+
+        formenteraIslandLoc.addNativeStore(storeBuilder.buildIbiza(2, 100))
+        formenteraIslandLoc.addAlternativeStore(storeBuilder.buildPalmaED(6, 250))
+        formenteraIslandLoc.addAlternativeStore(storeBuilder.buildPalmaNG(6, 200))
+
+        formenteraIslandLoc.addGrayStore(storeBuilder.buildM55(168))
+        formenteraIslandLoc.addGrayStore(storeBuilder.buildAntibes(23))
+        formenteraIslandLoc.addGrayStore(storeBuilder.buildOlbiaNA(168))
+        formenteraIslandLoc.addGrayStore(storeBuilder.buildOlbiaSYS(168))
+        formenteraIslandLoc.addGrayStore(storeBuilder.buildGenova(120))
+        formenteraIslandLoc.addGrayStore(storeBuilder.buildNapoli(168))
+        formenteraIslandLoc.addGrayStore(storeBuilder.buildPalermo(216))
+        formenteraIslandLoc.addGrayStore(storeBuilder.buildRiposto(216))
+        formenteraIslandLoc.addGrayStore(storeBuilder.buildMalta(216))
+        formenteraIslandLoc.addGrayStore(storeBuilder.buildAthensSotiris(216))
+        formenteraIslandLoc.addGrayStore(storeBuilder.buildAthensH360(216))
+        formenteraIslandLoc.addGrayStore(storeBuilder.buildCorfu(216))
+        formenteraIslandLoc.addGrayStore(storeBuilder.buildKosA1(216))
+        formenteraIslandLoc.addGrayStore(storeBuilder.buildRhodes(216))
+        formenteraIslandLoc.addGrayStore(storeBuilder.buildVenice(96))
+        formenteraIslandLoc.addGrayStore(storeBuilder.buildZadar(120))
+        formenteraIslandLoc.addGrayStore(storeBuilder.buildSplit(120))
+        formenteraIslandLoc.addGrayStore(storeBuilder.buildDubrovnikKristijan(120))
+        formenteraIslandLoc.addGrayStore(storeBuilder.buildDubrovnikBWA(120))
+        formenteraIslandLoc.addGrayStore(storeBuilder.buildBCM(216))
+        formenteraIslandLoc.addGrayStore(storeBuilder.buildTivat(216))
+        formenteraIslandLoc.addNewItemsStore(storeBuilder.buildNewItemsStore(72))
+
+        ibiza.addLocation(ibizaIslandLoc)
+        ibiza.addLocation(formenteraIslandLoc)
+
         regions.add(ibiza)
 
+
+        // Mallorca
         val mallorca = Region("Mallorca",11)
-        mallorca.addLocation(Location("Island - North/East"))
-        mallorca.addLocation(Location("Palma"))
-        mallorca.addLocation(Location("Port Portals"))
-        mallorca.addLocation(Location("Porto Adriano"))
+
+        val islandNorthEastLoc = Location("Island - North/East")
+        val palmaLoc = Location("Palma")
+        val portPortalsLoc = Location("Port Portals")
+        val portoAdrianoLoc = Location("Porto Adriano")
+
+        islandNorthEastLoc.addNativeStore(storeBuilder.buildPalmaED(2, 100))
+        islandNorthEastLoc.addNativeStore(storeBuilder.buildPalmaNG(2, 100))
+        islandNorthEastLoc.addAlternativeStore(storeBuilder.buildIbiza(6, 200))
+
+        palmaLoc.addNativeStore(storeBuilder.buildPalmaED(1, 50))
+        palmaLoc.addNativeStore(storeBuilder.buildPalmaNG(1, 50))
+        palmaLoc.addAlternativeStore(storeBuilder.buildIbiza(6, 200))
+
+        portPortalsLoc.addNativeStore(storeBuilder.buildPalmaED(1, 50))
+        portPortalsLoc.addNativeStore(storeBuilder.buildPalmaNG(1, 50))
+        portPortalsLoc.addAlternativeStore(storeBuilder.buildIbiza(6, 200))
+
+        portoAdrianoLoc.addNativeStore(storeBuilder.buildPalmaED(1, 50))
+        portoAdrianoLoc.addNativeStore(storeBuilder.buildPalmaNG(1, 50))
+        portoAdrianoLoc.addAlternativeStore(storeBuilder.buildIbiza(6, 200))
+
+        mallorca.addLocation(islandNorthEastLoc)
+        mallorca.addLocation(palmaLoc)
+        mallorca.addLocation(portPortalsLoc)
+        mallorca.addLocation(portoAdrianoLoc)
+
+        mallorca.locations.forEach { location ->
+            location.addGrayStore(storeBuilder.buildM55(168))
+            location.addGrayStore(storeBuilder.buildAntibes(18))
+            location.addGrayStore(storeBuilder.buildOlbiaNA(168))
+            location.addGrayStore(storeBuilder.buildOlbiaSYS(168))
+            location.addGrayStore(storeBuilder.buildGenova(120))
+            location.addGrayStore(storeBuilder.buildNapoli(168))
+            location.addGrayStore(storeBuilder.buildPalermo(216))
+            location.addGrayStore(storeBuilder.buildRiposto(216))
+            location.addGrayStore(storeBuilder.buildMalta(216))
+            location.addGrayStore(storeBuilder.buildAthensSotiris(216))
+            location.addGrayStore(storeBuilder.buildAthensH360(216))
+            location.addGrayStore(storeBuilder.buildCorfu(216))
+            location.addGrayStore(storeBuilder.buildKosA1(216))
+            location.addGrayStore(storeBuilder.buildRhodes(216))
+            location.addGrayStore(storeBuilder.buildVenice(96))
+            location.addGrayStore(storeBuilder.buildZadar(120))
+            location.addGrayStore(storeBuilder.buildSplit(120))
+            location.addGrayStore(storeBuilder.buildDubrovnikKristijan(120))
+            location.addGrayStore(storeBuilder.buildDubrovnikBWA(120))
+            location.addGrayStore(storeBuilder.buildBCM(216))
+            location.addGrayStore(storeBuilder.buildTivat(216))
+            location.addNewItemsStore(storeBuilder.buildNewItemsStore(72))
+        }
+
         regions.add(mallorca)
 
+
+        // Menorca
         val menorca = Region("Menorca",12)
-        menorca.addLocation(Location("Menorca Island"))
+
+        val menorcaLoc = Location("Menorca Island")
+
+        menorcaLoc.addNativeStore(storeBuilder.buildPalmaED(3, 200))
+        menorcaLoc.addNativeStore(storeBuilder.buildPalmaNG(3, 200))
+        menorcaLoc.addAlternativeStore(storeBuilder.buildIbiza(8, 300))
+
+        menorcaLoc.addGrayStore(storeBuilder.buildM55(168))
+        menorcaLoc.addGrayStore(storeBuilder.buildAntibes(17))
+        menorcaLoc.addGrayStore(storeBuilder.buildOlbiaNA(168))
+        menorcaLoc.addGrayStore(storeBuilder.buildOlbiaSYS(168))
+        menorcaLoc.addGrayStore(storeBuilder.buildGenova(120))
+        menorcaLoc.addGrayStore(storeBuilder.buildNapoli(168))
+        menorcaLoc.addGrayStore(storeBuilder.buildPalermo(216))
+        menorcaLoc.addGrayStore(storeBuilder.buildRiposto(216))
+        menorcaLoc.addGrayStore(storeBuilder.buildMalta(216))
+        menorcaLoc.addGrayStore(storeBuilder.buildAthensSotiris(216))
+        menorcaLoc.addGrayStore(storeBuilder.buildAthensH360(216))
+        menorcaLoc.addGrayStore(storeBuilder.buildCorfu(216))
+        menorcaLoc.addGrayStore(storeBuilder.buildKosA1(216))
+        menorcaLoc.addGrayStore(storeBuilder.buildRhodes(216))
+        menorcaLoc.addGrayStore(storeBuilder.buildVenice(96))
+        menorcaLoc.addGrayStore(storeBuilder.buildZadar(120))
+        menorcaLoc.addGrayStore(storeBuilder.buildSplit(120))
+        menorcaLoc.addGrayStore(storeBuilder.buildDubrovnikKristijan(120))
+        menorcaLoc.addGrayStore(storeBuilder.buildDubrovnikBWA(120))
+        menorcaLoc.addGrayStore(storeBuilder.buildBCM(216))
+        menorcaLoc.addGrayStore(storeBuilder.buildTivat(216))
+        menorcaLoc.addNewItemsStore(storeBuilder.buildNewItemsStore(72))
+
+        menorca.addLocation(menorcaLoc)
+
         regions.add(menorca)
-
-        var j = 10
-        regions.forEach { region ->
-
-            region.addStore(Store("Antibes", 99))
-            region.addStore(Store("Palma", 3))
-            region.addStore(Store("M55", 5))
-            region.addStore(Store("Croatia", 98))
-            region.addStore(Store("AntiguaSxm", 14))
-            region.addStore(Store("FTL", 13))
-
-            region.locations.forEach { location ->
-                location.id = j
-                j++
-            }
-        }
 
         return regions.toList()
     }
@@ -509,69 +635,381 @@ class RegionBuilderImpl(@Autowired private val storeBuilder: StoreBuilderImpl): 
     override fun buildSouthOfFrance(): List<Region> {
         val regions: MutableList<Region> = mutableListOf()
 
-        //South Of France
+        // Port Vendres
         val portVendres = Region("Port Vendres",13)
-        portVendres.addLocation(Location())
+
+        val portVendresLoc = Location("Port Vendres")
+
+        portVendresLoc.addNativeStore(storeBuilder.buildAntibes(6, 500))
+        portVendresLoc.addAlternativeStore(storeBuilder.buildGenova(24, 450))
+
+        portVendresLoc.addGrayStore(storeBuilder.buildM55(24))
+        portVendresLoc.addGrayStore(storeBuilder.buildPalmaED(96))
+        portVendresLoc.addGrayStore(storeBuilder.buildPalmaNG(96))
+        portVendresLoc.addGrayStore(storeBuilder.buildIbiza(96))
+        portVendresLoc.addGrayStore(storeBuilder.buildOlbiaNA(96))
+        portVendresLoc.addGrayStore(storeBuilder.buildOlbiaSYS(96))
+        portVendresLoc.addGrayStore(storeBuilder.buildNapoli(96))
+        portVendresLoc.addGrayStore(storeBuilder.buildPalermo(168))
+        portVendresLoc.addGrayStore(storeBuilder.buildRiposto(168))
+        portVendresLoc.addGrayStore(storeBuilder.buildMalta(168))
+        portVendresLoc.addGrayStore(storeBuilder.buildAthensSotiris(168))
+        portVendresLoc.addGrayStore(storeBuilder.buildAthensH360(168))
+        portVendresLoc.addGrayStore(storeBuilder.buildCorfu(192))
+        portVendresLoc.addGrayStore(storeBuilder.buildKosA1(216))
+        portVendresLoc.addGrayStore(storeBuilder.buildRhodes(216))
+        portVendresLoc.addGrayStore(storeBuilder.buildVenice(72))
+        portVendresLoc.addGrayStore(storeBuilder.buildZadar(96))
+        portVendresLoc.addGrayStore(storeBuilder.buildSplit(96))
+        portVendresLoc.addGrayStore(storeBuilder.buildDubrovnikKristijan(96))
+        portVendresLoc.addGrayStore(storeBuilder.buildDubrovnikBWA(96))
+        portVendresLoc.addGrayStore(storeBuilder.buildBCM(120))
+        portVendresLoc.addGrayStore(storeBuilder.buildTivat(120))
+        portVendresLoc.addNewItemsStore(storeBuilder.buildNewItemsStore(72))
+
+        portVendres.addLocation(portVendresLoc)
+
         regions.add(portVendres)
 
+
+        // Marseilles
         val marseilles = Region("Marseilles",14)
-        marseilles.addLocation(Location())
+
+        val marseillesLoc = Location("Marseilles")
+
+        marseillesLoc.addNativeStore(storeBuilder.buildAntibes(5, 184))
+        marseillesLoc.addAlternativeStore(storeBuilder.buildGenova(24, 450))
+
+        marseillesLoc.addGrayStore(storeBuilder.buildM55(24))
+        marseillesLoc.addGrayStore(storeBuilder.buildPalmaED(96))
+        marseillesLoc.addGrayStore(storeBuilder.buildPalmaNG(96))
+        marseillesLoc.addGrayStore(storeBuilder.buildIbiza(96))
+        marseillesLoc.addGrayStore(storeBuilder.buildOlbiaNA(96))
+        marseillesLoc.addGrayStore(storeBuilder.buildOlbiaSYS(96))
+        marseillesLoc.addGrayStore(storeBuilder.buildNapoli(96))
+        marseillesLoc.addGrayStore(storeBuilder.buildPalermo(168))
+        marseillesLoc.addGrayStore(storeBuilder.buildRiposto(168))
+        marseillesLoc.addGrayStore(storeBuilder.buildMalta(168))
+        marseillesLoc.addGrayStore(storeBuilder.buildAthensSotiris(168))
+        marseillesLoc.addGrayStore(storeBuilder.buildAthensH360(168))
+        marseillesLoc.addGrayStore(storeBuilder.buildCorfu(192))
+        marseillesLoc.addGrayStore(storeBuilder.buildKosA1(216))
+        marseillesLoc.addGrayStore(storeBuilder.buildRhodes(216))
+        marseillesLoc.addGrayStore(storeBuilder.buildVenice(72))
+        marseillesLoc.addGrayStore(storeBuilder.buildZadar(96))
+        marseillesLoc.addGrayStore(storeBuilder.buildSplit(96))
+        marseillesLoc.addGrayStore(storeBuilder.buildDubrovnikKristijan(96))
+        marseillesLoc.addGrayStore(storeBuilder.buildDubrovnikBWA(96))
+        marseillesLoc.addGrayStore(storeBuilder.buildBCM(120))
+        marseillesLoc.addGrayStore(storeBuilder.buildTivat(120))
+        marseillesLoc.addNewItemsStore(storeBuilder.buildNewItemsStore(72))
+
+        marseilles.addLocation(marseillesLoc)
         regions.add(marseilles)
 
+
+        // Toulon
         val toulon = Region("Toulon",15)
-        toulon.addLocation(Location())
-        toulon.addLocation(Location("Cavalaire sur Mer"))
-        toulon.addLocation(Location("Hyeres"))
-        toulon.addLocation(Location("La Ciotat"))
+
+        val cavalaireSurMerLoc = Location("Cavalaire sur Mer")
+        val hyeresLoc = Location("Hyeres")
+        val toulonLoc = Location("Toulon")
+        val laCiotatLoc = Location("La Ciotat")
+
+        cavalaireSurMerLoc.addNativeStore(storeBuilder.buildAntibes(4, 102))
+        cavalaireSurMerLoc.addAlternativeStore(storeBuilder.buildGenova(24, 450))
+
+        hyeresLoc.addNativeStore(storeBuilder.buildAntibes(4, 136))
+        hyeresLoc.addAlternativeStore(storeBuilder.buildGenova(24, 450))
+
+        toulonLoc.addNativeStore(storeBuilder.buildAntibes(4, 134))
+        toulonLoc.addAlternativeStore(storeBuilder.buildGenova(24, 450))
+
+        laCiotatLoc.addNativeStore(storeBuilder.buildAntibes(4, 173))
+        laCiotatLoc.addAlternativeStore(storeBuilder.buildGenova(24, 450))
+
+        toulon.addLocation(cavalaireSurMerLoc)
+        toulon.addLocation(hyeresLoc)
+        toulon.addLocation(toulonLoc)
+        toulon.addLocation(laCiotatLoc)
+
+        toulon.locations.forEach { location ->
+            location.addGrayStore(storeBuilder.buildM55(24))
+            location.addGrayStore(storeBuilder.buildPalmaED(96))
+            location.addGrayStore(storeBuilder.buildPalmaNG(96))
+            location.addGrayStore(storeBuilder.buildIbiza(96))
+            location.addGrayStore(storeBuilder.buildOlbiaNA(96))
+            location.addGrayStore(storeBuilder.buildOlbiaSYS(96))
+            location.addGrayStore(storeBuilder.buildNapoli(96))
+            location.addGrayStore(storeBuilder.buildPalermo(168))
+            location.addGrayStore(storeBuilder.buildRiposto(168))
+            location.addGrayStore(storeBuilder.buildMalta(168))
+            location.addGrayStore(storeBuilder.buildAthensSotiris(168))
+            location.addGrayStore(storeBuilder.buildAthensH360(168))
+            location.addGrayStore(storeBuilder.buildCorfu(192))
+            location.addGrayStore(storeBuilder.buildKosA1(216))
+            location.addGrayStore(storeBuilder.buildRhodes(216))
+            location.addGrayStore(storeBuilder.buildVenice(72))
+            location.addGrayStore(storeBuilder.buildZadar(96))
+            location.addGrayStore(storeBuilder.buildSplit(96))
+            location.addGrayStore(storeBuilder.buildDubrovnikKristijan(96))
+            location.addGrayStore(storeBuilder.buildDubrovnikBWA(96))
+            location.addGrayStore(storeBuilder.buildBCM(120))
+            location.addGrayStore(storeBuilder.buildTivat(120))
+            location.addNewItemsStore(storeBuilder.buildNewItemsStore(72))
+        }
+
         regions.add(toulon)
 
+
+        // St Tropez
         val stTropez = Region("St. Tropez",16)
-        stTropez.addLocation(Location())
-        stTropez.addLocation(Location("Saint Raphael"))
-        stTropez.addLocation(Location("Pampellonne beach"))
+
+        val saintRaphaelLoc = Location("Saint Raphael")
+        val stTropezLoc = Location("St. Tropez")
+        val pampellonneBeachLoc = Location("Pampellonne beach")
+
+        saintRaphaelLoc.addNativeStore(storeBuilder.buildAntibes(3, 52))
+        saintRaphaelLoc.addAlternativeStore(storeBuilder.buildGenova(24, 450))
+
+        stTropezLoc.addNativeStore(storeBuilder.buildAntibes(4, 97))
+        stTropezLoc.addAlternativeStore(storeBuilder.buildGenova(24, 450))
+
+        pampellonneBeachLoc.addNativeStore(storeBuilder.buildAntibes(4, 100))
+        pampellonneBeachLoc.addAlternativeStore(storeBuilder.buildGenova(24, 450))
+
+        stTropez.addLocation(saintRaphaelLoc)
+        stTropez.addLocation(stTropezLoc)
+        stTropez.addLocation(pampellonneBeachLoc)
+
+        stTropez.locations.forEach { location ->
+            location.addGrayStore(storeBuilder.buildM55(24))
+            location.addGrayStore(storeBuilder.buildPalmaED(96))
+            location.addGrayStore(storeBuilder.buildPalmaNG(96))
+            location.addGrayStore(storeBuilder.buildIbiza(96))
+            location.addGrayStore(storeBuilder.buildOlbiaNA(96))
+            location.addGrayStore(storeBuilder.buildOlbiaSYS(96))
+            location.addGrayStore(storeBuilder.buildNapoli(96))
+            location.addGrayStore(storeBuilder.buildPalermo(168))
+            location.addGrayStore(storeBuilder.buildRiposto(168))
+            location.addGrayStore(storeBuilder.buildMalta(168))
+            location.addGrayStore(storeBuilder.buildAthensSotiris(168))
+            location.addGrayStore(storeBuilder.buildAthensH360(168))
+            location.addGrayStore(storeBuilder.buildCorfu(192))
+            location.addGrayStore(storeBuilder.buildKosA1(216))
+            location.addGrayStore(storeBuilder.buildRhodes(216))
+            location.addGrayStore(storeBuilder.buildVenice(72))
+            location.addGrayStore(storeBuilder.buildZadar(96))
+            location.addGrayStore(storeBuilder.buildSplit(96))
+            location.addGrayStore(storeBuilder.buildDubrovnikKristijan(96))
+            location.addGrayStore(storeBuilder.buildDubrovnikBWA(96))
+            location.addGrayStore(storeBuilder.buildBCM(120))
+            location.addGrayStore(storeBuilder.buildTivat(120))
+            location.addNewItemsStore(storeBuilder.buildNewItemsStore(72))
+        }
+
         regions.add(stTropez)
 
+
+        // Cannes
         val cannes = Region("Cannes",17)
-        cannes.addLocation(Location())
-        cannes.addLocation(Location("Mandelieu la Napoule"))
-        cannes.addLocation(Location("Theule sur Mer"))
+
+        val cannesLoc = Location("Cannes")
+        val mandelieuLaNapouleLoc = Location("Mandelieu la Napoule")
+        val theuleSurMerLoc = Location("Theule sur Mer")
+
+        cannesLoc.addNativeStore(storeBuilder.buildAntibes(1, 20))
+        cannesLoc.addAlternativeStore(storeBuilder.buildGenova(24, 450))
+
+        mandelieuLaNapouleLoc.addNativeStore(storeBuilder.buildAntibes(2, 25))
+        mandelieuLaNapouleLoc.addAlternativeStore(storeBuilder.buildGenova(24, 450))
+
+        theuleSurMerLoc.addNativeStore(storeBuilder.buildAntibes(2, 35))
+        theuleSurMerLoc.addAlternativeStore(storeBuilder.buildGenova(24, 450))
+
+        cannes.addLocation(cannesLoc)
+        cannes.addLocation(mandelieuLaNapouleLoc)
+        cannes.addLocation(theuleSurMerLoc)
+
+        cannes.locations.forEach { location ->
+            location.addGrayStore(storeBuilder.buildM55(24))
+            location.addGrayStore(storeBuilder.buildPalmaED(96))
+            location.addGrayStore(storeBuilder.buildPalmaNG(96))
+            location.addGrayStore(storeBuilder.buildIbiza(96))
+            location.addGrayStore(storeBuilder.buildOlbiaNA(96))
+            location.addGrayStore(storeBuilder.buildOlbiaSYS(96))
+            location.addGrayStore(storeBuilder.buildNapoli(96))
+            location.addGrayStore(storeBuilder.buildPalermo(168))
+            location.addGrayStore(storeBuilder.buildRiposto(168))
+            location.addGrayStore(storeBuilder.buildMalta(168))
+            location.addGrayStore(storeBuilder.buildAthensSotiris(168))
+            location.addGrayStore(storeBuilder.buildAthensH360(168))
+            location.addGrayStore(storeBuilder.buildCorfu(192))
+            location.addGrayStore(storeBuilder.buildKosA1(216))
+            location.addGrayStore(storeBuilder.buildRhodes(216))
+            location.addGrayStore(storeBuilder.buildVenice(72))
+            location.addGrayStore(storeBuilder.buildZadar(96))
+            location.addGrayStore(storeBuilder.buildSplit(96))
+            location.addGrayStore(storeBuilder.buildDubrovnikKristijan(96))
+            location.addGrayStore(storeBuilder.buildDubrovnikBWA(96))
+            location.addGrayStore(storeBuilder.buildBCM(120))
+            location.addGrayStore(storeBuilder.buildTivat(120))
+            location.addNewItemsStore(storeBuilder.buildNewItemsStore(72))
+        }
+
         regions.add(cannes)
 
+
+        // Antibes
         val antibes = Region("Antibes",18)
-        antibes.addLocation(Location())
-        antibes.addLocation(Location("Marina Baie Des Anges"))
-        antibes.addLocation(Location("Golfe Juan"))
+
+        val marinaBaieDesAngesLoc = Location("Marina Baie Des Anges")
+        val antibesLoc = Location("Antibes")
+        val golfeJuanLoc = Location("Golfe Juan")
+
+        marinaBaieDesAngesLoc.addNativeStore(storeBuilder.buildAntibes(1, 20))
+        marinaBaieDesAngesLoc.addAlternativeStore(storeBuilder.buildGenova(24, 450))
+
+        antibesLoc.addNativeStore(storeBuilder.buildAntibes(1, 15))
+        antibesLoc.addAlternativeStore(storeBuilder.buildGenova(24, 450))
+
+        golfeJuanLoc.addNativeStore(storeBuilder.buildAntibes(1, 15))
+        golfeJuanLoc.addAlternativeStore(storeBuilder.buildGenova(24, 450))
+
+        antibes.addLocation(marinaBaieDesAngesLoc)
+        antibes.addLocation(antibesLoc)
+        antibes.addLocation(golfeJuanLoc)
+
+        antibes.locations.forEach { location ->
+            location.addGrayStore(storeBuilder.buildM55(24))
+            location.addGrayStore(storeBuilder.buildPalmaED(96))
+            location.addGrayStore(storeBuilder.buildPalmaNG(96))
+            location.addGrayStore(storeBuilder.buildIbiza(96))
+            location.addGrayStore(storeBuilder.buildOlbiaNA(96))
+            location.addGrayStore(storeBuilder.buildOlbiaSYS(96))
+            location.addGrayStore(storeBuilder.buildNapoli(96))
+            location.addGrayStore(storeBuilder.buildPalermo(168))
+            location.addGrayStore(storeBuilder.buildRiposto(168))
+            location.addGrayStore(storeBuilder.buildMalta(168))
+            location.addGrayStore(storeBuilder.buildAthensSotiris(168))
+            location.addGrayStore(storeBuilder.buildAthensH360(168))
+            location.addGrayStore(storeBuilder.buildCorfu(192))
+            location.addGrayStore(storeBuilder.buildKosA1(216))
+            location.addGrayStore(storeBuilder.buildRhodes(216))
+            location.addGrayStore(storeBuilder.buildVenice(72))
+            location.addGrayStore(storeBuilder.buildZadar(96))
+            location.addGrayStore(storeBuilder.buildSplit(96))
+            location.addGrayStore(storeBuilder.buildDubrovnikKristijan(96))
+            location.addGrayStore(storeBuilder.buildDubrovnikBWA(96))
+            location.addGrayStore(storeBuilder.buildBCM(120))
+            location.addGrayStore(storeBuilder.buildTivat(120))
+            location.addNewItemsStore(storeBuilder.buildNewItemsStore(72))
+        }
+
         regions.add(antibes)
 
+
+        // Nice
         val nice = Region("Nice",19)
-        nice.addLocation(Location())
-        nice.addLocation(Location("Villefranche sur Mer"))
-        nice.addLocation(Location("Cagnes sur Mer"))
+
+        val villeFrancheSurMerLoc = Location("Villefranche sur Mer")
+        val niceLoc = Location("Nice")
+        val cagnesSurMer = Location("Cagnes sur Mer")
+
+        villeFrancheSurMerLoc.addNativeStore(storeBuilder.buildAntibes(1, 35))
+        villeFrancheSurMerLoc.addAlternativeStore(storeBuilder.buildGenova(24, 450))
+
+        niceLoc.addNativeStore(storeBuilder.buildAntibes(1, 25))
+        niceLoc.addAlternativeStore(storeBuilder.buildGenova(24, 450))
+
+        cagnesSurMer.addNativeStore(storeBuilder.buildAntibes(1, 15))
+        cagnesSurMer.addAlternativeStore(storeBuilder.buildGenova(24, 450))
+
+        nice.addLocation(villeFrancheSurMerLoc)
+        nice.addLocation(niceLoc)
+        nice.addLocation(cagnesSurMer)
+
+        nice.locations.forEach { location ->
+            location.addGrayStore(storeBuilder.buildM55(24))
+            location.addGrayStore(storeBuilder.buildPalmaED(96))
+            location.addGrayStore(storeBuilder.buildPalmaNG(96))
+            location.addGrayStore(storeBuilder.buildIbiza(96))
+            location.addGrayStore(storeBuilder.buildOlbiaNA(96))
+            location.addGrayStore(storeBuilder.buildOlbiaSYS(96))
+            location.addGrayStore(storeBuilder.buildNapoli(96))
+            location.addGrayStore(storeBuilder.buildPalermo(168))
+            location.addGrayStore(storeBuilder.buildRiposto(168))
+            location.addGrayStore(storeBuilder.buildMalta(168))
+            location.addGrayStore(storeBuilder.buildAthensSotiris(168))
+            location.addGrayStore(storeBuilder.buildAthensH360(168))
+            location.addGrayStore(storeBuilder.buildCorfu(192))
+            location.addGrayStore(storeBuilder.buildKosA1(216))
+            location.addGrayStore(storeBuilder.buildRhodes(216))
+            location.addGrayStore(storeBuilder.buildVenice(72))
+            location.addGrayStore(storeBuilder.buildZadar(96))
+            location.addGrayStore(storeBuilder.buildSplit(96))
+            location.addGrayStore(storeBuilder.buildDubrovnikKristijan(96))
+            location.addGrayStore(storeBuilder.buildDubrovnikBWA(96))
+            location.addGrayStore(storeBuilder.buildBCM(120))
+            location.addGrayStore(storeBuilder.buildTivat(120))
+            location.addNewItemsStore(storeBuilder.buildNewItemsStore(72))
+        }
+
         regions.add(nice)
 
+
+        // Monaco
         val monaco = Region("Monaco",20)
-        monaco.addLocation(Location())
-        monaco.addLocation(Location("Cap d'Ail"))
-        monaco.addLocation(Location("Saint Jean Cap Ferrat"))
-        monaco.addLocation(Location("Beaulieu sur Mer"))
-        regions.add(monaco)
 
-        var j = 20
-        regions.forEach { region ->
+        val monacoLoc = Location("Monaco")
+        val capDAilLoc = Location("Cap d'Ail")
+        val saintJeanCapFerratLoc = Location("Saint Jean Cap Ferrat")
+        val beaulieuSurMer = Location("Beaulieu sur Mer")
 
-            region.addStore(Store("Antibes", 99))
-            region.addStore(Store("Olbia", 11))
-            region.addStore(Store("M55", 5))
-            region.addStore(Store("Napoli", 15))
-            region.addStore(Store("Croatia", 98))
-            region.addStore(Store("AntiguaSxm", 14))
-            region.addStore(Store("FTL", 13))
+        monacoLoc.addNativeStore(storeBuilder.buildAntibes(2, 50))
+        monacoLoc.addAlternativeStore(storeBuilder.buildGenova(24, 450))
 
-            region.locations.forEach { location ->
-                location.id = j
-                j++
-            }
+        capDAilLoc.addNativeStore(storeBuilder.buildAntibes(2, 45))
+        capDAilLoc.addAlternativeStore(storeBuilder.buildGenova(24, 450))
+
+        saintJeanCapFerratLoc.addNativeStore(storeBuilder.buildAntibes(2, 40))
+        saintJeanCapFerratLoc.addAlternativeStore(storeBuilder.buildGenova(24, 450))
+
+        beaulieuSurMer.addNativeStore(storeBuilder.buildAntibes(2, 35))
+        beaulieuSurMer.addAlternativeStore(storeBuilder.buildGenova(24, 450))
+
+        monaco.addLocation(monacoLoc)
+        monaco.addLocation(capDAilLoc)
+        monaco.addLocation(saintJeanCapFerratLoc)
+        monaco.addLocation(beaulieuSurMer)
+
+        monaco.locations.forEach { location ->
+            location.addGrayStore(storeBuilder.buildM55(24))
+            location.addGrayStore(storeBuilder.buildPalmaED(96))
+            location.addGrayStore(storeBuilder.buildPalmaNG(96))
+            location.addGrayStore(storeBuilder.buildIbiza(96))
+            location.addGrayStore(storeBuilder.buildOlbiaNA(96))
+            location.addGrayStore(storeBuilder.buildOlbiaSYS(96))
+            location.addGrayStore(storeBuilder.buildNapoli(96))
+            location.addGrayStore(storeBuilder.buildPalermo(168))
+            location.addGrayStore(storeBuilder.buildRiposto(168))
+            location.addGrayStore(storeBuilder.buildMalta(168))
+            location.addGrayStore(storeBuilder.buildAthensSotiris(168))
+            location.addGrayStore(storeBuilder.buildAthensH360(168))
+            location.addGrayStore(storeBuilder.buildCorfu(192))
+            location.addGrayStore(storeBuilder.buildKosA1(216))
+            location.addGrayStore(storeBuilder.buildRhodes(216))
+            location.addGrayStore(storeBuilder.buildVenice(72))
+            location.addGrayStore(storeBuilder.buildZadar(96))
+            location.addGrayStore(storeBuilder.buildSplit(96))
+            location.addGrayStore(storeBuilder.buildDubrovnikKristijan(96))
+            location.addGrayStore(storeBuilder.buildDubrovnikBWA(96))
+            location.addGrayStore(storeBuilder.buildBCM(120))
+            location.addGrayStore(storeBuilder.buildTivat(120))
+            location.addNewItemsStore(storeBuilder.buildNewItemsStore(72))
         }
+
+        regions.add(monaco)
 
         return regions.toList()
     }
