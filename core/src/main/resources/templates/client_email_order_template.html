@@ -105,7 +105,7 @@
                                                             <p align="center">Rental period</p>
                                                         </th>
                                                         <th>
-                                                            <p align="left">Unit price</p>
+                                                            <p align="left">Unit price (per day)</p>
                                                         </th>
                                                         <th>
                                                             <p align="left">Total (unit) cost</p>
@@ -114,7 +114,7 @@
                                                     <tr th:each="product : ${availableProducts}">
                                                         <td align="center" th:text="|${product.quantity}x ${product.name}|">name placeholder</td>
                                                         <td align="center" th:text="|${product.period.startDateTime} - ${product.period.endDateTime}|">period placeholder</td>
-                                                        <td align="center" th:text="${product.rates?.get(0)?.price}">unit price placeholder</td>
+                                                        <td align="center" th:text="|${product.rates?.get(0)?.price}|">unit price placeholder</td>
                                                         <td align="center" th:text="${product.totalCostProducts}">total cost placeholder</td>
                                                     </tr>
                                                     <th:block th:each="product : ${availableProducts}">

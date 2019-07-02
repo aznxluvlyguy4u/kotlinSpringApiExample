@@ -7,15 +7,18 @@ import com.oceanpremium.api.core.model.ProductAvailabilityItemDto
 import com.oceanpremium.api.core.model.ProductAvailabilityResponse
 import com.oceanpremium.api.core.util.DateTimeUtil
 import com.oceanpremium.api.core.util.DateTimeUtil.CURRENT_RMS_API_DATE_ISO8601_FORMAT
+import org.joda.time.Days
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
+import java.lang.Exception
 
 /**
  * Get the availability for batch POSTED product items and check against the available quantity has sufficient stock levels compared to
  * the wanted quantity. This is can be used by, for example, for checking the availability of a basket where multiple products are added.
  */
 interface CheckProductBatchAvailabilityUseCase {
+    @Throws(Exception::class)
     fun execute(productItems: List<ProductAvailabilityItemDto>): ProductAvailabilityResponse
 }
 
@@ -29,6 +32,7 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
         private const val PAYLOAD_EMPTY_ERROR_MESSAGE = "Payload may not contain empty array"
+        private val DEFAULT_RENTAL_DAYS_DURATION = Days.ONE
     }
 
     /**
@@ -36,12 +40,9 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
      */
     override fun execute(productItems: List<ProductAvailabilityItemDto>): ProductAvailabilityResponse {
 
-        if (productItems.isEmpty()) {
-            throw BadRequestException(PAYLOAD_EMPTY_ERROR_MESSAGE)
-        }
+        validateInput(productItems)
 
         productItems.forEach { productAvailabilityItem ->
-
             if (productAvailabilityItem.quantity == 0) {
                 productAvailabilityItem.message =
                     "Quantity supplied for product: ${productAvailabilityItem.id} must be greater then 0."
@@ -117,40 +118,53 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
             }
         }
 
-        val availableProductItems = productItems.filter {
-            it.availabilityState == AvailabilityStateType.AVAILABLE || it.availabilityState == AvailabilityStateType.AVAILABLE_BUT_ACCESSORY_NOT_AVAILABLE
+        return buildResponseModel(productItems)
+    }
+
+    @Throws(BadRequestException::class)
+    private fun validateInput(productItems: List<ProductAvailabilityItemDto>) {
+
+        if (productItems.isEmpty()) {
+            throw BadRequestException(PAYLOAD_EMPTY_ERROR_MESSAGE)
         }
 
-        val availableAccessoryItems = productItems.flatMap { it.accessories }.filter {
-            it.availabilityState == AvailabilityStateType.AVAILABLE
+        productItems.forEach { productAvailabilityItem ->
+
+            if (productAvailabilityItem.period?.start != null
+                && productAvailabilityItem.period?.end != null
+                && Days.daysBetween(productAvailabilityItem.period?.start, productAvailabilityItem.period?.end) == Days.ZERO) {
+
+                throw BadRequestException("Supplied rental period (" +
+                        "start: ${productAvailabilityItem.period?.start}, " +
+                        "end: ${productAvailabilityItem.period?.end} " +
+                        "must be at minimum: P1D, for product id: ${productAvailabilityItem.id}, for more information see section: " +
+                        "Duration on the following page for understanding the provided Duration format: https://en.wikipedia.org/w/index.php?title=ISO_8601"
+                )
+
+            } else {
+                val x = Days.daysBetween(productAvailabilityItem.period?.start, productAvailabilityItem.period?.end)
+                logger.debug("${x.days}")
+            }
+
+            if (productAvailabilityItem.quantity == 0) {
+                productAvailabilityItem.message =
+                    "Quantity supplied for product: ${productAvailabilityItem.id} must be greater then 0."
+                productAvailabilityItem.availabilityState = AvailabilityStateType.NOT_AVAILABLE
+                productAvailabilityItem.quantityAvailable = productAvailabilityItem.quantity
+
+                throw BadRequestException(productAvailabilityItem.message)
+            }
+
+            productAvailabilityItem.accessories.forEach {
+                if (it.quantity == 0) {
+                    it.message = "Quantity supplied for product: ${it.id} must be greater then 0."
+                    it.availabilityState = AvailabilityStateType.NOT_AVAILABLE
+                    it.quantityAvailable = productAvailabilityItem.quantity
+
+                    throw BadRequestException(it.message)
+                }
+            }
         }
-
-        val unavailableProductItems = productItems.filter {
-            it.availabilityState == AvailabilityStateType.NOT_AVAILABLE
-        }
-
-        val unavailableAccessoryItems = productItems.flatMap { it.accessories }.filter {
-            it.availabilityState == AvailabilityStateType.NOT_AVAILABLE
-        }
-
-        val allUnavailableProducts: MutableList<ProductAvailabilityItemDto> = mutableListOf()
-        allUnavailableProducts.addAll(unavailableProductItems)
-        allUnavailableProducts.addAll(unavailableAccessoryItems)
-
-        val allAvailableProducts: MutableList<ProductAvailabilityItemDto> = mutableListOf()
-        allAvailableProducts.addAll(availableProductItems)
-        allAvailableProducts.addAll(availableAccessoryItems)
-
-        val totalCostOfAvailableProducts = computeTotalCostOfAllItems(allAvailableProducts)
-        val totalCostOfUnavailableProducts = computeTotalCostOfAllItems(allUnavailableProducts)
-
-        return ProductAvailabilityResponse(
-            "%.2f".format(totalCostOfAvailableProducts),
-            productItems,
-            allAvailableProducts,
-            allUnavailableProducts,
-            "%.2f".format(totalCostOfUnavailableProducts)
-        )
     }
 
     private fun buildQueryParametersMap(
@@ -166,12 +180,13 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
         queryParameters["q[product_id_eq]"] = productAvailabilityItem.id.toString()
 
         if (productAvailabilityItem.period?.start != null) {
-            val startDateAtNoon = productAvailabilityItem.period?.start!!.withTime(DateTimeUtil.NOON, 0,0,0)
-            queryParameters["starts_at"] = DateTimeUtil.toISO8601UTC(startDateAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
+            val startDateAtNoon = productAvailabilityItem.period?.start!!.withTime(DateTimeUtil.NOON, 0, 0, 0)
+            queryParameters["starts_at"] =
+                DateTimeUtil.toISO8601UTC(startDateAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
         }
 
         if (productAvailabilityItem.period?.end != null) {
-            val endDateAtNoon = productAvailabilityItem.period?.end!!.withTime(DateTimeUtil.NOON, 0,0,0)
+            val endDateAtNoon = productAvailabilityItem.period?.end!!.withTime(DateTimeUtil.NOON, 0, 0, 0)
             queryParameters["ends_at"] = DateTimeUtil.toISO8601UTC(endDateAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
         }
 
@@ -239,18 +254,27 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
 
         // Calculate parent cost
         productItems.forEach { productItem ->
-            var totalProductItemCost = 0.0
+
+            // Default rentalDays
+            var productItemRentalDays = DEFAULT_RENTAL_DAYS_DURATION
+
+            if (productItem.period?.start != null && productItem.period?.end != null
+                && Days.daysBetween(productItem.period?.start, productItem.period?.end) != Days.ZERO) {
+                productItemRentalDays = Days.daysBetween(productItem.period?.start, productItem.period?.end)
+            }
+
             var totalAccessoriesCost = 0.0
 
             if (productItem.rates?.first() != null) {
+                var totalAccessoriesCost = 0.0
 
-                productItem.totalCostProducts = "%.2f".format(totalProductItemCost)
+//                productItem.totalCostProducts = "%.2f".format(totalProductItemCost)
                 productItem.accessories.forEach { accessoryItem ->
+
                     when {
                         accessoryItem.rates?.first() != null -> {
                             if (accessoryItem.availabilityState == AvailabilityStateType.AVAILABLE) {
-                                val itemCost =
-                                    accessoryItem.quantity * accessoryItem.rates!!.first().price?.toDouble()!!
+                                val itemCost = productItemRentalDays.days * (accessoryItem.quantity * accessoryItem.rates!!.first().price?.toDouble()!!)
                                 accessoryItem.totalCostProducts = "%.2f".format(itemCost)
                                 totalAccessoriesCost += itemCost
                             }
@@ -260,11 +284,50 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
 
                 productItem.totalCostAccessories = "%.2f".format(totalAccessoriesCost)
 
-                val parentItemCost = productItem.quantity * productItem.rates!!.first().price?.toDouble()!!
+                val parentItemCost = productItemRentalDays.days * (productItem.quantity * productItem.rates!!.first().price?.toDouble()!!)
                 productItem.totalCostProducts = "%.2f".format(parentItemCost)
                 productItem.totalCost = "%.2f".format(parentItemCost + totalAccessoriesCost)
 
             }
         }
+    }
+
+    private fun buildResponseModel(productItems: List<ProductAvailabilityItemDto>): ProductAvailabilityResponse {
+
+        val availableProductItems = productItems.filter {
+            it.availabilityState == AvailabilityStateType.AVAILABLE
+                    || it.availabilityState == AvailabilityStateType.AVAILABLE_BUT_ACCESSORY_NOT_AVAILABLE
+        }
+
+        val availableAccessoryItems = productItems.flatMap { it.accessories }.filter {
+            it.availabilityState == AvailabilityStateType.AVAILABLE
+        }
+
+        val unavailableProductItems = productItems.filter {
+            it.availabilityState == AvailabilityStateType.NOT_AVAILABLE
+        }
+
+        val unavailableAccessoryItems = productItems.flatMap { it.accessories }.filter {
+            it.availabilityState == AvailabilityStateType.NOT_AVAILABLE
+        }
+
+        val allUnavailableProducts: MutableList<ProductAvailabilityItemDto> = mutableListOf()
+        allUnavailableProducts.addAll(unavailableProductItems)
+        allUnavailableProducts.addAll(unavailableAccessoryItems)
+
+        val allAvailableProducts: MutableList<ProductAvailabilityItemDto> = mutableListOf()
+        allAvailableProducts.addAll(availableProductItems)
+        allAvailableProducts.addAll(availableAccessoryItems)
+
+        val totalCostOfAvailableProducts = computeTotalCostOfAllItems(allAvailableProducts)
+        val totalCostOfUnavailableProducts = computeTotalCostOfAllItems(allUnavailableProducts)
+
+        return ProductAvailabilityResponse(
+            "%.2f".format(totalCostOfAvailableProducts),
+            productItems,
+            allAvailableProducts,
+            allUnavailableProducts,
+            "%.2f".format(totalCostOfUnavailableProducts)
+        )
     }
 }
