@@ -65,9 +65,9 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <th align="left">Role:</th>
+                                                        <th align="left">Affiliation:</th>
                                                         <td>
-                                                            <a th:text="${contactDetails.role}">Role placeholder</a><br>
+                                                            <a th:text="${contactDetails.role}">Affiliation placeholder</a><br>
                                                         </td>
                                                     </tr>
                                                     <tr>
@@ -102,58 +102,65 @@
                                                             <p align="left">Product name</p>
                                                         </th>
                                                         <th>
-                                                            <p>Unit price</p>
+                                                            <p align="center">Rental period</p>
                                                         </th>
-                                                        <th></th>
                                                         <th>
-                                                            <p>Total (unit) cost</p>
+                                                            <p align="left">Unit price</p>
+                                                        </th>
+                                                        <th>
+                                                            <p align="left">Total (unit) cost</p>
                                                         </th>
                                                     </tr>
                                                     <tr th:each="product : ${availableProducts}">
-                                                        <td th:text="|${product.quantity}x ${product.name}|">Product item name placeholder</td>
-                                                        <td th:text="${product.rates?.get(0)?.price}">Product item unit price placeholder</td>
-                                                        <td></td>
-                                                        <td th:text="${product.totalCostProducts}">Product total cost placeholder</td>
+                                                        <td align="center" th:text="|${product.quantity}x ${product.name}|">name placeholder</td>
+                                                        <td align="center" th:text="|${product.period.startDateTime} - ${product.period.endDateTime}|">period placeholder</td>
+                                                        <td align="center" th:text="${product.rates?.get(0)?.price}">unit price placeholder</td>
+                                                        <td align="center" th:text="${product.totalCostProducts}">total cost placeholder</td>
                                                     </tr>
-<!--                                                    <th:block th:each="product : ${products}">-->
-<!--                                                        <tr th:each="accessory : ${product.accessories}">-->
-<!--                                                            <td th:text="|${accessory.quantity}x ${accessory.name}|">Accessory item name placeholder</td>-->
-<!--                                                            <td th:text="${accessory.rates?.get(0)?.price}">Accessory item unit price placeholder</td>-->
-<!--                                                            <td></td>-->
-<!--                                                            <td th:text="${accessory.totalCost}">Accessory total cost placeholder</td>-->
-<!--                                                        </tr>-->
-<!--                                                    </th:block>-->
+                                                    <th:block th:each="product : ${availableProducts}">
+                                                        <tr th:each="accessory : ${product.accessories}">
+                                                            <td align="center" th:if="${accessory.availabilityState == T(com.oceanpremium.api.core.enum.AvailabilityStateType).AVAILABLE}" th:text="|${accessory.quantity}x ${accessory.name}|">Accessory item name placeholder</td>
+                                                            <td align="center" th:if="${accessory.availabilityState == T(com.oceanpremium.api.core.enum.AvailabilityStateType).AVAILABLE}" th:text="|${accessory.period.startDateTime} - ${accessory.period.endDateTime}|">period placeholder</td>
+                                                            <td align="center" th:if="${accessory.availabilityState == T(com.oceanpremium.api.core.enum.AvailabilityStateType).AVAILABLE}" th:text="${accessory.rates?.get(0)?.price}">Accessory item unit price placeholder</td>
+                                                            <td align="center" th:if="${accessory.availabilityState == T(com.oceanpremium.api.core.enum.AvailabilityStateType).AVAILABLE}" th:text="${accessory.totalCost}">Accessory total cost placeholder</td>
+                                                        </tr>
+                                                    </th:block>
                                                     <tr>
-                                                        <td></td><td></td>
+                                                        <td></td><td></td><td></td>
                                                         <td><p><b>Subtotal</b></p></td>
                                                         <td th:text="${totalCost}"></td>
                                                     </tr>
                                                 </table>
-                                                <h3>Unavailable products</h3>
-                                                <table>
-                                                    <tr>
-                                                        <th>
-                                                            <p align="left">Product name</p>
-                                                        </th>
-                                                        <th>
-                                                            <p>Unit price</p>
-                                                        </th>
-                                                        <th>
-                                                            <p>Total (unit) cost</p>
-                                                        </th>
-                                                    </tr>
-                                                    <tr th:each="unavailableProduct : ${unavailableProducts}">
-                                                        <td th:text="|${unavailableProduct.quantity}x ${unavailableProduct.name}|">Unavailable product item name placeholder</td>
-                                                        <td th:text="${unavailableProduct.rates?.get(0)?.price}">Unavailable product item unit price placeholder</td>
-                                                        <td></td>
-<!--                                                        <td th:text="${unavailableProduct.totalCostProducts}">Unavailable product total cost placeholder</td>-->
-                                                    </tr>
-                                                    <tr>
-                                                        <td></td><td></td>
-                                                        <td><p><b>Subtotal</b></p></td>
-<!--                                                        <td th:text="${totalCostUnavailableProducts}"></td>-->
-                                                    </tr>
-                                                </table>
+<!--                                                <div th:if="${not #lists.isEmpty(unavailableProducts)}">-->
+<!--                                                    <h3>Unavailable products</h3>-->
+<!--                                                    <table>-->
+<!--                                                        <tr>-->
+<!--                                                            <th>-->
+<!--                                                                <p align="left">Product name</p>-->
+<!--                                                            </th>-->
+<!--                                                            <th>-->
+<!--                                                                <p align="center">Rental period</p>-->
+<!--                                                            </th>-->
+<!--                                                            <th>-->
+<!--                                                                <p align="left">Unit price</p>-->
+<!--                                                            </th>-->
+<!--                                                            <th>-->
+<!--                                                                <p align="left">Total (unit) cost</p>-->
+<!--                                                            </th>-->
+<!--                                                        </tr>-->
+<!--                                                        <tr th:each="unavailableProduct : ${unavailableProducts}">-->
+<!--                                                            <td align="center" th:text="|${unavailableProduct.quantity}x ${unavailableProduct.name}|">name placeholder</td>-->
+<!--                                                            <td align="center" th:text="|${unavailableProduct.period.startDateTime} - ${unavailableProduct.period.endDateTime}|">period placeholder</td>-->
+<!--                                                            <td align="center" th:text="${unavailableProduct.rates?.get(0)?.price}">unit price placeholder</td>-->
+<!--                                                            <td align="center" th:text="${unavailableProduct.totalCostProducts}">total cost placeholder</td>-->
+<!--                                                        </tr>-->
+<!--                                                        <tr>-->
+<!--                                                            <td></td><td></td><td></td>-->
+<!--                                                            <td><p><b>Subtotal</b></p></td>-->
+<!--                                                            <td th:text="${totalCostUnavailableProducts}"></td>-->
+<!--                                                        </tr>-->
+<!--                                                    </table>-->
+<!--                                                </div>-->
                                             </td>
                                         </tr>
                                     </table>

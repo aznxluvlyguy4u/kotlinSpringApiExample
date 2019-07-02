@@ -51,6 +51,12 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
                 throw BadRequestException(productAvailabilityItem.message)
             }
 
+            productAvailabilityItem.accessories.forEach {
+                if (it.period == null) {
+                    it.period = productAvailabilityItem.period
+                }
+            }
+
             logger.debug(
                 "check availability for product with id: ${productAvailabilityItem.id} on location collection: " +
                         "${productAvailabilityItem.location?.collection?.id} - dropOff: ${productAvailabilityItem.location?.delivery?.id} " +
@@ -112,7 +118,7 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
         }
 
         val availableProductItems = productItems.filter {
-            it.availabilityState == AvailabilityStateType.AVAILABLE
+            it.availabilityState == AvailabilityStateType.AVAILABLE || it.availabilityState == AvailabilityStateType.AVAILABLE_BUT_ACCESSORY_NOT_AVAILABLE
         }
 
         val availableAccessoryItems = productItems.flatMap { it.accessories }.filter {

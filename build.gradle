@@ -30,6 +30,7 @@ buildscript {
         springBootMailerVersion = '2.1.5.RELEASE'
         sesSdkVersion = '1.11.568'
         mailApiVersion = '1.6.2'
+        thymeleafJodaDialectVersion = '2.0.0'
     }
 
     repositories {
@@ -180,7 +181,9 @@ allprojects {
         // Thymeleaf - HTML templating
         compile ("org.thymeleaf:thymeleaf-spring5:$thymeleafVersion")
         compile ("org.thymeleaf:thymeleaf:$thymeleafVersion")
+        compile ("nz.net.ultraq.thymeleaf:thymeleaf-joda-dialect:$thymeleafJodaDialectVersion")
 
+        // Coroutines Retrofit - Concurrent API calls
         compile 'ru.gildor.coroutines:kotlin-coroutines-retrofit:1.1.0'
     }
 

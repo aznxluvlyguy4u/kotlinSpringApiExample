@@ -1,5 +1,6 @@
 package com.oceanpremium.api.core.config
 
+import nz.net.ultraq.thymeleaf.JodaDialect
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.thymeleaf.spring5.SpringTemplateEngine
@@ -21,6 +22,7 @@ class ThymeleafConfig {
     fun templateEngine(): SpringTemplateEngine {
         return SpringTemplateEngine()
             .apply { setTemplateResolver(templateResolver()) }
+            .apply { addDialect(JodaDialect()) }
     }
 
     @Bean
