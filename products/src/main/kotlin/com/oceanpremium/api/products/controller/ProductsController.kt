@@ -187,7 +187,7 @@ class ProductsController(
         val result =  getProductInventoryUseCase.execute(queryParameters, headers)
 
         return CurrentRmsApiResponse.build {
-            rawResponse = result.getRawResponse()
+            rawResponse = result.response
             dtoMapper = result.dtoMapper
         }
     }

@@ -3,29 +3,20 @@ package com.oceanpremium.api.core.usecase
 import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.CurrentRmsBaseDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductDtoMapper
+import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.resolver.LocationStoreResolver
 import com.oceanpremium.api.core.resolver.WrappedStores
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import retrofit2.Response
 
 
 class ResponseContainer(
-    private val successResponse: Response<Any>?,
-    private val errorResponse: Response<Any>?,
+    val response: Response<Any>?,
     val dtoMapper: CurrentRmsBaseDtoMapper
-) {
-
-    fun getRawResponse(): Response<Any>? {
-
-        if (successResponse != null) {
-            return successResponse
-        }
-
-        return errorResponse
-    }
-}
+)
 
 /**
  * Checks the availability for the given search term(s). The availability is checked on multiple stores based on given
@@ -61,61 +52,33 @@ class GetProductInventoryUseCaseImpl(
         val newItemStoreIds: List<Int>? = wrappedStores?.newItemStores?.map {it.id}
         val allStoreIds: List<Int>? = wrappedStores?.allStores?.map {it.id}
 
-        var seedSuccessResponse: Response<Any>? = null
-        var seedErrorResponse: Response<Any>? = null
         val dtos: MutableList<CurrentRmsBaseDtoMapper> = mutableListOf()
         var combinedDto: CurrentRmsBaseDtoMapper? = null
 
         val allStoresResponse = productsApi.getProductsInventory(queryParameters, headers, allStoreIds)
         logger.debug("Response code for query on storeIds: $allStoreIds - ${allStoresResponse?.code()}")
 
+        val dto = ProductDtoMapper(allStoresResponse!!.code(), allStoresResponse, allStoreIds)
 
-        val dto = ProductDtoMapper(allStoresResponse!!.code(), allStoresResponse)
+        combinedDto = dto
+        if (dto.httpStatus == HttpStatus.OK) {
+            val combinedDtoData: List<ProductDto> = dto!!.data as List<ProductDto>
+            combinedDtoData.forEach {productDto ->
+                var totalQuantityAvailable: Double = 0.0
+                productDto.storeQuantities?.forEach { storeQuantityDto ->
+                    val quantityAvailable = storeQuantityDto.quantityAvailable?.toDouble()
+                    if (quantityAvailable != null) {
+                        totalQuantityAvailable = totalQuantityAvailable.plus(quantityAvailable)
+                    }
+                }
 
-//        responses.forEach {
-//            dtos.add(ProductDtoMapper(it.code(), it))
-//        }
+                productDto.rates.first().quantityAvailable = totalQuantityAvailable.toString()
+            }
+            combinedDto.data = combinedDtoData
+        }
 
-//        dtos.forEach { dto ->
-//            when {
-//                combinedDto == null || combinedDto?.httpStatus !== HttpStatus.OK -> {
-//                    combinedDto = dto
-//                }
-//                else -> {
-//                    if (dto.httpStatus == HttpStatus.OK) {
-//
-//                        val combinedDtoData: List<ProductDto> = combinedDto!!.data as List<ProductDto>
-//                        val currentDtoData: List<ProductDto>? = dto.data as List<ProductDto>?
-//
-//                        combinedDtoData.forEach { productDtoItem ->
-//                            val itemQuantityAvailable: Double? = productDtoItem.rates.first().quantityAvailable?.toDouble()
-//
-//                            // find the matching dto item in current dto data set, based on its id, to update the total count of available quantity
-//                            val currentDtoItem = currentDtoData?.find { it.id == productDtoItem.id }
-//
-//                            if (currentDtoItem != null) {
-//                                logger.debug("Found candidate: ${currentDtoItem.name}")
-//                                val currentQuantityAvailable: Double? = currentDtoItem.rates.first().quantityAvailable?.toDouble()
-//
-//                                if (itemQuantityAvailable != null && currentQuantityAvailable != null) {
-//                                    val totalQuantityAvailable = itemQuantityAvailable.plus(currentQuantityAvailable)
-//
-//                                    logger.debug(
-//                                        "item id: ${productDtoItem.id} : " +
-//                                            "current quantity: $currentQuantityAvailable, " +
-//                                            "item id:${currentDtoItem.id} " +
-//                                            "addition quantity: $itemQuantityAvailable, " +
-//                                            "total new quantity: $totalQuantityAvailable"
-//                                    )
-//
-//                                    productDtoItem.rates.first().quantityAvailable = totalQuantityAvailable.toString()
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
+
+
 //
 //        val filteredData: List<ProductDto>? = (combinedDto?.data as List<ProductDto>?)?.filter{ p ->
 //            p.rates.first().quantityAvailable?.toDouble() != null && p.rates.first().quantityAvailable?.toDouble()!! > 0
@@ -144,9 +107,8 @@ class GetProductInventoryUseCaseImpl(
         // rowcount =
 
         return ResponseContainer(
-            seedSuccessResponse,
-            seedErrorResponse,
-            combinedDto!!
+            allStoresResponse,
+            combinedDto
         )
     }
 }

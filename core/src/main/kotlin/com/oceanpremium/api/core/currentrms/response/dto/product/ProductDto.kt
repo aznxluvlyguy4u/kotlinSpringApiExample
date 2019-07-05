@@ -25,6 +25,7 @@ class ProductDto(
     @JsonIgnore
     val accesoryIds: List<AccessoryItem>? = null,
     val attachments: List<AttachmentDto>? = null,
+    var storeQuantities: List<StoreQuantityDto>? = null,
     @JsonIgnore
     var rawConfigurationIds: List<ConfigPropertyField>? = null,
     var configurations: List<ConfigProperty>? = null
