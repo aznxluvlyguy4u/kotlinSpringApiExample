@@ -13,6 +13,7 @@ import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Query
 import retrofit2.http.QueryMap
 
 /**
@@ -48,7 +49,8 @@ interface ProductsApi {
      */
     @GET("products/inventory")
     fun getProductsInventory(
-        @QueryMap map: Map<String, String>
+        @QueryMap uniqueQueryParamsMap: Map<String, String>,
+        @Query(QueryParametersResolverImpl.STORE_ID_QUERY_PARAMS) storeIdsQueryParamsMap: List<Int>?
     ): Call<Any>
 
     /**
@@ -190,10 +192,10 @@ class ProductsApiImpl(
     fun getProductsInventory(
         queryParameters: Map<String, String>,
         headers: HttpHeaders,
-        storeId: Int?
+        storeIds: List<Int>?
     ): Response<Any>? {
-        val validatedMap = queryParametersResolver.resolveGetProductsInventory(queryParameters, headers, storeId)
-        val retrofitCall = productsApi.getProductsInventory(map = validatedMap)
+        val validatedMap = queryParametersResolver.resolveGetProductsInventory(queryParameters, headers, storeIds)
+        val retrofitCall = productsApi.getProductsInventory(uniqueQueryParamsMap = validatedMap.uniqueQueryParams, storeIdsQueryParamsMap = validatedMap.storeIdsQueryParams)
         lateinit var response: Response<Any>
 
         try {

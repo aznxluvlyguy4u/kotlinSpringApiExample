@@ -10,7 +10,7 @@ interface QueryParametersResolver {
 
     fun resolveGetProducts(map: Map<String, String>, headers: HttpHeaders): Map<String, String>
 
-    fun resolveGetProductsInventory(map: Map<String, String>, headers: HttpHeaders, storeId: Int?): Map<String, String>
+    fun resolveGetProductsInventory(map: Map<String, String>, headers: HttpHeaders, storeIds: List<Int>?): ProductsInventoryValidatedMap
 
     fun resolveGetProductGroups(map: Map<String, String>, headers: HttpHeaders): Map<String, String>
 
@@ -35,11 +35,17 @@ interface QueryParametersResolver {
     }
 }
 
+class ProductsInventoryValidatedMap (
+    var uniqueQueryParams: Map<String, String>,
+    var storeIdsQueryParams: List<Int>?
+)
+
 @Suppress("KDocUnresolvedReference")
 class QueryParametersResolverImpl : QueryParametersResolver {
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
+        const val STORE_ID_QUERY_PARAMS = "store_id[]"
         private const val ACTIVE_PRODUCT_QUERY = "q[active_eq]"
         private const val FILTER_MODE_QUERY = "filtermode[]"
         private const val DEFAULT_STORE_ID_QUERY = "store_id"
@@ -106,24 +112,26 @@ class QueryParametersResolverImpl : QueryParametersResolver {
      * 7  ends_at=YYYY-MM-DD
      * 8  q[product_product_group_name_not_eq]=FunctionalIntegrationTest
      */
-    override fun resolveGetProductsInventory(map: Map<String, String>, headers: HttpHeaders, storeId: Int?): Map<String, String> {
-        val validatedMap = mutableMapOf<String, String>()
+    override fun resolveGetProductsInventory(map: Map<String, String>, headers: HttpHeaders, storeIds: List<Int>?): ProductsInventoryValidatedMap {
+        var productsInventoryValidatedMap: ProductsInventoryValidatedMap = ProductsInventoryValidatedMap(mutableMapOf(), listOf())
+        val uniqueQueryParamsMap = mutableMapOf<String, String>()
         val host = getHost(headers)
 
+        // Set unique query params to validatedMap
         try {
 
             when {
                 // Only query product with tags containing the search value
                 map.containsKey(PRODUCT_TAGS_SEARCH_QUERY) ->  {
-                    validatedMap[PRODUCT_TAGS_SEARCH_QUERY] = map[PRODUCT_TAGS_SEARCH_QUERY] as String
+                    uniqueQueryParamsMap[PRODUCT_TAGS_SEARCH_QUERY] = map[PRODUCT_TAGS_SEARCH_QUERY] as String
                 }
                 // Only query product with group ids containing the search value
                 map.containsKey(PRODUCT_GROUPS_ID_SEARCH_QUERY)-> {
-                    validatedMap[PRODUCT_GROUPS_ID_SEARCH_QUERY] = map[PRODUCT_GROUPS_ID_SEARCH_QUERY] as String
+                    uniqueQueryParamsMap[PRODUCT_GROUPS_ID_SEARCH_QUERY] = map[PRODUCT_GROUPS_ID_SEARCH_QUERY] as String
                 }
                 // Only query product with group ids containing the search value
                 map.containsKey(PRODUCT_ID_SEARCH_QUERY)-> {
-                    validatedMap[PRODUCT_ID_SEARCH_QUERY] = map[PRODUCT_ID_SEARCH_QUERY] as String
+                    uniqueQueryParamsMap[PRODUCT_ID_SEARCH_QUERY] = map[PRODUCT_ID_SEARCH_QUERY] as String
                 }
                 // Cannot continue, the minimal input is a search keyword which is not present
                 else -> {
@@ -135,14 +143,14 @@ class QueryParametersResolverImpl : QueryParametersResolver {
              * Static parameters, add default mandatory query parameters.
              */
             // Only query active products
-            validatedMap[ACTIVE_PRODUCT_QUERY] = "true"
+            uniqueQueryParamsMap[ACTIVE_PRODUCT_QUERY] = "true"
 
             // Only query products of rental type
-            validatedMap[FILTER_MODE_QUERY] = "rental"
+            uniqueQueryParamsMap[FILTER_MODE_QUERY] = "rental"
 
             // Only query products and accessories that are rentable on it self (exclude non-rentable accessories)
             if (!map.containsKey(ACCESSORY_ONLY_QUERY)) {
-                validatedMap[ACCESSORY_ONLY_QUERY] = "false"
+                uniqueQueryParamsMap[ACCESSORY_ONLY_QUERY] = "false"
             }
 
             /**
@@ -158,7 +166,7 @@ class QueryParametersResolverImpl : QueryParametersResolver {
                 logger.debug("Running other then $LOCALHOST, DISABLE functional integration test product querying")
 
                 when {
-                    !map.containsKey(FUNCTIONAL_INTEGRATION_GROUP_QUERY) -> validatedMap[FUNCTIONAL_INTEGRATION_GROUP_QUERY] =
+                    !map.containsKey(FUNCTIONAL_INTEGRATION_GROUP_QUERY) -> uniqueQueryParamsMap[FUNCTIONAL_INTEGRATION_GROUP_QUERY] =
                         FUNCTIONAL_INTEGRATION_GROUP_NAME
                 }
             }
@@ -178,8 +186,8 @@ class QueryParametersResolverImpl : QueryParametersResolver {
                     startDate != null && endDate != null -> when {
                         endDate.before(startDate) -> throw BadRequestException("Collection date: $endDate may not be before delivery date: $startDate")
                         else -> {
-                            validatedMap[START_DATE_QUERY] = DateTimeUtil.toISO8601UTC(startDate, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)
-                            validatedMap[END_DATE_QUERY] = DateTimeUtil.toISO8601UTC(endDate, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)
+                            uniqueQueryParamsMap[START_DATE_QUERY] = DateTimeUtil.toISO8601UTC(startDate, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)
+                            uniqueQueryParamsMap[END_DATE_QUERY] = DateTimeUtil.toISO8601UTC(endDate, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)
                         }
                     }
                 }
@@ -188,8 +196,8 @@ class QueryParametersResolverImpl : QueryParametersResolver {
             // No time interval boundaries supplied, create an interval of ONE day
             if (!map.containsKey(START_DATE_QUERY) && !map.containsKey(END_DATE_QUERY) ) {
                 val now = DateTimeUtil.toISO8601UTC(Date(), format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)
-                validatedMap[START_DATE_QUERY] = now
-                validatedMap[END_DATE_QUERY] = now
+                uniqueQueryParamsMap[START_DATE_QUERY] = now
+                uniqueQueryParamsMap[END_DATE_QUERY] = now
             }
 
             // Only a start date is supplied
@@ -199,8 +207,8 @@ class QueryParametersResolverImpl : QueryParametersResolver {
                 when {
                     startDate != null -> {
                         val startDateStr = DateTimeUtil.toISO8601UTC(startDate, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)
-                        validatedMap[START_DATE_QUERY] = startDateStr
-                        validatedMap[END_DATE_QUERY] = startDateStr
+                        uniqueQueryParamsMap[START_DATE_QUERY] = startDateStr
+                        uniqueQueryParamsMap[END_DATE_QUERY] = startDateStr
                     } else -> throw BadRequestException("Failed to parse delivery date: $startDate")
                 }
             }
@@ -212,8 +220,8 @@ class QueryParametersResolverImpl : QueryParametersResolver {
                 when {
                     endDate != null -> {
                         val endDateStr = DateTimeUtil.toISO8601UTC(endDate, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)
-                        validatedMap[START_DATE_QUERY] = endDateStr
-                        validatedMap[END_DATE_QUERY] = endDateStr
+                        uniqueQueryParamsMap[START_DATE_QUERY] = endDateStr
+                        uniqueQueryParamsMap[END_DATE_QUERY] = endDateStr
                     } else -> throw BadRequestException("Failed to parse delivery date: $endDate")
                 }
             }
@@ -221,26 +229,20 @@ class QueryParametersResolverImpl : QueryParametersResolver {
             // If a location/collection id is given, grab it, resolve it to store id and append it to the map,
             // and remove the location/collection id from the map as current rms does not recognize those fields
             if (map.containsKey(COLLECTION_LOCATION_KEY)) {
-                validatedMap.remove(COLLECTION_LOCATION_KEY)
+                uniqueQueryParamsMap.remove(COLLECTION_LOCATION_KEY)
             }
 
             if (map.containsKey(DELIVERY_LOCATION_KEY)) {
-                validatedMap.remove(DELIVERY_LOCATION_KEY)
-            }
-
-            // Use to location/collection id's to resolve to a store id
-            // Only query products on a specific store (for now)
-            if (!map.containsKey(DEFAULT_STORE_ID_QUERY) && storeId != null) {
-                validatedMap[DEFAULT_STORE_ID_QUERY] = "$storeId"
+                uniqueQueryParamsMap.remove(DELIVERY_LOCATION_KEY)
             }
 
             // Explicit pagination parameters are given, map them
             if (map.containsKey(PAGE_KEY)) {
-                validatedMap[PAGE_KEY] = map[PAGE_KEY] as String
+                uniqueQueryParamsMap[PAGE_KEY] = map[PAGE_KEY] as String
             }
 
             if (map.containsKey(PER_PAGE_KEY)) {
-                validatedMap[PER_PAGE_KEY] = map[PER_PAGE_KEY] as String
+                uniqueQueryParamsMap[PER_PAGE_KEY] = map[PER_PAGE_KEY] as String
             }
 
         } catch (e: Exception) {
@@ -251,8 +253,32 @@ class QueryParametersResolverImpl : QueryParametersResolver {
             throw BadRequestException(message)
         }
 
-        logger.debug("Validated query parameters set build: $validatedMap")
-        return validatedMap
+        // Set multiple query params to validatedMap
+        try {
+            // Use to location/collection id's to resolve to a store id
+            // Only query products on a specific store (for now)
+            if (!map.containsKey(STORE_ID_QUERY_PARAMS) && storeIds != null) {
+//                var concatenatedStoreIdsString: String? = null
+//                storeIds.forEachIndexed{ index, storeId ->
+//                    if (index == 0) { concatenatedStoreIdsString = storeId.toString() }
+//                    else { concatenatedStoreIdsString = concatenatedStoreIdsString?.plus("&").plus(STORE_ID_QUERY_PARAMS).plus("=").plus(storeId.toString()) }
+//                }
+////                validatedMap[STORE_ID_QUERY_PARAMS] = "$concatenatedStoreIdsString"
+                productsInventoryValidatedMap.storeIdsQueryParams = storeIds
+            }
+        }
+        catch (e: Exception) {
+            e.printStackTrace()
+            val message = "Failed to parse query parameters: ${e.message}"
+            logger.error(message)
+
+            throw BadRequestException(message)
+        }
+
+        productsInventoryValidatedMap.uniqueQueryParams = uniqueQueryParamsMap
+
+        logger.debug("Validated query parameters set build: $productsInventoryValidatedMap")
+        return productsInventoryValidatedMap
     }
 
     override fun resolveGetProducts(map: Map<String, String>, headers: HttpHeaders): Map<String, String> {
