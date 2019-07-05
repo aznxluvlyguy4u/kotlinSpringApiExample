@@ -8,7 +8,7 @@ apply plugin: 'org.springframework.boot'
 
 buildscript {
     ext {
-        kotlinVersion = '1.3.31'
+        kotlinVersion = '1.3.40'
         springBootVersion = '2.1.3.RELEASE'
         shadowVersion = '2.0.4' // Keep it to version 2.0.4 as this works on CI, lower/ higher (thus) other versions don't
         springCloudStarterVersion = '2.0.1.RELEASE'
@@ -30,6 +30,7 @@ buildscript {
         springBootMailerVersion = '2.1.5.RELEASE'
         sesSdkVersion = '1.11.568'
         mailApiVersion = '1.6.2'
+        thymeleafJodaDialectVersion = '2.0.0'
     }
 
     repositories {
@@ -138,6 +139,10 @@ allprojects {
         // Jackson - JSON Serialization / Deserialization
         compile ("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
         compile ("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+        compile ("joda-time:joda-time")
+        compile ("org.jadira.usertype:usertype.core:3.1.0.CR1")
+        compile ("com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.2.1")
+        compile ("com.fasterxml.jackson.datatype:jackson-datatype-joda")
 
         // Spring test - test framework
         testCompile ("org.springframework.boot:spring-boot-starter-test")
@@ -172,16 +177,21 @@ allprojects {
 
         // AWS - SES - SDK Mail service
         compile ("com.amazonaws:aws-java-sdk-ses:$sesSdkVersion")
-        
+
         // Thymeleaf - HTML templating
         compile ("org.thymeleaf:thymeleaf-spring5:$thymeleafVersion")
         compile ("org.thymeleaf:thymeleaf:$thymeleafVersion")
+        compile ("nz.net.ultraq.thymeleaf:thymeleaf-joda-dialect:$thymeleafJodaDialectVersion")
+
+        // Coroutines Retrofit - Concurrent API calls
+        compile 'ru.gildor.coroutines:kotlin-coroutines-retrofit:1.1.0'
     }
 
     /**
      * Configure the shaded jar with custom settings, like for example the main attribute class.
      */
     jar {
+        zip64 = true
         enabled = true
         from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     }

@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus
 import retrofit2.Response
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.oceanpremium.api.core.currentrms.response.dto.config.ConfigPropertyField
+import com.oceanpremium.api.core.model.ConfigPropertyField
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.util.FileSizeFormatUtil
 
@@ -206,13 +206,15 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                         }
 
                         when {
-                            imageUrl != null && thumbUrl != null -> imageSourceCandidate = ImageSource(imageUrl, thumbUrl)
+                            imageUrl != null && thumbUrl != null -> imageSourceCandidate =
+                                ImageSource(imageUrl, thumbUrl)
                         }
                     }
                 }
             } else {
                 if (itemBody.containsKey("icon_thumb_url") && itemBody.containsKey("icon_url")) {
-                    imageSourceCandidate = ImageSource(itemBody["icon_url"] as String?, itemBody["icon_thumb_url"] as String?)
+                    imageSourceCandidate =
+                        ImageSource(itemBody["icon_url"] as String?, itemBody["icon_thumb_url"] as String?)
                 }
             }
 
@@ -227,13 +229,15 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                 when {
                     customFieldsBody.containsKey(imageUrlKey)
                             && (customFieldsBody[imageUrlKey] as String?) != null
-                            && (customFieldsBody[imageUrlKey] as String).isNotEmpty() -> imageUrl = customFieldsBody[imageUrlKey] as String?
+                            && (customFieldsBody[imageUrlKey] as String).isNotEmpty() -> imageUrl =
+                        customFieldsBody[imageUrlKey] as String?
                 }
 
                 when {
                     customFieldsBody.containsKey(imageThumbUrlKey)
                             && (customFieldsBody[imageThumbUrlKey] as String?) != null
-                            && (customFieldsBody[imageThumbUrlKey] as String).isNotEmpty() -> thumbUrl = customFieldsBody[imageThumbUrlKey] as String?
+                            && (customFieldsBody[imageThumbUrlKey] as String).isNotEmpty() -> thumbUrl =
+                        customFieldsBody[imageThumbUrlKey] as String?
                 }
 
                 when {
@@ -458,7 +462,8 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
 
                         if (configName != null && preparedConfigIds.size > 0) {
                             logger.debug("HIT list:$configName: $preparedConfigIds")
-                            val configIds = ConfigPropertyField(configName, preparedConfigIds)
+                            val configIds =
+                                ConfigPropertyField(configName, preparedConfigIds)
                             items.add(configIds)
                         }
 
@@ -532,9 +537,13 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
     /**
      * Grab the custom fields for the full details of a product item.
      */
-    private fun mapDescriptionText(itemBody: Map<*, *>): List<Map<String, String>> {
-        val descriptions: MutableList<Map<String, String>> = mutableListOf()
+    private fun mapDescriptionText(itemBody: Map<*, *>): Map<*, *> {
+        val descriptions = mutableMapOf<String, Any>()
         val customProductDescriptionKey = "custom_product_description_"
+        val headKeyPrefix = customProductDescriptionKey + "head_"
+        val paragraphKeyPrefix = customProductDescriptionKey + "paragraph_"
+        val sectionKey = "section"
+        val dimensionsKey = customProductDescriptionKey + "dimensions"
         val productDescriptionKey = "description"
 
         // Grab the custom product description
@@ -544,13 +553,27 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                     @Suppress("UNCHECKED_CAST")
                     val customFieldsBody = itemBody[CUSTOM_FIELDS_KEY] as Map<String, *>
 
-                    val mapEntry = customFieldsBody.entries.filter {
-                        it.key.contains(customProductDescriptionKey)
+                    if (customFieldsBody.containsKey(dimensionsKey) && (customFieldsBody[dimensionsKey] as String).isNotEmpty()) {
+                        descriptions["dimensions"] = customFieldsBody[dimensionsKey] as String
                     }
 
-                    mapEntry.forEach {
-                        if ((it.value as String).isNotEmpty()) {
-                            descriptions.add(mapOf(it.key to it.value as String))
+                    for (x in 1..9) {
+                        val headKey = headKeyPrefix + x
+                        val paragraphKey = paragraphKeyPrefix + x
+
+                        var head: String? = null
+                        var paragraph: String? = null
+
+                        if (customFieldsBody.containsKey(headKey) && (customFieldsBody[headKey] as String).isNotEmpty()) {
+                            head = customFieldsBody[headKey] as String
+                        }
+
+                        if (customFieldsBody.containsKey(paragraphKey) && (customFieldsBody[paragraphKey] as String).isNotEmpty()) {
+                            paragraph = customFieldsBody[paragraphKey] as String
+                        }
+
+                        if (head != null || paragraph != null) {
+                            descriptions["$sectionKey$x"] = DescriptionSectionDto(head, paragraph)
                         }
                     }
                 }
@@ -558,12 +581,12 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
 
             // Revert to original product description, because custom product description either is not set or failed
             // to parse
-            when {
-                descriptions.isEmpty()
-                        && itemBody.containsKey(productDescriptionKey)
-                        && itemBody[productDescriptionKey] as String? != null
-                        && (itemBody[productDescriptionKey] as String).isNotEmpty() ->
-                    descriptions.add(mapOf(customProductDescriptionKey + "head_1" to itemBody[productDescriptionKey] as String))
+            if (descriptions.isEmpty()
+                && itemBody.containsKey(productDescriptionKey)
+                && itemBody[productDescriptionKey] as String? != null
+                && (itemBody[productDescriptionKey] as String).isNotEmpty()
+            ) {
+                descriptions[sectionKey + "1"] = DescriptionSectionDto(mapProductName(itemBody), itemBody[productDescriptionKey] as String)
             }
         } catch (e: Exception) {
             e.printStackTrace()

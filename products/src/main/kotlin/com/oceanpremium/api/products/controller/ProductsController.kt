@@ -4,8 +4,8 @@ import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductGroupDtoMapper
-import com.oceanpremium.api.core.currentrms.response.dto.config.ConfigProperty
-import com.oceanpremium.api.core.currentrms.response.dto.config.ProductConfigOptionsResolverImpl
+import com.oceanpremium.api.core.model.ConfigProperty
+import com.oceanpremium.api.core.resolver.ProductConfigOptionsResolverImpl
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductConfigsDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.messenger.Slogger
@@ -24,6 +24,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDateTime
 import javax.servlet.http.HttpServletRequest
 
 @RestController
@@ -95,10 +96,11 @@ class ProductsController(
 
         // Resolve the product specific configurations
         @Suppress("UNCHECKED_CAST")
-        val resolvedProductConfigurationOptions = ProductConfigOptionsResolverImpl(
-            allConfigOptionsDto.data as List<ConfigProperty>,
-            productData
-        )
+        val resolvedProductConfigurationOptions =
+            ProductConfigOptionsResolverImpl(
+                allConfigOptionsDto.data as List<ConfigProperty>,
+                productData
+            )
         productData?.configurations = resolvedProductConfigurationOptions.data
 
         // Process product accessories
@@ -157,13 +159,30 @@ class ProductsController(
         @RequestParam queryParameters: MutableMap<String, String>,
         request: HttpServletRequest
     ): ResponseEntity<*> {
-        val logMessage = "[API] - GET products inventories with request headers: $headers, parameters: $queryParameters"
-        logger.debug(logMessage)
 
-        val logMessageSales = "[Sales analytics] GET products inventories by IP: " +
-                "${request.getHeader(REQUEST_FORWARD_HEADER)} - sales analytics: $queryParameters"
-        logger.debug(logMessageSales)
-        Slogger.send(messageBody = logMessage, salesLog = true, inDebugMode = true)
+        val originIp =  when {
+            request.getHeader(REQUEST_FORWARD_HEADER) != null -> {
+                request.getHeader(REQUEST_FORWARD_HEADER)
+            }
+            else -> {
+                request.remoteAddr
+            }
+        }
+
+        if (queryParameters.containsKey("q[product_tags_name_cont]")) {
+            var searchQuery = "_Search Parameters:_ \n"
+            searchQuery += "\n```"
+            queryParameters.forEach { (k, v) ->
+                searchQuery += "$k=$v\n"
+            }
+            searchQuery += "```\n_Search Words:_ \n```\n${queryParameters["q[product_tags_name_cont]"]}\n```"
+
+            val logMessageSales = "*OP - Sales Analytics* \n_Request Date:_ `${LocalDateTime.now()}`" +
+                    "\n\n_Origin:_\n\n```$originIp```\n$searchQuery```"
+
+            logger.debug(logMessageSales)
+            Slogger.send(messageBody = logMessageSales, salesLog = true, inDebugMode = true)
+        }
 
         val result =  getProductInventoryUseCase.execute(queryParameters, headers)
 

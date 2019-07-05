@@ -7,19 +7,17 @@ import com.amazonaws.serverless.proxy.spring.SpringBootLambdaContainerHandler
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler
 import com.oceanpremium.api.core.config.CorsConfig
+import com.oceanpremium.api.core.config.JacksonConfig
 import com.oceanpremium.api.core.config.SentryConfig
 import com.oceanpremium.api.core.config.ThymeleafConfig
 import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.currentrms.builder.LocationBuilderImpl
 import com.oceanpremium.api.core.currentrms.builder.RegionBuilderImpl
 import com.oceanpremium.api.core.currentrms.builder.StoreBuilderImpl
-import com.oceanpremium.api.core.currentrms.response.dto.parameter.LocationStoreResolverImpl
-import com.oceanpremium.api.core.currentrms.response.dto.config.ProductConfigOptionsResolverImpl
+import com.oceanpremium.api.core.resolver.LocationStoreResolverImpl
+import com.oceanpremium.api.core.resolver.ProductConfigOptionsResolverImpl
 import com.oceanpremium.api.core.exception.handler.GlobalExceptionHandler
-import com.oceanpremium.api.core.usecase.CheckProductBatchAvailabilityUseCaseUseCaseImpl
-import com.oceanpremium.api.core.usecase.GetProductInventoryUseCaseImpl
-import com.oceanpremium.api.core.usecase.OrderPlacementUseCaseImpl
-import com.oceanpremium.api.core.usecase.SendEmailUseCaseImpl
+import com.oceanpremium.api.core.usecase.*
 import org.slf4j.LoggerFactory
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -35,7 +33,6 @@ import kotlin.jvm.java as java1
 /**
  * The main application entry point that spins up the API.
  */
-@SpringBootApplication
 @Import(
     ProductsApiImpl::class,
     LocationStoreResolverImpl::class,
@@ -50,8 +47,10 @@ import kotlin.jvm.java as java1
     SendEmailUseCaseImpl::class,
     CorsConfig::class,
     SentryConfig::class,
-    ThymeleafConfig::class
+    ThymeleafConfig::class,
+    JacksonConfig::class
 )
+@SpringBootApplication
 class ProductsDriver : SpringBootServletInitializer() {
     companion object {
         @JvmStatic

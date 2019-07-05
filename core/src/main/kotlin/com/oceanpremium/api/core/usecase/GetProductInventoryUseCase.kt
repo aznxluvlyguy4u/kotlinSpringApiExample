@@ -3,8 +3,8 @@ package com.oceanpremium.api.core.usecase
 import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.CurrentRmsBaseDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductDtoMapper
-import com.oceanpremium.api.core.currentrms.response.dto.parameter.LocationStoreResolver
-import com.oceanpremium.api.core.currentrms.response.dto.parameter.WrappedStores
+import com.oceanpremium.api.core.resolver.LocationStoreResolver
+import com.oceanpremium.api.core.resolver.WrappedStores
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
@@ -14,7 +14,8 @@ import retrofit2.Response
 class ResponseContainer(
     private val successResponse: Response<Any>?,
     private val errorResponse: Response<Any>?,
-    val dtoMapper: CurrentRmsBaseDtoMapper) {
+    val dtoMapper: CurrentRmsBaseDtoMapper
+) {
 
     fun getRawResponse(): Response<Any>? {
 
@@ -39,8 +40,10 @@ interface GetProductInventoryUseCase {
 }
 
 /** {@inheritDoc} */
-class GetProductInventoryUseCaseImpl(@Autowired private val locationStoreResolver: LocationStoreResolver,
-                                     @Autowired private val productsApi: ProductsApiImpl) :
+class GetProductInventoryUseCaseImpl(
+    @Autowired private val locationStoreResolver: LocationStoreResolver,
+    @Autowired private val productsApi: ProductsApiImpl
+) :
     GetProductInventoryUseCase {
 
     companion object {
@@ -60,7 +63,6 @@ class GetProductInventoryUseCaseImpl(@Autowired private val locationStoreResolve
 
         var seedSuccessResponse: Response<Any>? = null
         var seedErrorResponse: Response<Any>? = null
-        val responses: MutableList<Response<Any>> = mutableListOf()
         val dtos: MutableList<CurrentRmsBaseDtoMapper> = mutableListOf()
         var combinedDto: CurrentRmsBaseDtoMapper? = null
 

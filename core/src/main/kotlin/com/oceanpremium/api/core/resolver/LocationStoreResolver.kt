@@ -1,4 +1,4 @@
-package com.oceanpremium.api.core.currentrms.response.dto.parameter
+package com.oceanpremium.api.core.resolver
 
 import com.oceanpremium.api.core.currentrms.builder.LocationBuilder
 import com.oceanpremium.api.core.currentrms.builder.Store
@@ -40,10 +40,13 @@ class LocationStoreResolverImpl(
 
                 logger.debug("Both collection- & delivery location are given (only using delivery location)")
 
-                val deliveryLocationId = (queryParameters[QueryParametersResolverImpl.DELIVERY_LOCATION_KEY] as String).toInt()
+                val deliveryLocationId =
+                    (queryParameters[QueryParametersResolverImpl.DELIVERY_LOCATION_KEY] as String).toInt()
 
                 val deliveryLocation = locationBuilder.getAllLocations().find { location
-                    -> location.id == deliveryLocationId }
+                    ->
+                    location.id == deliveryLocationId
+                }
 
                 val wrappedStores = WrappedStores(listOf(), listOf(), listOf(), listOf(), listOf())
                 val allStores: MutableList<Store> = mutableListOf()
@@ -59,6 +62,7 @@ class LocationStoreResolverImpl(
                 wrappedStores.allStores = allStores
 
                 return  wrappedStores
+
             }
 
             // Only collection location is given

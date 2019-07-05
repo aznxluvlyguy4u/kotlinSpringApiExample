@@ -2,8 +2,8 @@ package com.oceanpremium.api.core.currentrms.response.dto.mapper
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.oceanpremium.api.core.currentrms.response.dto.config.ConfigPropertyValue
-import com.oceanpremium.api.core.currentrms.response.dto.config.ConfigProperty
+import com.oceanpremium.api.core.model.ConfigPropertyValue
+import com.oceanpremium.api.core.model.ConfigProperty
 import com.oceanpremium.api.core.exception.handler.ApiError
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.exception.throwable.NotFoundException

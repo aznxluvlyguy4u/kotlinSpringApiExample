@@ -1,10 +1,16 @@
 package com.oceanpremium.api.products
 
-import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolverImpl.Companion.FUNCTIONAL_INTEGRATION_GROUP_NAME
+import com.oceanpremium.api.core.resolver.QueryParametersResolverImpl.Companion.DELIVERY_LOCATION_KEY
+import com.oceanpremium.api.core.resolver.QueryParametersResolverImpl.Companion.FUNCTIONAL_INTEGRATION_GROUP_NAME
+import com.oceanpremium.api.core.resolver.QueryParametersResolverImpl.Companion.KEYWORD_LESS_TAG
+import com.oceanpremium.api.core.resolver.QueryParametersResolverImpl.Companion.PRODUCT_TAGS_SEARCH_EQ_QUERY
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.enum.ClientRoleType
 import com.oceanpremium.api.core.model.*
+import com.oceanpremium.api.core.util.DateTimeUtil
+import com.oceanpremium.api.core.util.DateTimeUtil.CURRENT_RMS_API_DATE_ISO8601_FORMAT
 import org.assertj.core.api.Assertions.assertThat
+import org.joda.time.DateTime
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -13,12 +19,16 @@ import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit4.SpringRunner
-import java.util.*
+import java.io.UnsupportedEncodingException
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 class Errors(var errors: List<String>? = null)
 class ErrorResponse(var code: Int? = null, var message: Errors? = null)
 class ProductResponse(var code: Int? = null, var data: ProductDto? = null)
 class ProductsResponse(var code: Int? = null, var data: List<ProductDto>? = null)
+class ProductAvailabilityResponse(val totalPrice: String, val products: List<ProductAvailabilityItemDto>? = null)
+class CheckAvailabilityResponse(var code: Int? = null, var data: ProductAvailabilityResponse)
 class ProductGroupsResponse(var code: Int?, var data: List<ProductGroup>? = null)
 class ProductGroup(var id: Int? = null, var name: String, var description: String?)
 
@@ -50,6 +60,8 @@ class ProductsControllerTest {
         private const val endpoint = "/api/v1/products"
         private val testProduct = TestProduct()
         private val testExistingProduct = TestExistingProduct()
+        private val todayAtNoon =  DateTime().withTime(DateTimeUtil.NOON, 0, 0, 0)
+        private val tomorrowAtNoon = todayAtNoon.plusDays(1)
     }
 
     /**
@@ -116,6 +128,8 @@ class ProductsControllerTest {
         val productItem = productsResponse?.data
         assertThat(productItem).isNotNull
         assertThat(productItem?.id).isEqualTo(testProduct.id)
+        assertThat(productItem?.rates).isNotNull
+        assertThat(productItem?.rates).isNotEmpty
     }
 
     /**
@@ -144,7 +158,8 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductGroups() {
-        val productGroupsResponse = restTemplate?.getForObject("$endpoint/groups?page=1&per_page=100", ProductGroupsResponse::class.java)
+        val productGroupsResponse =
+            restTemplate?.getForObject("$endpoint/groups?page=1&per_page=100", ProductGroupsResponse::class.java)
 
         assertThat(productGroupsResponse).isNotNull
         assertThat(productGroupsResponse?.code).isEqualTo(HttpStatus.OK.value())
@@ -153,7 +168,7 @@ class ProductsControllerTest {
         val productGroupItem = productGroupsResponse?.data
         assertThat(productGroupItem).isNotNull
 
-        val filteredGroups  = productGroupItem?.filter { item -> item.name.contains(testProduct.group)}
+        val filteredGroups = productGroupItem?.filter { item -> item.name.contains(testProduct.group) }
 
         assertThat(filteredGroups).isNotNull
         assertThat(filteredGroups?.size).isEqualTo(1)
@@ -188,8 +203,46 @@ class ProductsControllerTest {
         assertThat(productItems).isNotEmpty
 
         productItems?.forEach {
+            assertThat(it.rates).isNotNull
+            assertThat(it.rates).isNotEmpty
+
             assertThat(it.name).containsIgnoringCase("f5")
         }
+    }
+
+    @Test
+    fun testGetProductsInventoryByNoKeyword() {
+        val keywordLessParameter = "$PRODUCT_TAGS_SEARCH_EQ_QUERY=$KEYWORD_LESS_TAG"
+        val deliveryParameter = "$DELIVERY_LOCATION_KEY=13"
+        val params = "$keywordLessParameter&$deliveryParameter"
+
+        val productsResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ProductsResponse::class.java)
+
+        assertThat(productsResponse).isNotNull
+        assertThat(productsResponse?.code).isEqualTo(HttpStatus.OK.value())
+        assertThat(productsResponse?.data).isNotNull
+
+        val productItems = productsResponse?.data
+        assertThat(productItems).isNotEmpty
+
+        productItems?.forEach {
+            assertThat(it.rates).isNotNull
+            assertThat(it.rates).isNotEmpty
+        }
+    }
+
+    /**
+     * Get products by not providing a search keyword.
+     */
+    @Test
+    fun testGetProductsInventoryFailedByNotProvidingMandatoryParameters() {
+        val params = "$PRODUCT_TAGS_SEARCH_EQ_QUERY=$KEYWORD_LESS_TAG"
+
+        val productsResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ProductsResponse::class.java)
+
+        assertThat(productsResponse).isNotNull
+        assertThat(productsResponse?.code).isEqualTo(HttpStatus.BAD_REQUEST.value())
+        assertThat(productsResponse?.data).isNull()
     }
 
     /**
@@ -208,7 +261,9 @@ class ProductsControllerTest {
         val productItems = productsResponse?.data
         assertThat(productItems).isNotEmpty
 
-        val testProduct: ProductDto? = productItems?.find{ p -> p.id == testExistingProduct.id }
+        val testProduct: ProductDto? = productItems?.find { p -> p.id == testExistingProduct.id }
+        assertThat(testProduct?.rates).isNotNull
+        assertThat(testProduct?.rates).isNotEmpty
         assertThat(testProduct?.rates?.first()?.quantityAvailable).isEqualTo("2.0")
 
         // Then query inventory with delivery_location_id set to port vendres
@@ -222,7 +277,9 @@ class ProductsControllerTest {
         val productItems2 = productsResponse2?.data
         assertThat(productItems2).isNotEmpty
 
-        val testProduct2: ProductDto? = productItems2?.find{ p -> p.id == testExistingProduct.id }
+        val testProduct2: ProductDto? = productItems2?.find { p -> p.id == testExistingProduct.id }
+        assertThat(testProduct2?.rates).isNotNull
+        assertThat(testProduct2?.rates).isNotEmpty
         assertThat(testProduct2?.rates?.first()?.quantityAvailable).isEqualTo("3.0")
     }
 
@@ -274,31 +331,42 @@ class ProductsControllerTest {
         val batch: MutableList<ProductAvailabilityItemDto> = mutableListOf()
 
         val mockedItem1 = ProductAvailabilityItemDto(247, 1)
-        val rentalPeriod1 = RentalPeriod(Date(), Date())
-        val rentalLocal1 = RentalLocation(Location("Foo", 1),Location("Bar", 13))
+        val rentalPeriod1 =  RentalPeriod(todayAtNoon, tomorrowAtNoon)
+        val rentalLocal1 = RentalLocation(Location("Foo", 1), Location("Bar", 13))
         mockedItem1.period = rentalPeriod1
         mockedItem1.location = rentalLocal1
         batch.add(mockedItem1)
 
         val mockedItem2 = ProductAvailabilityItemDto(196, 2)
-        val rentalPeriod2 = RentalPeriod(Date(), Date())
-        val rentalLocal2 = RentalLocation(Location("Foo", 1),Location("Bar", 13))
+        val rentalPeriod2 =  RentalPeriod(todayAtNoon, tomorrowAtNoon)
+        val rentalLocal2 = RentalLocation(Location("Foo", 1), Location("Bar", 13))
         mockedItem2.period = rentalPeriod2
         mockedItem2.location = rentalLocal2
         batch.add(mockedItem2)
 
         val mockedItem3 = ProductAvailabilityItemDto(148, 2)
-        val rentalPeriod3 = RentalPeriod(Date(), Date())
-        val rentalLocal3 = RentalLocation(Location("Foo", 1),Location("Bar", 13))
+        val rentalPeriod3 =  RentalPeriod(todayAtNoon, tomorrowAtNoon)
+        val rentalLocal3 = RentalLocation(Location("Foo", 1), Location("Bar", 13))
         mockedItem3.period = rentalPeriod3
         mockedItem3.location = rentalLocal3
         batch.add(mockedItem3)
 
         val request = HttpEntity<List<ProductAvailabilityItemDto>>(batch)
-        val productsResponse = restTemplate?.postForEntity("$endpoint/availability", request, Any::class.java)
+        val response =
+            restTemplate?.postForObject("$endpoint/availability", request, CheckAvailabilityResponse::class.java)
 
-        assertThat(productsResponse).isNotNull
-        assertThat(productsResponse?.statusCode).isEqualTo(HttpStatus.CREATED)
+        assertThat(response).isNotNull
+        assertThat(response?.code).isEqualTo(HttpStatus.CREATED.value())
+        assertThat(response?.data).isNotNull
+
+        val availability = response?.data
+        assertThat(availability?.products).isNotNull
+        assertThat(availability?.products).isNotEmpty
+
+        availability?.products?.forEach {
+            assertThat(it.rates).isNotNull
+            assertThat(it.rates).isNotEmpty
+        }
     }
 
     /**
@@ -335,7 +403,11 @@ class ProductsControllerTest {
      */
     @Test
     fun testBadRequestStartDateBeforeEndDateGetProductsInventory() {
-        val params = "starts_at=2019-09-15&ends_at=2019-09-01&q[product_tags_name_cont]=seabob"
+        val now = DateTime.now()
+        val startDateStr = DateTimeUtil.toISO8601UTC(now.withHourOfDay(DateTimeUtil.NOON), CURRENT_RMS_API_DATE_ISO8601_FORMAT)
+        val endDateStr = DateTimeUtil.toISO8601UTC(now.plusDays(1), CURRENT_RMS_API_DATE_ISO8601_FORMAT)
+        val params = encodeValue("starts_at=$startDateStr&ends_at=$endDateStr&q[product_tags_name_cont]=seabob")
+
         val productsErrorResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ErrorResponse::class.java)
 
         assertThat(productsErrorResponse).isNotNull
@@ -350,6 +422,15 @@ class ProductsControllerTest {
         }
     }
 
+    // Method to encode a string value using `UTF-8` encoding scheme
+    private fun encodeValue(value: String): String {
+        try {
+            return URLEncoder.encode(value, StandardCharsets.UTF_8.toString())
+        } catch (ex: UnsupportedEncodingException) {
+            throw RuntimeException(ex.cause)
+        }
+
+    }
 
     /**
      * Create rental order of products.
@@ -369,7 +450,7 @@ class ProductsControllerTest {
 
         val mockedItem1 = ProductAvailabilityItemDto(148, 1)
 
-        val rentalPeriod1 = RentalPeriod(Date(), Date())
+        val rentalPeriod1 = RentalPeriod(todayAtNoon, tomorrowAtNoon)
         val rentalLocal1 = RentalLocation(Location("Foo", 1), location)
         mockedItem1.period = rentalPeriod1
         mockedItem1.location = rentalLocal1
@@ -377,7 +458,7 @@ class ProductsControllerTest {
 
         val mockedItem2 = ProductAvailabilityItemDto(196, 2)
 
-        val rentalPeriod2 = RentalPeriod(Date(), Date())
+        val rentalPeriod2 = RentalPeriod(todayAtNoon, tomorrowAtNoon)
         val rentalLocal2 = RentalLocation(Location("Foo", 1), location)
         mockedItem2.period = rentalPeriod2
         mockedItem2.location = rentalLocal2
@@ -385,7 +466,7 @@ class ProductsControllerTest {
 
         val mockedItem3 = ProductAvailabilityItemDto(148, 2)
 
-        val rentalPeriod3 = RentalPeriod(Date(), Date())
+        val rentalPeriod3 = RentalPeriod(todayAtNoon, tomorrowAtNoon)
         val rentalLocal3 = RentalLocation(Location("Foo", 1), location)
         mockedItem3.period = rentalPeriod3
         mockedItem3.location = rentalLocal3

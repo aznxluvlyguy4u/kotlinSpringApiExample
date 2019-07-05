@@ -1,7 +1,9 @@
 package com.oceanpremium.api.core.enum
 
+import com.google.gson.annotations.SerializedName
+
 enum class ClientRoleType(val type: String) {
-    CHARGER_BROKEN_OR_MANAGER("CHARGER BROKEN / MANAGER"),
-    CAPTAIN_OR_CREW("CAPTAIN_/ CREW"),
-    OTHER("OTHER")
+    @SerializedName("Charter Broker / Manager") CHARTER_BROKER_OR_MANAGER("Charter Broker / Manager"),
+    @SerializedName("Captain / Crew") CAPTAIN_OR_CREW("Captain / Crew"),
+    @SerializedName("Other") OTHER("Other")
 }

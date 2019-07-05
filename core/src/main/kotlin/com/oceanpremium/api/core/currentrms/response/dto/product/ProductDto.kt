@@ -2,8 +2,8 @@ package com.oceanpremium.api.core.currentrms.response.dto.product
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.oceanpremium.api.core.currentrms.response.dto.config.ConfigProperty
-import com.oceanpremium.api.core.currentrms.response.dto.config.ConfigPropertyField
+import com.oceanpremium.api.core.model.ConfigProperty
+import com.oceanpremium.api.core.model.ConfigPropertyField
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class AccessoryItem(
@@ -16,7 +16,7 @@ class AccessoryItem(
 class ProductDto(
     val id: Int?,
     val name: String?,
-    val description: List<Map<String, String>>,
+    val description: Map<*,*>,
     var type: String? = null,
     val productGroup: ProductGroupDto?,
     val rates: List<PricingDto>,

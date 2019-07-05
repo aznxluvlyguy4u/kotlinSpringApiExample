@@ -1,8 +1,8 @@
 package com.oceanpremium.api.core.currentrms
 
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductConfigsDtoMapper.Companion.PRODUCT_CONFIG_OPTION_PREFIX
-import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolver
-import com.oceanpremium.api.core.currentrms.response.dto.parameter.QueryParametersResolverImpl
+import com.oceanpremium.api.core.resolver.QueryParametersResolver
+import com.oceanpremium.api.core.resolver.QueryParametersResolverImpl
 import com.oceanpremium.api.core.enum.AuthorizationType
 import com.oceanpremium.api.core.exception.throwable.*
 import io.sentry.Sentry
@@ -189,6 +189,7 @@ class ProductsApiImpl(
     /**
      * @inherit
      */
+
     fun getProductsInventory(
         queryParameters: Map<String, String>,
         headers: HttpHeaders,
