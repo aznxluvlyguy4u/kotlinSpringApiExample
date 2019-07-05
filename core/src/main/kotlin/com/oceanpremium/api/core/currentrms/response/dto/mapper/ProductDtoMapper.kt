@@ -19,7 +19,7 @@ class ErrorResponse {
 }
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-class ProductDtoMapper(code: Int, response: Response<Any>?, storeIds: List<Int>? = null) : CurrentRmsBaseDtoMapper(code) {
+class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoMapper(code) {
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
@@ -32,7 +32,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?, storeIds: List<Int>?
         /**
          * The root node of the response payload that will contain the response result for data key
          */
-        data = mapToDto(response, storeIds)
+        data = mapToDto(response)
     }
 
     /**
@@ -40,7 +40,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?, storeIds: List<Int>?
      * and parse accordingly.
      */
     @Throws(NotFoundException::class)
-    private fun mapToDto(response: Response<Any>?, storeIds: List<Int>?): Any? {
+    private fun mapToDto(response: Response<Any>?): Any? {
 
         when {
             // Request failed, build error message
@@ -82,7 +82,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?, storeIds: List<Int>?
                          */
                         val metaMapper = MetaDtoMapper(response)
 
-                        if (metaMapper.overrideHttpStatus || storeIds.isNullOrEmpty()) {
+                        if (metaMapper.overrideHttpStatus) {
                             httpStatus = HttpStatus.NOT_FOUND
 
                             val errorResponse = ErrorResponse()

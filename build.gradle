@@ -230,15 +230,15 @@ allprojects {
      * it is used ONLY for LOCAL development.
      */
     //FIXME For now manually uncomment this block on manual deployment
-//    configurations {
-//        runtime.exclude module: "spring-boot-starter-web"
-//        runtime.exclude module: "spring-boot-starter-test"
-//        runtime.exclude module: "spring-boot-devtools"
-//        runtime.exclude module: "spring-boot-starter-jetty"
-//        runtime.exclude module: "junit"
-//        runtime.exclude module: "kotlintest"
-//        runtime.exclude module: "sonarqube-gradle-plugin"
-//    }
+    configurations {
+        runtime.exclude module: "spring-boot-starter-web"
+        runtime.exclude module: "spring-boot-starter-test"
+        runtime.exclude module: "spring-boot-devtools"
+        runtime.exclude module: "spring-boot-starter-jetty"
+        runtime.exclude module: "junit"
+        runtime.exclude module: "kotlintest"
+        runtime.exclude module: "sonarqube-gradle-plugin"
+    }
 
     jacocoTestReport {
         group = "Reporting"

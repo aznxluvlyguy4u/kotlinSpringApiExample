@@ -2,8 +2,10 @@ package com.oceanpremium.api.core.usecase
 
 import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.CurrentRmsBaseDtoMapper
+import com.oceanpremium.api.core.currentrms.response.dto.mapper.ErrorResponse
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
+import com.oceanpremium.api.core.exception.handler.ApiError
 import com.oceanpremium.api.core.resolver.LocationStoreResolver
 import com.oceanpremium.api.core.resolver.WrappedStores
 import org.slf4j.LoggerFactory
@@ -51,14 +53,24 @@ class GetProductInventoryUseCaseImpl(
         val grayStoreIds: List<Int>? = wrappedStores?.grayStores?.map {it.id}
         val newItemStoreIds: List<Int>? = wrappedStores?.newItemStores?.map {it.id}
         val allStoreIds: List<Int>? = wrappedStores?.allStores?.map {it.id}
-
-        val dtos: MutableList<CurrentRmsBaseDtoMapper> = mutableListOf()
-        var combinedDto: CurrentRmsBaseDtoMapper? = null
+        var combinedDto: CurrentRmsBaseDtoMapper?
 
         val allStoresResponse = productsApi.getProductsInventory(queryParameters, headers, allStoreIds)
         logger.debug("Response code for query on storeIds: $allStoreIds - ${allStoresResponse?.code()}")
 
-        val dto = ProductDtoMapper(allStoresResponse!!.code(), allStoresResponse, allStoreIds)
+        val dto = ProductDtoMapper(allStoresResponse!!.code(), allStoresResponse)
+
+        /**
+         * CurrentRms returns a 200 OK for empty result sets. AND after accepting multi store ids as input,
+         * when no store ids are given, default response is given of the store id with lowest ID.
+         * As a best practice for REST API, the response should be a 404 NOT FOUND when an empty result set is returned OR when no store ids is supplied.
+         */
+        if (allStoreIds.isNullOrEmpty()) {
+            dto.httpStatus = HttpStatus.NOT_FOUND
+            val errorResponse = ErrorResponse()
+            errorResponse.errors.add(dto.httpStatus.reasonPhrase)
+            dto.error = ApiError(code = dto.httpStatus.value(), message = errorResponse)
+        }
 
         combinedDto = dto
         if (dto.httpStatus == HttpStatus.OK) {

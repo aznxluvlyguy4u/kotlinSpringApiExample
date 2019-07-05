@@ -53,7 +53,7 @@ class ProductsControllerTest {
         val id: Int = 148,
         val name: String = "Seabob F5",
         val gibraltarLocationId: Int = 1,
-        val portVendresLocationId: Int = 29
+        val miamiLocationId: Int = 139
     )
 
     companion object {
@@ -264,10 +264,10 @@ class ProductsControllerTest {
         val testProduct: ProductDto? = productItems?.find { p -> p.id == testExistingProduct.id }
         assertThat(testProduct?.rates).isNotNull
         assertThat(testProduct?.rates).isNotEmpty
-        assertThat(testProduct?.rates?.first()?.quantityAvailable).isEqualTo("2.0")
+        assertThat(testProduct?.rates?.first()?.quantityAvailable).isEqualTo("1.0")
 
         // Then query inventory with delivery_location_id set to port vendres
-        val params2 = "delivery_location_id=${testExistingProduct.portVendresLocationId}&q[product_tags_name_cont]=f5"
+        val params2 = "delivery_location_id=${testExistingProduct.miamiLocationId}&q[product_tags_name_cont]=f5"
         val productsResponse2 = restTemplate?.getForObject("$endpoint/inventory?$params2", ProductsResponse::class.java)
 
         assertThat(productsResponse2).isNotNull
