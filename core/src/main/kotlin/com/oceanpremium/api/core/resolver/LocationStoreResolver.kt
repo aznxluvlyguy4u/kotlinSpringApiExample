@@ -10,12 +10,12 @@ interface LocationStoreResolver {
     fun resolveStoresByLocation(queryParameters: Map<String, String>): WrappedStores?
 }
 
-class WrappedStores (
-    var nativeStores: List<Store>?,
-    var alternativeStores: List<Store>?,
-    var grayStores: List<Store>?,
-    var newItemStores: List<Store>?,
-    var allStores: List<Store>?
+class WrappedStores(
+    var nativeStores: List<Store>? = null,
+    var alternativeStores: List<Store>? = null,
+    var grayStores: List<Store>? = null,
+    var newItemStores: List<Store>? = null,
+    var allStores: List<Store>? = null
 )
 
 class LocationStoreResolverImpl(
@@ -31,7 +31,7 @@ class LocationStoreResolverImpl(
      * If a location/collection id is given, grab it, resolve it to store id and append it to the map,
      * and remove the location/collection id from the map as current rms does not recognize those fields
      */
-    override fun resolveStoresByLocation(queryParameters: Map<String, String>) : WrappedStores? {
+    override fun resolveStoresByLocation(queryParameters: Map<String, String>): WrappedStores? {
 
         return when {
             // Both collection- & delivery location are given
@@ -40,29 +40,27 @@ class LocationStoreResolverImpl(
 
                 logger.debug("Both collection- & delivery location are given (only using delivery location)")
 
-                val deliveryLocationId =
-                    (queryParameters[QueryParametersResolverImpl.DELIVERY_LOCATION_KEY] as String).toInt()
+                val allStores: MutableList<Store> = mutableListOf()
+                val deliveryLocationId = (queryParameters[QueryParametersResolverImpl.DELIVERY_LOCATION_KEY] as String).toInt()
 
-                val deliveryLocation = locationBuilder.getAllLocations().find { location
-                    ->
+                val deliveryLocation = locationBuilder.getAllLocations().find { location ->
                     location.id == deliveryLocationId
                 }
 
-                val wrappedStores = WrappedStores(null, null, null, null, null)
-                val allStores: MutableList<Store> = mutableListOf()
-                if (deliveryLocation?.nativeStores != null) allStores.addAll(deliveryLocation.nativeStores)
-                if (deliveryLocation?.alternativeStores != null) allStores.addAll(deliveryLocation.alternativeStores)
-                if (deliveryLocation?.grayStores != null) allStores.addAll(deliveryLocation.grayStores)
-                if (deliveryLocation?.newItemsStores != null) allStores.addAll(deliveryLocation.newItemsStores)
+                if (deliveryLocation != null) {
+                    allStores.addAll(deliveryLocation.nativeStores)
+                    allStores.addAll(deliveryLocation.alternativeStores)
+                    allStores.addAll(deliveryLocation.grayStores)
+                    allStores.addAll(deliveryLocation.newItemsStores)
+                }
 
-                wrappedStores.nativeStores = deliveryLocation?.nativeStores
-                wrappedStores.alternativeStores = deliveryLocation?.alternativeStores
-                wrappedStores.grayStores = deliveryLocation?.grayStores
-                wrappedStores.newItemStores = deliveryLocation?.newItemsStores
-                if (!allStores.isNullOrEmpty()) wrappedStores.allStores = allStores
-
-                return  wrappedStores
-
+                return WrappedStores(
+                    deliveryLocation?.nativeStores,
+                    deliveryLocation?.alternativeStores,
+                    deliveryLocation?.grayStores,
+                    deliveryLocation?.newItemsStores,
+                    allStores
+                )
             }
 
             // Only collection location is given
@@ -70,11 +68,10 @@ class LocationStoreResolverImpl(
                     && !queryParameters.containsKey(QueryParametersResolverImpl.DELIVERY_LOCATION_KEY) -> {
                 logger.debug("Only collection location is given")
 
-                val wrappedStores = WrappedStores(null, null, null, null, null)
-                wrappedStores.nativeStores = storeBuilder.getAllStores()
-                wrappedStores.allStores = storeBuilder.getAllStores()
-
-                return  wrappedStores
+                return WrappedStores(
+                    nativeStores = storeBuilder.getAllStores(),
+                    allStores = storeBuilder.getAllStores()
+                )
             }
 
             // Only delivery location is given
@@ -84,22 +81,25 @@ class LocationStoreResolverImpl(
 
                 val deliveryLocationId =
                     (queryParameters[QueryParametersResolverImpl.DELIVERY_LOCATION_KEY] as String).toInt()
-                val deliveryLocation = locationBuilder.getAllLocations().find { location -> location.id == deliveryLocationId }
+                val deliveryLocation =
+                    locationBuilder.getAllLocations().find { location -> location.id == deliveryLocationId }
 
-                val wrappedStores = WrappedStores(null, null, null, null, null)
                 val allStores: MutableList<Store> = mutableListOf()
-                if (deliveryLocation?.nativeStores != null) allStores.addAll(deliveryLocation.nativeStores)
-                if (deliveryLocation?.alternativeStores != null) allStores.addAll(deliveryLocation.alternativeStores)
-                if (deliveryLocation?.grayStores != null) allStores.addAll(deliveryLocation.grayStores)
-                if (deliveryLocation?.newItemsStores != null) allStores.addAll(deliveryLocation.newItemsStores)
 
-                wrappedStores.nativeStores = deliveryLocation?.nativeStores
-                wrappedStores.alternativeStores = deliveryLocation?.alternativeStores
-                wrappedStores.grayStores = deliveryLocation?.grayStores
-                wrappedStores.newItemStores = deliveryLocation?.newItemsStores
-                if (!allStores.isNullOrEmpty()) wrappedStores.allStores = allStores
+                if (deliveryLocation != null) {
+                    allStores.addAll(deliveryLocation.nativeStores)
+                    allStores.addAll(deliveryLocation.alternativeStores)
+                    allStores.addAll(deliveryLocation.grayStores)
+                    allStores.addAll(deliveryLocation.newItemsStores)
+                }
 
-                return  wrappedStores
+                return WrappedStores(
+                    deliveryLocation?.nativeStores,
+                    deliveryLocation?.alternativeStores,
+                    deliveryLocation?.grayStores,
+                    deliveryLocation?.newItemsStores,
+                    allStores
+                )
             }
 
             // Both collection- & delivery location are not given
@@ -107,11 +107,12 @@ class LocationStoreResolverImpl(
                     && !queryParameters.containsKey(QueryParametersResolverImpl.DELIVERY_LOCATION_KEY) -> {
                 logger.debug("Both collection- & delivery location are not given")
 
-                val wrappedStores = WrappedStores(null, null, null, null, null)
-                wrappedStores.nativeStores = storeBuilder.getAllStores()
-                wrappedStores.allStores = storeBuilder.getAllStores()
 
-                return  wrappedStores
+                return WrappedStores(
+                    nativeStores = storeBuilder.getAllStores(),
+                    allStores = storeBuilder.getAllStores()
+                )
+
             }
 
             else -> {
