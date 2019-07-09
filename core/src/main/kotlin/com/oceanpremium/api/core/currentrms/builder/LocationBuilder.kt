@@ -14,23 +14,7 @@ class Location(
     var alternativeStores: MutableList<Store> = mutableListOf(),
     var grayStores: MutableList<Store> = mutableListOf(),
     var newItemsStores: MutableList<Store> = mutableListOf()
-) {
-    fun addNativeStore(store: Store) {
-        nativeStores.add(store)
-    }
-
-    fun addAlternativeStore(store: Store) {
-        alternativeStores.add(store)
-    }
-
-    fun addGrayStore(store: Store) {
-        grayStores.add(store)
-    }
-
-    fun addNewItemsStore(store: Store) {
-        newItemsStores.add(store)
-    }
-}
+)
 
 class Region(
     private val name: String,
