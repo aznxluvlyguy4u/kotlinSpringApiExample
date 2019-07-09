@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service
 
 interface RegionBuilder {
     fun getAllRegions(): List<Region>
-
     fun buildSpainMainLand1(): List<Region>
     fun buildSpainMainLand2(): List<Region>
     fun buildBaleraicsIslands(): List<Region>
@@ -26,7 +25,6 @@ interface RegionBuilder {
     fun buildCaribbean(): List<Region>
     fun buildFloridaAndBahamas(): List<Region>
     fun buildMaldives(): List<Region>
-
 }
 
 /**

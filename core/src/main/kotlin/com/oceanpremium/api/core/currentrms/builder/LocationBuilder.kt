@@ -3,13 +3,11 @@ package com.oceanpremium.api.core.currentrms.builder
 import com.fasterxml.jackson.annotation.JsonIgnore
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.*
 
 class Location(
     var name: String? = null,
     var id: Int = 0,
     var regionId: Int = 0,
-    var storeIds: SortedSet<Int> = sortedSetOf(),
     var nativeStores: MutableList<Store> = mutableListOf(),
     var alternativeStores: MutableList<Store> = mutableListOf(),
     var grayStores: MutableList<Store> = mutableListOf(),
@@ -37,8 +35,8 @@ class Store(
     @JsonIgnore
     val name: String,
     var id: Int = 0,
-    var delayInHours: Int? = null,
-    var deliveryCostInEuro: Int? = null
+    var minimumDeliveryHours: Int? = null,
+    var deliveryCost: Double? = null
 )
 
 interface LocationBuilder {
@@ -67,6 +65,6 @@ class LocationBuilderImpl(
             locations.addAll(region.locations)
         }
 
-        return locations.sortedWith(compareBy({ it.name }))
+        return locations.sortedWith(compareBy { it.name })
     }
 }
