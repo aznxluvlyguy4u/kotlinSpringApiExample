@@ -258,19 +258,6 @@ class QueryParametersResolverImpl : QueryParametersResolver {
             if (map.containsKey(PER_PAGE_KEY)) {
                 uniqueQueryParamsMap[PER_PAGE_KEY] = map[PER_PAGE_KEY] as String
             }
-
-            // If a location/collection id is given, grab it, resolve it to store id and append it to the map,
-            // and remove the location/collection id from the map as current rms does not recognize those fields
-
-//            // If location delivery / collection is given, remove it from map
-//            if (map.containsKey(COLLECTION_LOCATION_KEY)) {
-//                uniqueQueryParamsMap.remove(COLLECTION_LOCATION_KEY)
-//            }
-//
-//            if (map.containsKey(DELIVERY_LOCATION_KEY)) {
-//                uniqueQueryParamsMap.remove(DELIVERY_LOCATION_KEY)
-//            }
-
         } catch (e: Exception) {
             e.printStackTrace()
             val message = "Failed to parse query parameters: ${e.message}"
