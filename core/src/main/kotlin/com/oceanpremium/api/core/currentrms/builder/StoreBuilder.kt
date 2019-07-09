@@ -12,122 +12,122 @@ interface StoreBuilder {
  * Source @link: https://docs.google.com/spreadsheets/d/1Jpx59haz_8cZw0uGUBSZX47mQDPv0V3OvgJUtr--JzA/edit#gid=0
  */
 @Service
-class StoreBuilderImpl: StoreBuilder {
+class StoreBuilderImpl : StoreBuilder {
 
-    fun buildM55(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("M55", 5, delayInHours, deliveryCostInEuro)
+    fun buildM55(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("M55", 5, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildAntibes(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Antibes", 18, delayInHours, deliveryCostInEuro)
+    fun buildAntibes(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Antibes", 18, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildPalmaED(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Palma de Mallorca (ED)", 19, delayInHours, deliveryCostInEuro)
+    fun buildPalmaED(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Palma de Mallorca (ED)", 19, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildPalmaNG(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Palma de Mallorca (NG)", 3, delayInHours, deliveryCostInEuro)
+    fun buildPalmaNG(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Palma de Mallorca (NG)", 3, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildIbiza(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Ibiza (Rodriquez)", 20, delayInHours, deliveryCostInEuro)
+    fun buildIbiza(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Ibiza (Rodriquez)", 20, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildOlbiaNA(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Olbia (NA)", 11, delayInHours, deliveryCostInEuro)
+    fun buildOlbiaNA(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Olbia (NA)", 11, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildOlbiaSYS(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Olbia (SYS)", 21, delayInHours, deliveryCostInEuro)
+    fun buildOlbiaSYS(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Olbia (SYS)", 21, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildGenova(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Genova (Maremoto)", 16, delayInHours, deliveryCostInEuro)
+    fun buildGenova(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Genova (Maremoto)", 16, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildNapoli(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Napoli (MLF)", 15, delayInHours, deliveryCostInEuro)
+    fun buildNapoli(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Napoli (MLF)", 15, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildPalermo(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Palermo (Artemis)", 23, delayInHours, deliveryCostInEuro)
+    fun buildPalermo(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Palermo (Artemis)", 23, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildRiposto(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Riposto (Artemis)", 24, delayInHours, deliveryCostInEuro)
+    fun buildRiposto(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Riposto (Artemis)", 24, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildMalta(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Malta", 25, delayInHours, deliveryCostInEuro)
+    fun buildMalta(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Malta", 25, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildAthensSotiris(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Athens (Sotiris)", 26, delayInHours, deliveryCostInEuro)
+    fun buildAthensSotiris(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Athens (Sotiris)", 26, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildAthensH360(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Athens (H360)", 10, delayInHours, deliveryCostInEuro)
+    fun buildAthensH360(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Athens (H360)", 10, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildCorfu(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Corfu", 27, delayInHours, deliveryCostInEuro)
+    fun buildCorfu(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Corfu", 27, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildKosA1(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Kos (A1)", 28, delayInHours, deliveryCostInEuro)
+    fun buildKosA1(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Kos (A1)", 28, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildRhodes(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Rhodes (Roditis)", 29, delayInHours, deliveryCostInEuro)
+    fun buildRhodes(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Rhodes (Roditis)", 29, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildVenice(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Venice (Katarina)", 30, delayInHours, deliveryCostInEuro)
+    fun buildVenice(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Venice (Katarina)", 30, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildZadar(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Zadar (Alessia)", 31, delayInHours, deliveryCostInEuro)
+    fun buildZadar(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Zadar (Alessia)", 31, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildSplit(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Split (Luka)", 32, delayInHours, deliveryCostInEuro)
+    fun buildSplit(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Split (Luka)", 32, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildDubrovnikKristijan(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Dubrovnik (Kristijan)", 33, delayInHours, deliveryCostInEuro)
+    fun buildDubrovnikKristijan(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Dubrovnik (Kristijan)", 33, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildDubrovnikBWA(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Dubrovnik (BWA)", 24, delayInHours, deliveryCostInEuro)
+    fun buildDubrovnikBWA(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Dubrovnik (BWA)", 24, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildBCM(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("BCM (Kotor)", 35, delayInHours, deliveryCostInEuro)
+    fun buildBCM(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("BCM (Kotor)", 35, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildTivat(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Tivat (BWA)", 36, delayInHours, deliveryCostInEuro)
+    fun buildTivat(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Tivat (BWA)", 36, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildAntigua(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Antigua (AC)", 14, delayInHours, deliveryCostInEuro)
+    fun buildAntigua(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Antigua (AC)", 14, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildStMaarten(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("St. Maarten (DSM)", 9, delayInHours, deliveryCostInEuro)
+    fun buildStMaarten(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("St. Maarten (DSM)", 9, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildFortLauderdale(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Fort Lauderdale (YC)", 13, delayInHours, deliveryCostInEuro)
+    fun buildFortLauderdale(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Fort Lauderdale (YC)", 13, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildMale(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("Male", 37, delayInHours, deliveryCostInEuro)
+    fun buildMale(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("Male", 37, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
-    fun buildNewItemsStore(delayInHours: Int? = null, deliveryCostInEuro: Int? = null): Store {
-        return Store("New Items Store", 22, delayInHours, deliveryCostInEuro)
+    fun buildNewItemsStore(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store("New Items Store", 22, minimumDeliveryHours, deliveryCost?.toDouble())
     }
 
     override fun getAllStores(): List<Store> {
