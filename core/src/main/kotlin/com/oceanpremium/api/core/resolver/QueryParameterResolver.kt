@@ -36,10 +36,7 @@ interface QueryParametersResolver {
     }
 }
 
-class ProductsInventoryValidatedMap (
-    var uniqueQueryParams: Map<String, String>,
-    var storeIdsQueryParams: List<Int>?
-)
+class ProductsInventoryValidatedMap(val storeIdsQueryParams: List<Int>?, val uniqueQueryParams: Map<String, String>)
 
 @Suppress("KDocUnresolvedReference")
 class QueryParametersResolverImpl : QueryParametersResolver {
@@ -49,7 +46,6 @@ class QueryParametersResolverImpl : QueryParametersResolver {
         const val STORE_ID_QUERY_PARAMS = "store_id[]"
         private const val ACTIVE_PRODUCT_QUERY = "q[active_eq]"
         private const val FILTER_MODE_QUERY = "filtermode[]"
-        private const val DEFAULT_STORE_ID_QUERY = "store_id"
         private const val START_DATE_QUERY = "starts_at"
         private const val END_DATE_QUERY = "ends_at"
         private const val ACCESSORY_ONLY_QUERY = "q[product_accessory_only_eq]"
@@ -83,7 +79,7 @@ class QueryParametersResolverImpl : QueryParametersResolver {
      * 1  q[product_tags_name_cont]=SEARCH_KEY_STRING
      * 2  q[active_eq]=true
      * 3  filtermode[]=rental
-     * 4  store_id=STORE_ID_INT
+     * 4  store_id[]=STORE_ID_INT
      * 5  q[product_accessory_only_eq]=false
      * 6  starts_at=YYYY-MM-DD
      * 7  ends_at=YYYY-MM-DD
@@ -96,7 +92,7 @@ class QueryParametersResolverImpl : QueryParametersResolver {
      * 1  q[product_group_id_eq]=19
      * 2  q[active_eq]=true
      * 3  filtermode[]=rental
-     * 4  store_id=STORE_ID_INT
+     * 4  store_id[]=STORE_ID_INT
      * 5  q[product_accessory_only_eq]=false
      * 6  starts_at=YYYY-MM-DD
      * 7  ends_at=YYYY-MM-DD
@@ -109,14 +105,13 @@ class QueryParametersResolverImpl : QueryParametersResolver {
      * 1  q[product_id_eq]=247
      * 2  q[active_eq]=true
      * 3  filtermode[]=rental
-     * 4  store_id=STORE_ID_INT
+     * 4  store_id[]=STORE_ID_INT
      * 5  q[product_accessory_only_eq]=false
      * 6  starts_at=YYYY-MM-DD
      * 7  ends_at=YYYY-MM-DD
      * 8  q[product_product_group_name_not_eq]=FunctionalIntegrationTest
      */
     override fun resolveGetProductsInventory(map: Map<String, String>, headers: HttpHeaders, storeIds: List<Int>?): ProductsInventoryValidatedMap {
-        var productsInventoryValidatedMap: ProductsInventoryValidatedMap = ProductsInventoryValidatedMap(mutableMapOf(), listOf())
         val uniqueQueryParamsMap = mutableMapOf<String, String>()
         val host = getHost(headers)
 
@@ -255,16 +250,6 @@ class QueryParametersResolverImpl : QueryParametersResolver {
                 }
             }
 
-            // If a location/collection id is given, grab it, resolve it to store id and append it to the map,
-            // and remove the location/collection id from the map as current rms does not recognize those fields
-            if (map.containsKey(COLLECTION_LOCATION_KEY)) {
-                uniqueQueryParamsMap.remove(COLLECTION_LOCATION_KEY)
-            }
-
-            if (map.containsKey(DELIVERY_LOCATION_KEY)) {
-                uniqueQueryParamsMap.remove(DELIVERY_LOCATION_KEY)
-            }
-
             // Explicit pagination parameters are given, map them
             if (map.containsKey(PAGE_KEY)) {
                 uniqueQueryParamsMap[PAGE_KEY] = map[PAGE_KEY] as String
@@ -274,6 +259,23 @@ class QueryParametersResolverImpl : QueryParametersResolver {
                 uniqueQueryParamsMap[PER_PAGE_KEY] = map[PER_PAGE_KEY] as String
             }
 
+            // Setup all stores to be queried
+            if (storeIds != null && storeIds.isNotEmpty()) {
+                var storeIdValues = ""
+
+                storeIds.forEachIndexed{ index, storeId ->
+                     if (index == 0) {
+                         storeIdValues += "$storeId"
+                     } else {
+                         storeIdValues += "&$STORE_ID_QUERY_PARAMS=$storeId"
+                     }
+                }
+
+                if (storeIdValues != null && storeIdValues.isNotBlank()) {
+                    storeIdValues?.removePrefix("$STORE_ID_QUERY_PARAMS=")
+                    uniqueQueryParamsMap[STORE_ID_QUERY_PARAMS] = storeIdValues
+                }
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             val message = "Failed to parse query parameters: ${e.message}"
@@ -282,26 +284,9 @@ class QueryParametersResolverImpl : QueryParametersResolver {
             throw BadRequestException(message)
         }
 
-        // Set multiple query params to validatedMap
-        try {
-            // Use to location/collection id's to resolve to a store id
-            // Only query products on a specific store (for now)
-            if (!map.containsKey(STORE_ID_QUERY_PARAMS) && storeIds != null) {
-                productsInventoryValidatedMap.storeIdsQueryParams = storeIds
-            }
-        }
-        catch (e: Exception) {
-            e.printStackTrace()
-            val message = "Failed to parse query parameters: ${e.message}"
-            logger.error(message)
+        logger.debug("Validated query parameters set build: $uniqueQueryParamsMap")
 
-            throw BadRequestException(message)
-        }
-
-        productsInventoryValidatedMap.uniqueQueryParams = uniqueQueryParamsMap
-
-        logger.debug("Validated query parameters set build: $productsInventoryValidatedMap")
-        return productsInventoryValidatedMap
+        return ProductsInventoryValidatedMap(storeIds, uniqueQueryParamsMap)
     }
 
     override fun resolveGetProducts(map: Map<String, String>, headers: HttpHeaders): Map<String, String> {

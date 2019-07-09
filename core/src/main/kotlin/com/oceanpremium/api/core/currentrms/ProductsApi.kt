@@ -196,8 +196,13 @@ class ProductsApiImpl(
         headers: HttpHeaders,
         storeIds: List<Int>?
     ): Response<Any>? {
-        val validatedMap = queryParametersResolver.resolveGetProductsInventory(queryParameters, headers, storeIds)
-        val retrofitCall = productsApi.getProductsInventory(uniqueQueryParamsMap = validatedMap.uniqueQueryParams, storeIdsQueryParamsMap = validatedMap.storeIdsQueryParams)
+        val validatedMap
+                = queryParametersResolver.resolveGetProductsInventory(queryParameters, headers, storeIds)
+
+        val retrofitCall = productsApi.getProductsInventory(
+            uniqueQueryParamsMap = validatedMap.uniqueQueryParams,
+            storeIdsQueryParamsMap = validatedMap.storeIdsQueryParams
+        )
         lateinit var response: Response<Any>
 
         try {

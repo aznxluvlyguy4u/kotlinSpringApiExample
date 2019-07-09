@@ -47,23 +47,24 @@ class GetProductInventoryUseCaseImpl(
     override fun execute(queryParameters: Map<String, String>, headers: HttpHeaders): ResponseContainer {
         // List of mapped store ids for the given input location(s), for which we need to query each store,
         // to get the product inventory of
-        val wrappedStores: WrappedStores? = locationStoreResolver.resolveStoresByLocation(queryParameters)
-        val nativeStoreIds: List<Int>? = wrappedStores?.nativeStores?.map {it.id}
-        val alternativeStoreIds: List<Int>? = wrappedStores?.alternativeStores?.map {it.id}
-        val grayStoreIds: List<Int>? = wrappedStores?.grayStores?.map {it.id}
-        val newItemStoreIds: List<Int>? = wrappedStores?.newItemStores?.map {it.id}
-        val allStoreIds: List<Int>? = wrappedStores?.allStores?.map {it.id}
+        val stores: WrappedStores? = locationStoreResolver.resolveStoresByLocation(queryParameters)
+        val nativeStoreIds: List<Int>? = stores?.nativeStores?.map {it.id}
+        val alternativeStoreIds: List<Int>? = stores?.alternativeStores?.map {it.id}
+        val grayStoreIds: List<Int>? = stores?.grayStores?.map {it.id}
+        val newItemStoreIds: List<Int>? = stores?.newItemStores?.map {it.id}
+        val allStoreIds: List<Int>? = stores?.allStores?.map {it.id}
         var combinedDto: CurrentRmsBaseDtoMapper?
 
-        val allStoresResponse = productsApi.getProductsInventory(queryParameters, headers, allStoreIds)
-        logger.debug("Response code for query on storeIds: $allStoreIds - ${allStoresResponse?.code()}")
+        val productInventoryResponse = productsApi.getProductsInventory(queryParameters, headers, allStoreIds)
+        logger.debug("Response code for query on storeIds: $allStoreIds - ${productInventoryResponse?.code()}")
 
-        val dto = ProductDtoMapper(allStoresResponse!!.code(), allStoresResponse)
+        val dto = ProductDtoMapper(productInventoryResponse!!.code(), productInventoryResponse)
 
         /**
-         * CurrentRms returns a 200 OK for empty result sets. AND after accepting multi store ids as input,
+         * CurrentRms returns a 200 OK for empty result sets AND after accepting multi-store ids as input,
          * when no store ids are given, default response is given of the store id with lowest ID.
-         * As a best practice for REST API, the response should be a 404 NOT FOUND when an empty result set is returned OR when no store ids is supplied.
+         * As a best practice for REST API, the response should be a 404 NOT FOUND when an empty result set is returned
+         * OR when no store ids is supplied.
          */
         if (allStoreIds.isNullOrEmpty()) {
             dto.httpStatus = HttpStatus.NOT_FOUND
@@ -73,8 +74,9 @@ class GetProductInventoryUseCaseImpl(
         }
 
         combinedDto = dto
+
         if (dto.httpStatus == HttpStatus.OK) {
-            val combinedDtoData: List<ProductDto> = dto!!.data as List<ProductDto>
+            val combinedDtoData: List<ProductDto> = dto.data as List<ProductDto>
             combinedDtoData.forEach {productDto ->
                 var totalQuantityAvailable: Double = 0.0
                 productDto.storeQuantities?.forEach { storeQuantityDto ->
@@ -119,7 +121,7 @@ class GetProductInventoryUseCaseImpl(
         // rowcount =
 
         return ResponseContainer(
-            allStoresResponse,
+            productInventoryResponse,
             combinedDto
         )
     }
