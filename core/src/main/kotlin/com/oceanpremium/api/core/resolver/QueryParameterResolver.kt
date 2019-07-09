@@ -206,7 +206,7 @@ class QueryParametersResolverImpl : QueryParametersResolver {
             }
 
             // No time interval boundaries supplied, create an interval of ONE day
-            if (!map.containsKey(START_DATE_QUERY) && !map.containsKey(END_DATE_QUERY) ) {
+            if (!map.containsKey(START_DATE_QUERY) && !map.containsKey(END_DATE_QUERY)) {
                 val todayAtNoon = DateTime().withTime(DateTimeUtil.NOON, 0, 0, 0)
                 val todayAtNoonStr =
                     DateTimeUtil.toISO8601UTC(todayAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
@@ -259,23 +259,18 @@ class QueryParametersResolverImpl : QueryParametersResolver {
                 uniqueQueryParamsMap[PER_PAGE_KEY] = map[PER_PAGE_KEY] as String
             }
 
-            // Setup all stores to be queried
-            if (storeIds != null && storeIds.isNotEmpty()) {
-                var storeIdValues = ""
+            // If a location/collection id is given, grab it, resolve it to store id and append it to the map,
+            // and remove the location/collection id from the map as current rms does not recognize those fields
 
-                storeIds.forEachIndexed{ index, storeId ->
-                     if (index == 0) {
-                         storeIdValues += "$storeId"
-                     } else {
-                         storeIdValues += "&$STORE_ID_QUERY_PARAMS=$storeId"
-                     }
-                }
+//            // If location delivery / collection is given, remove it from map
+//            if (map.containsKey(COLLECTION_LOCATION_KEY)) {
+//                uniqueQueryParamsMap.remove(COLLECTION_LOCATION_KEY)
+//            }
+//
+//            if (map.containsKey(DELIVERY_LOCATION_KEY)) {
+//                uniqueQueryParamsMap.remove(DELIVERY_LOCATION_KEY)
+//            }
 
-                if (storeIdValues != null && storeIdValues.isNotBlank()) {
-                    storeIdValues?.removePrefix("$STORE_ID_QUERY_PARAMS=")
-                    uniqueQueryParamsMap[STORE_ID_QUERY_PARAMS] = storeIdValues
-                }
-            }
         } catch (e: Exception) {
             e.printStackTrace()
             val message = "Failed to parse query parameters: ${e.message}"

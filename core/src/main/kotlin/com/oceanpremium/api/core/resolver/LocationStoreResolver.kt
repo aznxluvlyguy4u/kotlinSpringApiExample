@@ -5,6 +5,7 @@ import com.oceanpremium.api.core.currentrms.builder.Store
 import com.oceanpremium.api.core.currentrms.builder.StoreBuilder
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import javax.ws.rs.BadRequestException
 
 interface LocationStoreResolver {
     fun resolveStoresByLocation(queryParameters: Map<String, String>): WrappedStores?
@@ -31,6 +32,7 @@ class LocationStoreResolverImpl(
      * If a location/collection id is given, grab it, resolve it to store id and append it to the map,
      * and remove the location/collection id from the map as current rms does not recognize those fields
      */
+    @Throws(BadRequestException::class)
     override fun resolveStoresByLocation(queryParameters: Map<String, String>): WrappedStores? {
 
         return when {
@@ -112,7 +114,6 @@ class LocationStoreResolverImpl(
                     nativeStores = storeBuilder.getAllStores(),
                     allStores = storeBuilder.getAllStores()
                 )
-
             }
 
             else -> {

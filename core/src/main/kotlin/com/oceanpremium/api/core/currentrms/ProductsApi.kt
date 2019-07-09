@@ -6,7 +6,6 @@ import com.oceanpremium.api.core.resolver.QueryParametersResolverImpl
 import com.oceanpremium.api.core.enum.AuthorizationType
 import com.oceanpremium.api.core.exception.throwable.*
 import io.sentry.Sentry
-import okhttp3.ResponseBody
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
