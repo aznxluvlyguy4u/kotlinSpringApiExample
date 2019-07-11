@@ -1,23 +1,16 @@
 package com.oceanpremium.api.core.resolver
 
 import com.oceanpremium.api.core.currentrms.builder.LocationBuilder
-import com.oceanpremium.api.core.currentrms.builder.Store
 import com.oceanpremium.api.core.currentrms.builder.StoreBuilder
+import com.oceanpremium.api.core.model.Store
+import com.oceanpremium.api.core.model.Stores
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import javax.ws.rs.BadRequestException
 
 interface LocationStoreResolver {
-    fun resolveStoresByLocation(queryParameters: Map<String, String>): WrappedStores?
+    fun resolveStoresByLocation(queryParameters: Map<String, String>): Stores?
 }
-
-class WrappedStores(
-    var nativeStores: List<Store>? = null,
-    var alternativeStores: List<Store>? = null,
-    var grayStores: List<Store>? = null,
-    var newItemStores: List<Store>? = null,
-    var allStores: List<Store>? = null
-)
 
 class LocationStoreResolverImpl(
     @Autowired private val locationBuilder: LocationBuilder,
@@ -33,7 +26,7 @@ class LocationStoreResolverImpl(
      * and remove the location/collection id from the map as current rms does not recognize those fields
      */
     @Throws(BadRequestException::class)
-    override fun resolveStoresByLocation(queryParameters: Map<String, String>): WrappedStores? {
+    override fun resolveStoresByLocation(queryParameters: Map<String, String>): Stores? {
 
         return when {
             // Both collection- & delivery location are given
@@ -44,19 +37,16 @@ class LocationStoreResolverImpl(
 
                 val allStores: MutableList<Store> = mutableListOf()
                 val deliveryLocationId = (queryParameters[QueryParametersResolverImpl.DELIVERY_LOCATION_KEY] as String).toInt()
-
-                val deliveryLocation = locationBuilder.getAllLocations().find { location ->
-                    location.id == deliveryLocationId
-                }
+                val deliveryLocation = locationBuilder.findById(deliveryLocationId)
 
                 if (deliveryLocation != null) {
-                    allStores.addAll(deliveryLocation.nativeStores)
-                    allStores.addAll(deliveryLocation.alternativeStores)
-                    allStores.addAll(deliveryLocation.grayStores)
-                    allStores.addAll(deliveryLocation.newItemsStores)
+                    allStores.addAll(deliveryLocation.nativeStores.sortedWith(compareBy { it.id }))
+                    allStores.addAll(deliveryLocation.alternativeStores.sortedWith(compareBy { it.id }))
+                    allStores.addAll(deliveryLocation.grayStores.sortedWith(compareBy { it.id }))
+                    allStores.addAll(deliveryLocation.newItemsStores.sortedWith(compareBy { it.id }))
                 }
 
-                return WrappedStores(
+                return Stores(
                     deliveryLocation?.nativeStores,
                     deliveryLocation?.alternativeStores,
                     deliveryLocation?.grayStores,
@@ -70,9 +60,9 @@ class LocationStoreResolverImpl(
                     && !queryParameters.containsKey(QueryParametersResolverImpl.DELIVERY_LOCATION_KEY) -> {
                 logger.debug("Only collection location is given")
 
-                return WrappedStores(
-                    nativeStores = storeBuilder.getAllStores(),
-                    allStores = storeBuilder.getAllStores()
+                return Stores(
+                    native = storeBuilder.getAllStores(),
+                    all = storeBuilder.getAllStores()
                 )
             }
 
@@ -89,13 +79,13 @@ class LocationStoreResolverImpl(
                 val allStores: MutableList<Store> = mutableListOf()
 
                 if (deliveryLocation != null) {
-                    allStores.addAll(deliveryLocation.nativeStores)
-                    allStores.addAll(deliveryLocation.alternativeStores)
-                    allStores.addAll(deliveryLocation.grayStores)
-                    allStores.addAll(deliveryLocation.newItemsStores)
+                    allStores.addAll(deliveryLocation.nativeStores.sortedWith(compareBy { it.id }))
+                    allStores.addAll(deliveryLocation.alternativeStores.sortedWith(compareBy { it.id }))
+                    allStores.addAll(deliveryLocation.grayStores.sortedWith(compareBy { it.id }))
+                    allStores.addAll(deliveryLocation.newItemsStores.sortedWith(compareBy { it.id }))
                 }
 
-                return WrappedStores(
+                return Stores(
                     deliveryLocation?.nativeStores,
                     deliveryLocation?.alternativeStores,
                     deliveryLocation?.grayStores,
@@ -110,9 +100,9 @@ class LocationStoreResolverImpl(
                 logger.debug("Both collection- & delivery location are not given")
 
 
-                return WrappedStores(
-                    nativeStores = storeBuilder.getAllStores(),
-                    allStores = storeBuilder.getAllStores()
+                return Stores(
+                    native = storeBuilder.getAllStores(),
+                    all = storeBuilder.getAllStores()
                 )
             }
 
