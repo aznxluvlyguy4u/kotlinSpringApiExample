@@ -1,6 +1,7 @@
 package com.oceanpremium.api.core.currentrms.builder
 
-import com.fasterxml.jackson.annotation.JsonIgnore
+import com.oceanpremium.api.core.enum.WarehouseStoreType
+import com.oceanpremium.api.core.model.Store
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -31,16 +32,10 @@ class Region(
     }
 }
 
-class Store(
-    @JsonIgnore
-    val name: String,
-    var id: Int = 0,
-    var minimumDeliveryHours: Int? = null,
-    var deliveryCost: Double? = null
-)
 
 interface LocationBuilder {
     fun getAllLocations(): List<Location>
+    fun findById(locationId: Int): Location?
 }
 
 @Service
@@ -65,6 +60,33 @@ class LocationBuilderImpl(
             locations.addAll(region.locations)
         }
 
+        categorizeWarehouse(locations)
+
         return locations.sortedWith(compareBy { it.name })
     }
+
+    override fun findById(locationId: Int): Location? {
+        return getAllLocations().firstOrNull { it.id == locationId }
+    }
+
+    private fun categorizeWarehouse(locations: List<Location>) {
+        locations.forEach { location ->
+            location.nativeStores.forEach { store ->
+                store.type = WarehouseStoreType.NATIVE
+            }
+
+            location.alternativeStores.forEach {store ->
+                store.type = WarehouseStoreType.ALTERNATIVE
+            }
+
+            location.grayStores.forEach {store ->
+                store.type = WarehouseStoreType.GRAY
+            }
+
+            location.newItemsStores.forEach {store ->
+                store.type = WarehouseStoreType.NEW_ITEMS
+            }
+        }
+    }
+
 }
