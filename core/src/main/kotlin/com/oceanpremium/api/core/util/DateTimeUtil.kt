@@ -1,6 +1,7 @@
 package com.oceanpremium.api.core.util
 
 import org.joda.time.DateTime
+import org.joda.time.Period
 import org.joda.time.format.DateTimeFormat
 import java.lang.Exception
 
@@ -40,5 +41,9 @@ object DateTimeUtil {
         }
 
         return null
+    }
+
+    fun toDurationISO8601HoursDuration(hours: Int): Period {
+        return Period.parse("PT${hours}H")
     }
 }
