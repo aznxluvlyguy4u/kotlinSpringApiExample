@@ -22,6 +22,6 @@ class Store(
             return null
         }
 
-        return DateTimeUtil.toDurationISO8601HoursDuration(minimumDeliveryHours!!).toString()
+        return DateTimeUtil.toISO8601DurationPeriod(minimumDeliveryHours!!).toString()
     }
 }
