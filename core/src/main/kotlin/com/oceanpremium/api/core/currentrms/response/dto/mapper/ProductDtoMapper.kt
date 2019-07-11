@@ -592,7 +592,8 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                 && itemBody[productDescriptionKey] as String? != null
                 && (itemBody[productDescriptionKey] as String).isNotEmpty()
             ) {
-                descriptions[sectionKey + "1"] = DescriptionSectionDto(mapProductName(itemBody), itemBody[productDescriptionKey] as String)
+                descriptions[sectionKey + "1"] =
+                    DescriptionSectionDto(mapProductName(itemBody), itemBody[productDescriptionKey] as String)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -644,39 +645,39 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
     }
 
     /**
-     * Map the quantity per store when using multi store id querying
+     * Map the rentalQuantityAvailable per store when using multi store id querying
      */
     private fun mapStoreQuantities(itemBody: Map<*, *>): List<StoreQuantityDto>? {
-
         val storeQuantitiesDtos: MutableList<StoreQuantityDto> = mutableListOf()
 
         try {
             if (itemBody.containsKey(STORE_QUANTITIES_KEY)
             ) {
                 @Suppress("UNCHECKED_CAST")
-                val storeQuantities = itemBody.get(key = STORE_QUANTITIES_KEY) as List<Map<*,*>>
+                val storeQuantities = itemBody.get(key = STORE_QUANTITIES_KEY) as List<Map<*, *>>
 
                 storeQuantities.forEach {
                     try {
-                        if (it.containsKey("store_id")
-                            && it.containsKey("rental_quantity_available")
-                        ) {
-                            val storeId = (it["store_id"] as Double?)?.toInt().toString()
-                            val rentalQuantityAvailable = it["rental_quantity_available"].toString() as String?
+                        when {
+                            it.containsKey("store_id") && it.containsKey("rental_quantity_available") -> {
+                                val storeId = (it["store_id"] as Double?)?.toInt()
+                                val rentalQuantityAvailable = it["rental_quantity_available"].toString() as String?
 
-                            storeQuantitiesDtos.add(StoreQuantityDto(storeId, rentalQuantityAvailable))
+                                when {
+                                    storeId != null && rentalQuantityAvailable != null ->
+                                        storeQuantitiesDtos.add(StoreQuantityDto(storeId, rentalQuantityAvailable))
+                                }
+                            }
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
 
-                        val message = "Failed to map product response to Dto: ${e.message}"
+                        val message = "Failed to map product store quantities to Dto: ${e.message}"
                         logger.error(message)
 
                         throw BadRequestException(e.message)
                     }
                 }
-
-
             }
         } catch (e: Exception) {
             e.printStackTrace()
