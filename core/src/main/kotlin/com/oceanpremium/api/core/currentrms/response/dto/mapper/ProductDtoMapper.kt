@@ -645,7 +645,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
     }
 
     /**
-     * Map the rentalQuantityAvailable per store when using multi store id querying
+     * Map the quantityAvailable per store when using multi store id querying
      */
     private fun mapStoreQuantities(itemBody: Map<*, *>): List<StoreQuantityDto>? {
         val storeQuantitiesDtos: MutableList<StoreQuantityDto> = mutableListOf()
