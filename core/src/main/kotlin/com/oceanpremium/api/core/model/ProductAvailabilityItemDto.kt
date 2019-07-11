@@ -42,4 +42,5 @@ class ProductAvailabilityItemDto(
     var totalCostProducts: String? = null
     var totalCostAccessories: String? = null
     val uuid: UUID = UUID.randomUUID()
+    var stores: Stores? = null
 }
