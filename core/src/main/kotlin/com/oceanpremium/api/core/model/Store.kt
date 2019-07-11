@@ -14,6 +14,14 @@ class Store(
     var deliveryCost: Double? = 0.0,
     var quantityAvailable: String? = "0.0"
 ) {
-    var deliveryPeriod = DateTimeUtil.toDurationISO8601HoursDuration(minimumDeliveryHours!!).toString()
+    var deliveryPeriod = determineDeliveryPeriod()
     var type: WarehouseStoreType = WarehouseStoreType.NONE
+
+    private fun determineDeliveryPeriod(): String? {
+        if (minimumDeliveryHours == null) {
+            return null
+        }
+
+        return DateTimeUtil.toDurationISO8601HoursDuration(minimumDeliveryHours!!).toString()
+    }
 }
