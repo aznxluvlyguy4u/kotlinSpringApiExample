@@ -1,10 +1,12 @@
 package com.oceanpremium.api.core.usecase
 
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
+import com.oceanpremium.api.core.currentrms.response.dto.product.StoreQuantityDto
 import com.oceanpremium.api.core.enum.AvailabilityStateType
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.model.ProductAvailabilityItemDto
 import com.oceanpremium.api.core.model.ProductAvailabilityResponse
+import com.oceanpremium.api.core.model.Stores
 import com.oceanpremium.api.core.util.DateTimeUtil
 import com.oceanpremium.api.core.util.DateTimeUtil.CURRENT_RMS_API_DATE_ISO8601_FORMAT
 import org.joda.time.Days
@@ -14,8 +16,9 @@ import org.springframework.http.HttpHeaders
 import java.lang.Exception
 
 /**
- * Get the availability for batch POSTED product items and check against the available quantity has sufficient stock levels compared to
- * the wanted quantity. This is can be used by, for example, for checking the availability of a basket where multiple products are added.
+ * Get the availability for batch POSTED product items and check against the available quantityAvailable
+ * has sufficient stock levels compared to the wanted quantityAvailable. This is can be used by, for example,
+ * for checking the availability of a basket where multiple products are added.
  */
 interface CheckProductBatchAvailabilityUseCase {
     @Throws(Exception::class)
@@ -43,20 +46,6 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
         validateInput(productItems)
 
         productItems.forEach { productAvailabilityItem ->
-            if (productAvailabilityItem.quantity == 0) {
-                productAvailabilityItem.message =
-                    "Quantity supplied for product: ${productAvailabilityItem.id} must be greater then 0."
-                productAvailabilityItem.availabilityState = AvailabilityStateType.NOT_AVAILABLE
-                productAvailabilityItem.quantityAvailable = productAvailabilityItem.quantity
-
-                throw BadRequestException(productAvailabilityItem.message)
-            }
-
-            productAvailabilityItem.accessories.forEach {
-                if (it.period == null) {
-                    it.period = productAvailabilityItem.period
-                }
-            }
 
             logger.debug(
                 "check availability for product with id: ${productAvailabilityItem.id} on location collection: " +
@@ -78,15 +67,22 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
             updateAvailability(
                 productAvailabilityItem,
                 productDtoItem,
-                productDtoItem?.rates?.first()?.quantityAvailable?.toDouble()?.toInt(),
-                false
+                false,
+                result.stores
             )
 
             //Check the availability of provided accessories for the given product, adjust the parent product
-            // to reflect a state that matched the availability of both the parent product and accessory.
+            //to reflect a state that matched the availability of both the parent product and accessory.
             productAvailabilityItem.accessories.forEach { accessoriesAvailabilityItem ->
+
+                if (accessoriesAvailabilityItem.period == null) {
+                    accessoriesAvailabilityItem.period = productAvailabilityItem.period
+                }
+
+                val map = buildQueryParametersMap(accessoriesAvailabilityItem, true, productAvailabilityItem)
+
                 val accessoriesResult = getProductInventoryUseCase.execute(
-                    buildQueryParametersMap(accessoriesAvailabilityItem, true),
+                    map,
                     HttpHeaders.EMPTY
                 )
 
@@ -100,8 +96,8 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
                 updateAvailability(
                     accessoriesAvailabilityItem,
                     accessoryDtoItem,
-                    accessoryDtoItem?.rates?.first()?.quantityAvailable?.toDouble()?.toInt(),
-                    true
+                    true,
+                    result.stores
                 )
 
                 // Restate the availability of the parent product
@@ -132,13 +128,18 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
 
             if (productAvailabilityItem.period?.start != null
                 && productAvailabilityItem.period?.end != null
-                && Days.daysBetween(productAvailabilityItem.period?.start, productAvailabilityItem.period?.end) == Days.ZERO) {
+                && Days.daysBetween(
+                    productAvailabilityItem.period?.start,
+                    productAvailabilityItem.period?.end
+                ) == Days.ZERO
+            ) {
 
-                throw BadRequestException("Supplied rental period (" +
-                        "start: ${productAvailabilityItem.period?.start}, " +
-                        "end: ${productAvailabilityItem.period?.end} " +
-                        "must be at minimum: P1D, for product id: ${productAvailabilityItem.id}, for more information see section: " +
-                        "Duration on the following page for understanding the provided Duration format: https://en.wikipedia.org/w/index.php?title=ISO_8601"
+                throw BadRequestException(
+                    "Supplied rental period (" +
+                            "start: ${productAvailabilityItem.period?.start}, " +
+                            "end: ${productAvailabilityItem.period?.end} " +
+                            "must be at minimum: P1D, for product id: ${productAvailabilityItem.id}, for more information see section: " +
+                            "Duration on the following page for understanding the provided Duration format: https://en.wikipedia.org/w/index.php?title=ISO_8601"
                 )
 
             } else {
@@ -169,15 +170,30 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
 
     private fun buildQueryParametersMap(
         productAvailabilityItem: ProductAvailabilityItemDto,
-        isAccessory: Boolean = false
+        isAccessory: Boolean = false,
+        parentProductItem: ProductAvailabilityItemDto? = null
     ): Map<String, String> {
         val queryParameters = mutableMapOf<String, String>()
 
-        if (isAccessory) {
-            queryParameters["q[product_accessory_only_eq]"] = "true"
-        }
-
         queryParameters["q[product_id_eq]"] = productAvailabilityItem.id.toString()
+
+        if (isAccessory && parentProductItem != null) {
+            queryParameters["q[product_accessory_only_eq]"] = "true"
+
+            queryParameters["delivery_location_id"] = parentProductItem.location?.delivery?.id.toString()
+
+            if (parentProductItem.location?.collection?.id != null) {
+                queryParameters["collection_location_id"] = parentProductItem.location?.collection?.id.toString()
+            }
+        } else {
+            if (productAvailabilityItem.location != null) {
+                queryParameters["delivery_location_id"] = productAvailabilityItem.location?.delivery?.id.toString()
+
+                if (productAvailabilityItem.location?.collection?.id != null) {
+                    queryParameters["collection_location_id"] = productAvailabilityItem.location?.collection?.id.toString()
+                }
+            }
+        }
 
         if (productAvailabilityItem.period?.start != null) {
             val startDateAtNoon = productAvailabilityItem.period?.start!!.withTime(DateTimeUtil.NOON, 0, 0, 0)
@@ -190,35 +206,32 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
             queryParameters["ends_at"] = DateTimeUtil.toISO8601UTC(endDateAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
         }
 
-        if (productAvailabilityItem.location != null) {
-            queryParameters["delivery_location_id"] = productAvailabilityItem.location?.delivery?.id.toString()
-
-            if (productAvailabilityItem.location?.collection?.id != null) {
-                queryParameters["collection_location_id"] = productAvailabilityItem.location?.collection?.id.toString()
-            }
-        }
-
         return queryParameters
     }
 
     private fun updateAvailability(
         productAvailabilityItem: ProductAvailabilityItemDto,
-        productDtoItem: ProductDto?, quantityAvailable: Int?,
-        isAccessory: Boolean
+        productDtoItem: ProductDto?,
+        isAccessory: Boolean,
+        stores: Stores
     ) {
-        // Check that the stock level quantity for the requested quantity for given product is sufficient
-        when {
-            quantityAvailable != null -> if (quantityAvailable >= productAvailabilityItem.quantity) {
-                productAvailabilityItem.availabilityState = AvailabilityStateType.AVAILABLE
-                productAvailabilityItem.quantityAvailable = quantityAvailable
-            } else {
-                productAvailabilityItem.availabilityState = AvailabilityStateType.NOT_AVAILABLE
-                productAvailabilityItem.quantityAvailable = quantityAvailable
-            }
-            else -> {
-                productAvailabilityItem.availabilityState = AvailabilityStateType.AVAILABLE_BUT_DELAYED
-                productAvailabilityItem.quantityAvailable = 0
-            }
+        // Set store references
+        productAvailabilityItem.stores = stores
+
+        // Determine total quantity available and update product item state accordingly
+        var quantityAvailable = 0
+
+        if (productDtoItem?.storeQuantities != null) {
+            quantityAvailable = determineProductAvailability(productDtoItem.storeQuantities!!)
+        }
+
+        // Check that the total product quantity available, compared to the requested quantity for given product is sufficient
+        if (quantityAvailable >= productAvailabilityItem.quantity) {
+            productAvailabilityItem.availabilityState = AvailabilityStateType.AVAILABLE
+            productAvailabilityItem.quantityAvailable = quantityAvailable
+        } else {
+            productAvailabilityItem.availabilityState = AvailabilityStateType.NOT_AVAILABLE
+            productAvailabilityItem.quantityAvailable = quantityAvailable
         }
 
         productAvailabilityItem.images = productDtoItem?.images
@@ -229,6 +242,23 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
         if (isAccessory) {
             productAvailabilityItem.totalCostAccessories = null
         }
+    }
+
+    /**
+     * Determines for all queried stores that total availability for given product.
+     */
+    private fun determineProductAvailability(stores: List<StoreQuantityDto>): Int {
+        var totalQuantityAvailable = 0
+
+        stores.forEach { store ->
+            val quantityPerStore = store.quantityAvailable?.toDouble()?.toInt()
+
+            if (quantityPerStore != null && quantityPerStore > 0) {
+                totalQuantityAvailable += quantityPerStore
+            }
+        }
+
+        return totalQuantityAvailable
     }
 
     private fun computeTotalCostOfAllItems(productItems: List<ProductAvailabilityItemDto>): Double {
@@ -259,22 +289,21 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
             var productItemRentalDays = DEFAULT_RENTAL_DAYS_DURATION
 
             if (productItem.period?.start != null && productItem.period?.end != null
-                && Days.daysBetween(productItem.period?.start, productItem.period?.end) != Days.ZERO) {
+                && Days.daysBetween(productItem.period?.start, productItem.period?.end) != Days.ZERO
+            ) {
                 productItemRentalDays = Days.daysBetween(productItem.period?.start, productItem.period?.end)
             }
-
-            var totalAccessoriesCost = 0.0
 
             if (productItem.rates?.first() != null) {
                 var totalAccessoriesCost = 0.0
 
-//                productItem.totalCostProducts = "%.2f".format(totalProductItemCost)
                 productItem.accessories.forEach { accessoryItem ->
 
                     when {
                         accessoryItem.rates?.first() != null -> {
                             if (accessoryItem.availabilityState == AvailabilityStateType.AVAILABLE) {
-                                val itemCost = productItemRentalDays.days * (accessoryItem.quantity * accessoryItem.rates!!.first().price?.toDouble()!!)
+                                val itemCost =
+                                    productItemRentalDays.days * (accessoryItem.quantity * accessoryItem.rates!!.first().price?.toDouble()!!)
                                 accessoryItem.totalCostProducts = "%.2f".format(itemCost)
                                 totalAccessoriesCost += itemCost
                             }
@@ -284,7 +313,8 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
 
                 productItem.totalCostAccessories = "%.2f".format(totalAccessoriesCost)
 
-                val parentItemCost = productItemRentalDays.days * (productItem.quantity * productItem.rates!!.first().price?.toDouble()!!)
+                val parentItemCost =
+                    productItemRentalDays.days * (productItem.quantity * productItem.rates!!.first().price?.toDouble()!!)
                 productItem.totalCostProducts = "%.2f".format(parentItemCost)
                 productItem.totalCost = "%.2f".format(parentItemCost + totalAccessoriesCost)
 
