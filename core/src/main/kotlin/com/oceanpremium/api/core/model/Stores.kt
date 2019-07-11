@@ -1,5 +1,6 @@
 package com.oceanpremium.api.core.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -8,5 +9,6 @@ class Stores(
     var alternative: List<Store>? = null,
     var gray: List<Store>? = null,
     var newItems: List<Store>? = null,
+    @JsonIgnore
     var all: List<Store>? = null
 )

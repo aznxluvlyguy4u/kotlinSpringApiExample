@@ -1,11 +1,11 @@
 package com.oceanpremium.api.core.usecase
 
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
-import com.oceanpremium.api.core.currentrms.response.dto.product.StoreQuantityDto
 import com.oceanpremium.api.core.enum.AvailabilityStateType
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.model.ProductAvailabilityItemDto
 import com.oceanpremium.api.core.model.ProductAvailabilityResponse
+import com.oceanpremium.api.core.model.Store
 import com.oceanpremium.api.core.model.Stores
 import com.oceanpremium.api.core.util.DateTimeUtil
 import com.oceanpremium.api.core.util.DateTimeUtil.CURRENT_RMS_API_DATE_ISO8601_FORMAT
@@ -215,23 +215,20 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
         isAccessory: Boolean,
         stores: Stores
     ) {
-        // Set store references
+        // Set stores reference to product dto
+        mapStoreQuantitiesToStoreDto(productDtoItem, stores)
         productAvailabilityItem.stores = stores
 
-        // Determine total quantity available and update product item state accordingly
-        var quantityAvailable = 0
-
-        if (productDtoItem?.storeQuantities != null) {
-            quantityAvailable = determineProductAvailability(productDtoItem.storeQuantities!!)
-        }
+        // Determine quantity available per store type and total and update product item state accordingly
+        val totalQuantityAvailable = determineProductAvailability(stores.all)
 
         // Check that the total product quantity available, compared to the requested quantity for given product is sufficient
-        if (quantityAvailable >= productAvailabilityItem.quantity) {
+        if (totalQuantityAvailable >= productAvailabilityItem.quantity) {
             productAvailabilityItem.availabilityState = AvailabilityStateType.AVAILABLE
-            productAvailabilityItem.quantityAvailable = quantityAvailable
+            productAvailabilityItem.quantityAvailable = totalQuantityAvailable
         } else {
             productAvailabilityItem.availabilityState = AvailabilityStateType.NOT_AVAILABLE
-            productAvailabilityItem.quantityAvailable = quantityAvailable
+            productAvailabilityItem.quantityAvailable = totalQuantityAvailable
         }
 
         productAvailabilityItem.images = productDtoItem?.images
@@ -244,13 +241,24 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
         }
     }
 
+    private fun mapStoreQuantitiesToStoreDto(productDtoItem: ProductDto?, stores: Stores ) {
+        // Map store quantities to stores dto
+        stores.all?.forEach { store ->
+            val storeQuantityDto = productDtoItem?.storeQuantities?.firstOrNull { it.storeId == store.id }
+
+            when {
+                storeQuantityDto != null -> store.quantityAvailable = storeQuantityDto.quantityAvailable
+            }
+        }
+    }
+
     /**
      * Determines for all queried stores that total availability for given product.
      */
-    private fun determineProductAvailability(stores: List<StoreQuantityDto>): Int {
+    private fun determineProductAvailability(stores: List<Store>?): Int {
         var totalQuantityAvailable = 0
 
-        stores.forEach { store ->
+        stores?.forEach { store ->
             val quantityPerStore = store.quantityAvailable?.toDouble()?.toInt()
 
             if (quantityPerStore != null && quantityPerStore > 0) {

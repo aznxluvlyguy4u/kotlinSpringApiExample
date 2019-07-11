@@ -47,12 +47,10 @@ class GetProductInventoryUseCaseImpl(
     override fun execute(queryParameters: Map<String, String>, headers: HttpHeaders): ResponseContainer {
         // List of mapped store ids for the given input location(s), for which we need to query each store,
         // to get the product inventory of
-        val stores: Stores? = locationStoreResolver.resolveStoresByLocation(queryParameters)
-        val allStoreIds: List<Int>? = stores?.all?.map {it.id}
+        val stores: Stores = locationStoreResolver.resolveStoresByLocation(queryParameters)
+            ?: throw BadRequestException("Could not resolve location(s) therefore cannot determine stock")
 
-        if (stores == null || stores.all.isNullOrEmpty()) {
-            throw BadRequestException("Could not resolve location(s) therefore cannot determine stock")
-        }
+        val allStoreIds = stores.all?.map { it.id }.orEmpty()
 
         val productInventoryResponse = productsApi.getProductsInventory(queryParameters, headers, allStoreIds)
         logger.debug("Response code for query on storeIds: $allStoreIds - ${productInventoryResponse?.code()}")
