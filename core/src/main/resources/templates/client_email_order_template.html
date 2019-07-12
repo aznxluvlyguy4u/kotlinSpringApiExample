@@ -64,10 +64,10 @@
                                                             <a th:text="${contactDetails.phoneNumber}">Phone number placeholder</a><br>
                                                         </td>
                                                     </tr>
-                                                    <tr>
-                                                        <th align="left">Affiliation:</th>
+                                                    <tr th:if="${contactDetails.type != null}">
+                                                        <th align="left">Role:</th>
                                                         <td>
-                                                            <a th:text="${contactDetails.role}">Affiliation placeholder</a><br>
+                                                            <a th:text="${contactDetails.type}">Role placeholder</a><br>
                                                         </td>
                                                     </tr>
                                                     <tr>
@@ -116,7 +116,7 @@
                                                         <td align="center">
                                                             <div class="grid-container">
                                                                 <div class="grid-item" th:text="|${product.period.startDateTime} - ${product.period.endDateTime}|">start/end date placeholder</div>
-                                                                <div class="grid-item" th:text="|${product.location.delivery.name} - ${product.location.collection.name}|">delivery/pickup placeholder</div>
+                                                                <div class="grid-item" th:text="|${product.location?.delivery?.name} - ${product.location?.collection?.name}|">delivery/pickup placeholder</div>
                                                             </div>
                                                         </td>
                                                         <td align="center" th:text="|${product.rates?.get(0)?.price}|">unit price placeholder</td>
@@ -128,7 +128,7 @@
                                                             <td align="center">
                                                                 <div class="grid-container">
                                                                     <div class="grid-item" th:if="${accessory.availabilityState == T(com.oceanpremium.api.core.enum.AvailabilityStateType).AVAILABLE}" th:text="|${accessory.period.startDateTime} - ${accessory.period.endDateTime}|">start/end date placeholder</div>
-                                                                    <div class="grid-item" th:if="${accessory.availabilityState == T(com.oceanpremium.api.core.enum.AvailabilityStateType).AVAILABLE}" th:text="|${accessory.location.delivery.name} - ${accessory.location.collection.name}|">delivery/pickup placeholder</div>
+                                                                    <div class="grid-item" th:if="${accessory.availabilityState == T(com.oceanpremium.api.core.enum.AvailabilityStateType).AVAILABLE}" th:text="|${accessory.location?.delivery?.name} - ${accessory.location?.collection?.name}|">delivery/pickup placeholder</div>
                                                                 </div>
                                                             </td>
                                                             <td align="center" th:if="${accessory.availabilityState == T(com.oceanpremium.api.core.enum.AvailabilityStateType).AVAILABLE}" th:text="${accessory.rates?.get(0)?.price}">Accessory item unit price placeholder</td>

@@ -16,7 +16,7 @@ class AddressDto(
 @JsonInclude(JsonInclude.Include.NON_NULL)
 
 class ContactDetailsDto(
-    var role: ClientRoleType,
+    var type: ClientRoleType?,
     val firstName: String,
     val surName: String,
     val emailAddress: String,
