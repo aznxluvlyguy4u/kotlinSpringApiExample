@@ -7,6 +7,7 @@ import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.model.Stores
 import com.oceanpremium.api.core.resolver.LocationStoreResolver
+import io.sentry.Sentry
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
@@ -60,12 +61,21 @@ class GetProductInventoryUseCaseImpl(
 
         if (dto.httpStatus == HttpStatus.OK) {
             val combinedDtoData: List<ProductDto> = dto.data as List<ProductDto>
+
             combinedDtoData.forEach { productDto ->
                 var totalQuantityAvailable = 0.0
+
                 productDto.storeQuantities?.forEach { storeQuantityDto ->
-                    val quantityAvailable = storeQuantityDto.quantityAvailable?.toDouble()
-                    if (quantityAvailable != null) {
-                        totalQuantityAvailable = totalQuantityAvailable.plus(quantityAvailable)
+                    if (storeQuantityDto.quantityAvailable != null) {
+
+                        try {
+                            val quantityAvailable = storeQuantityDto.quantityAvailable?.toDouble()!!
+                            totalQuantityAvailable = totalQuantityAvailable.plus(quantityAvailable)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            logger.error(e.message)
+                            Sentry.capture(e)
+                        }
                     }
                 }
 

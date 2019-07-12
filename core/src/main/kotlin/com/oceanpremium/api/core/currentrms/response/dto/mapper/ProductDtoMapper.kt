@@ -661,10 +661,18 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                         when {
                             it.containsKey("store_id") && it.containsKey("rental_quantity_available") -> {
                                 val storeId = (it["store_id"] as Double?)?.toInt()
-                                val rentalQuantityAvailable = it["rental_quantity_available"].toString() as String?
+                                
+                                val rentalQuantityAvailable = when {
+                                    it["rental_quantity_available"].toString() as String? != null
+                                            && it["rental_quantity_available"].toString() as String? != "null" -> {
+                                        it["rental_quantity_available"].toString()
+                                    }
+                                    else ->
+                                        "0.0"
+                                }
 
                                 when {
-                                    storeId != null && rentalQuantityAvailable != null ->
+                                    storeId != null ->
                                         storeQuantitiesDtos.add(StoreQuantityDto(storeId, rentalQuantityAvailable))
                                 }
                             }
