@@ -1,6 +1,6 @@
 package com.oceanpremium.api.core.currentrms.builder
 
-import org.springframework.beans.factory.annotation.Autowired
+import com.oceanpremium.api.core.model.Store
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -13,234 +13,305 @@ interface StoreBuilder {
  * Source @link: https://docs.google.com/spreadsheets/d/1Jpx59haz_8cZw0uGUBSZX47mQDPv0V3OvgJUtr--JzA/edit#gid=0
  */
 @Service
-class StoreBuilderImpl(@Autowired private val regionBuilder: RegionBuilder): StoreBuilder {
+class StoreBuilderImpl : StoreBuilder {
 
-    //TODO Store does not exist in current data dump
-    private fun buildAntibes(): List<Store> {
-        val stores: MutableList<Store> = mutableListOf()
-
-        // ANTIBES
-        val antibes = Store("Antibes", 99)
-        antibes.addRegion(regionBuilder.buildSpainMainLand())
-        antibes.addRegion(regionBuilder.buildBaleraicsIslands())
-        antibes.addRegion(regionBuilder.buildSouthOfFrance())
-        antibes.addRegion(regionBuilder.buildItaly())
-        antibes.addRegion(regionBuilder.buildSicily())
-        antibes.addRegion(regionBuilder.buildMalta())
-        antibes.addRegion(regionBuilder.buildCorsica())
-        antibes.addRegion(regionBuilder.buildSardinia())
-        antibes.addRegion(regionBuilder.buildCroatiaAndMontenegro())
-        antibes.addRegion(regionBuilder.buildAlbania())
-        antibes.addRegion(regionBuilder.buildGreece())
-        antibes.addRegion(regionBuilder.buildTurkey())
-
-        stores.add(antibes)
-
-        return stores.toList()
+    fun buildPalmaNG(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            3,
+            "Palma de Mallorca (NG)",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
     }
 
-    private fun buildPalma(): List<Store> {
-        val stores: MutableList<Store> = mutableListOf()
-
-        // Palma
-        val palma = Store("Palma", 3)
-        palma.addRegion(regionBuilder.buildBaleraicsIslands())
-
-        stores.add(palma)
-
-        return stores.toList()
+    fun buildM55(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            5,
+            "M55",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
     }
 
-    private fun buildOlbia(): List<Store> {
-        val stores: MutableList<Store> = mutableListOf()
-
-        // Palma
-        val olbia = Store("Olbia", 11)
-        olbia.addRegion(regionBuilder.buildSouthOfFrance())
-        olbia.addRegion(regionBuilder.buildItaly())
-        olbia.addRegion(regionBuilder.buildSicily())
-        olbia.addRegion(regionBuilder.buildMalta())
-        olbia.addRegion(regionBuilder.buildCorsica())
-        olbia.addRegion(regionBuilder.buildSardinia())
-
-        stores.add(olbia)
-
-        return stores.toList()
+    fun buildStMaarten(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            9,
+            "St. Maarten (DSM)",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
     }
 
-    private fun buildM55(): List<Store> {
-        val stores: MutableList<Store> = mutableListOf()
-
-        // M55
-        val m55 = Store("M55", 5)
-        m55.addRegion(regionBuilder.buildSpainMainLand())
-        m55.addRegion(regionBuilder.buildBaleraicsIslands())
-        m55.addRegion(regionBuilder.buildSouthOfFrance())
-        m55.addRegion(regionBuilder.buildItaly())
-        m55.addRegion(regionBuilder.buildSicily())
-        m55.addRegion(regionBuilder.buildMalta())
-        m55.addRegion(regionBuilder.buildCorsica())
-        m55.addRegion(regionBuilder.buildSardinia())
-        m55.addRegion(regionBuilder.buildCroatiaAndMontenegro())
-        m55.addRegion(regionBuilder.buildAlbania())
-        m55.addRegion(regionBuilder.buildGreece())
-        m55.addRegion(regionBuilder.buildTurkey())
-        m55.addRegion(regionBuilder.buildCaribbean())
-        m55.addRegion(regionBuilder.buildFloridaAndBahamas())
-        m55.addRegion(regionBuilder.buildMaldives())
-
-        stores.add(m55)
-
-        return stores.toList()
+    fun buildAthensH360(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            10,
+            "Athens (H360)",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
     }
 
-    private fun buildNapoli(): List<Store> {
-        val stores: MutableList<Store> = mutableListOf()
-
-        // Napoli
-        val napoli = Store("Napoli", 15)
-        napoli.addRegion(regionBuilder.buildSouthOfFrance())
-        napoli.addRegion(regionBuilder.buildItaly())
-        napoli.addRegion(regionBuilder.buildSicily())
-        napoli.addRegion(regionBuilder.buildMalta())
-        napoli.addRegion(regionBuilder.buildCorsica())
-        napoli.addRegion(regionBuilder.buildSardinia())
-        napoli.addRegion(regionBuilder.buildCroatiaAndMontenegro())
-        napoli.addRegion(regionBuilder.buildAlbania())
-        napoli.addRegion(regionBuilder.buildGreece())
-        napoli.addRegion(regionBuilder.buildTurkey())
-
-        stores.add(napoli)
-
-        return stores.toList()
+    fun buildOlbiaNA(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            11,
+            "Olbia (NA)",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
     }
 
-    //TODO Split buildSpain and split buildItaly
-    private fun buildAthene(): List<Store> {
-        val stores: MutableList<Store> = mutableListOf()
-
-        // Athene
-        val athene = Store("Athene", 10)
-        athene.addRegion(regionBuilder.buildItaly())
-        athene.addRegion(regionBuilder.buildSicily())
-        athene.addRegion(regionBuilder.buildCorsica())
-        athene.addRegion(regionBuilder.buildSardinia())
-        athene.addRegion(regionBuilder.buildCroatiaAndMontenegro())
-        athene.addRegion(regionBuilder.buildAlbania())
-        athene.addRegion(regionBuilder.buildGreece())
-        athene.addRegion(regionBuilder.buildTurkey())
-
-        stores.add(athene)
-
-        return stores.toList()
+    fun buildFortLauderdale(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            13,
+            "Fort Lauderdale (YC)",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
     }
 
-    //TODO Store does not exist in current data dump
-    private fun buildCroatia(): List<Store> {
-        val stores: MutableList<Store> = mutableListOf()
-
-        // CROATIA
-        val croatia = Store("Croatia", 98)
-        croatia.addRegion(regionBuilder.buildSpainMainLand())
-        croatia.addRegion(regionBuilder.buildBaleraicsIslands())
-        croatia.addRegion(regionBuilder.buildSouthOfFrance())
-        croatia.addRegion(regionBuilder.buildItaly())
-        croatia.addRegion(regionBuilder.buildSicily())
-        croatia.addRegion(regionBuilder.buildMalta())
-        croatia.addRegion(regionBuilder.buildCorsica())
-        croatia.addRegion(regionBuilder.buildSardinia())
-        croatia.addRegion(regionBuilder.buildCroatiaAndMontenegro())
-        croatia.addRegion(regionBuilder.buildAlbania())
-        croatia.addRegion(regionBuilder.buildGreece())
-        croatia.addRegion(regionBuilder.buildTurkey())
-
-        stores.add(croatia)
-
-        return stores.toList()
+    fun buildAntigua(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            14,
+            "Antigua (AC)",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
     }
 
-    private fun buildAntiguaSxm(): List<Store> {
-        val stores: MutableList<Store> = mutableListOf()
-
-        // AntiguaSxm
-        val antiguaSxm = Store("AntiguaSxm", 14)
-        antiguaSxm.addRegion(regionBuilder.buildSpainMainLand())
-        antiguaSxm.addRegion(regionBuilder.buildBaleraicsIslands())
-        antiguaSxm.addRegion(regionBuilder.buildSouthOfFrance())
-        antiguaSxm.addRegion(regionBuilder.buildItaly())
-        antiguaSxm.addRegion(regionBuilder.buildSicily())
-        antiguaSxm.addRegion(regionBuilder.buildMalta())
-        antiguaSxm.addRegion(regionBuilder.buildCorsica())
-        antiguaSxm.addRegion(regionBuilder.buildSardinia())
-        antiguaSxm.addRegion(regionBuilder.buildCroatiaAndMontenegro())
-        antiguaSxm.addRegion(regionBuilder.buildAlbania())
-        antiguaSxm.addRegion(regionBuilder.buildGreece())
-        antiguaSxm.addRegion(regionBuilder.buildTurkey())
-        antiguaSxm.addRegion(regionBuilder.buildCaribbean())
-        antiguaSxm.addRegion(regionBuilder.buildFloridaAndBahamas())
-        antiguaSxm.addRegion(regionBuilder.buildMaldives())
-
-        stores.add(antiguaSxm)
-
-        return stores.toList()
+    fun buildNapoli(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            15,
+            "Napoli (MLF)",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
     }
 
-    //TODO Store does not exist in current data dump
-    private fun buildFtl(): List<Store> {
-        val stores: MutableList<Store> = mutableListOf()
-
-        // FTL
-        val ftl = Store("FTL", 13)
-        ftl.addRegion(regionBuilder.buildSpainMainLand())
-        ftl.addRegion(regionBuilder.buildBaleraicsIslands())
-        ftl.addRegion(regionBuilder.buildSouthOfFrance())
-        ftl.addRegion(regionBuilder.buildItaly())
-        ftl.addRegion(regionBuilder.buildSicily())
-        ftl.addRegion(regionBuilder.buildMalta())
-        ftl.addRegion(regionBuilder.buildCorsica())
-        ftl.addRegion(regionBuilder.buildSardinia())
-        ftl.addRegion(regionBuilder.buildCroatiaAndMontenegro())
-        ftl.addRegion(regionBuilder.buildAlbania())
-        ftl.addRegion(regionBuilder.buildGreece())
-        ftl.addRegion(regionBuilder.buildTurkey())
-        ftl.addRegion(regionBuilder.buildCaribbean())
-        ftl.addRegion(regionBuilder.buildFloridaAndBahamas())
-        ftl.addRegion(regionBuilder.buildMaldives())
-
-        stores.add(ftl)
-
-        return stores.toList()
+    fun buildGenova(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            16,
+            "Genova (Maremoto)",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
     }
 
+    fun buildAntibes(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            18,
+            "Antibes",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
+    }
+
+    fun buildPalmaED(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            19,
+            "Palma de Mallorca (ED)",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
+    }
+
+    fun buildIbiza(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            20,
+            "Ibiza (Rodriquez)",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
+    }
+
+    fun buildOlbiaSYS(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            21,
+            "Olbia (SYS)",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
+    }
+
+    fun buildNewItemsStore(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            22,
+            "New Items Store",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
+    }
+
+    fun buildPalermo(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            23,
+            "Palermo (Artemis)",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
+    }
+
+    fun buildRiposto(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            24,
+            "Riposto (Artemis)",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
+    }
+
+    fun buildDubrovnikBWA(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            24, "Dubrovnik (BWA)", minimumDeliveryHours, deliveryCost?.toDouble()
+        )
+    }
+
+    fun buildMalta(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            25,
+            "Malta",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
+    }
+
+    fun buildAthensSotiris(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            26,
+            "Athens (Sotiris)",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
+    }
+
+    fun buildCorfu(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            27,
+            "Corfu",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
+    }
+
+    fun buildKosA1(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            28,
+            "Kos (A1)",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
+    }
+
+    fun buildRhodes(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            29,
+            "Rhodes (Roditis)",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
+    }
+
+    fun buildVenice(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            30,
+            "Venice (Katarina)",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
+    }
+
+    fun buildZadar(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            31,
+            "Zadar (Alessia)",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
+    }
+
+    fun buildSplit(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            32,
+            "Split (Luka)",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
+    }
+
+    fun buildDubrovnikKristijan(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            33,
+            "Dubrovnik (Kristijan)",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
+    }
+
+    fun buildBCM(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            35,
+            "BCM (Kotor)",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
+    }
+
+    fun buildTivat(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            36,
+            "Tivat (BWA)",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
+    }
+
+    fun buildMale(minimumDeliveryHours: Int? = null, deliveryCost: Int? = null): Store {
+        return Store(
+            37,
+            "Male",
+            minimumDeliveryHours,
+            deliveryCost?.toDouble()
+        )
+    }
 
     override fun getAllStores(): List<Store> {
         val allStores: MutableList<Store> = mutableListOf()
 
-        allStores.addAll(buildAntibes())
-        allStores.addAll(buildPalma())
-        allStores.addAll(buildOlbia())
-        allStores.addAll(buildM55())
-        allStores.addAll(buildNapoli())
-        allStores.addAll(buildAthene())
-        allStores.addAll(buildCroatia())
-        allStores.addAll(buildAntiguaSxm())
-        allStores.addAll(buildFtl())
+        allStores.add(buildPalmaNG())
+        allStores.add(buildM55())
+        allStores.add(buildStMaarten())
+        allStores.add(buildAthensH360())
+        allStores.add(buildOlbiaNA())
+        allStores.add(buildFortLauderdale())
+        allStores.add(buildAntigua())
+        allStores.add(buildNapoli())
+        allStores.add(buildGenova())
+        allStores.add(buildAntibes())
+        allStores.add(buildPalmaED())
+        allStores.add(buildIbiza())
+        allStores.add(buildOlbiaSYS())
+        allStores.add(buildNewItemsStore())
+        allStores.add(buildPalermo())
+        allStores.add(buildRiposto())
+        allStores.add(buildDubrovnikBWA())
+        allStores.add(buildMalta())
+        allStores.add(buildAthensSotiris())
+        allStores.add(buildCorfu())
+        allStores.add(buildKosA1())
+        allStores.add(buildRhodes())
+        allStores.add(buildVenice())
+        allStores.add(buildZadar())
+        allStores.add(buildSplit())
+        allStores.add(buildDubrovnikKristijan())
+        allStores.add(buildBCM())
+        allStores.add(buildTivat())
+        allStores.add(buildMale())
 
         return allStores
     }
 
     override fun getAllStoreIds(): SortedSet<Int> {
         val allStoreIds: SortedSet<Int> = sortedSetOf()
-
-        allStoreIds.add(99)
-        allStoreIds.add(3)
-        allStoreIds.add(11)
-        allStoreIds.add(5)
-        allStoreIds.add(15)
-        allStoreIds.add(10)
-        allStoreIds.add(98)
-        allStoreIds.add(14)
-        allStoreIds.add(13)
+        getAllStores().forEach { allStoreIds.add(it.id) }
 
         return allStoreIds
     }

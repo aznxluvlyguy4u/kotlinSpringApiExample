@@ -6,7 +6,6 @@ import com.oceanpremium.api.core.resolver.QueryParametersResolverImpl
 import com.oceanpremium.api.core.enum.AuthorizationType
 import com.oceanpremium.api.core.exception.throwable.*
 import io.sentry.Sentry
-import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -14,8 +13,8 @@ import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Query
 import retrofit2.http.QueryMap
-import ru.gildor.coroutines.retrofit.awaitResponse
 
 /**
  * Interface for Products API, used by Retrofit to create API call service.
@@ -50,7 +49,8 @@ interface ProductsApi {
      */
     @GET("products/inventory")
     fun getProductsInventory(
-        @QueryMap map: Map<String, String>
+        @QueryMap uniqueQueryParamsMap: Map<String, String>,
+        @Query(QueryParametersResolverImpl.STORE_ID_QUERY_PARAMS) storeIdsQueryParamsMap: List<Int>?
     ): Call<Any>
 
     /**
@@ -193,42 +193,40 @@ class ProductsApiImpl(
     fun getProductsInventory(
         queryParameters: Map<String, String>,
         headers: HttpHeaders,
-        storeIds: List<Int>
-    ): List<Response<Any>> {
-        val responses : MutableList<Response<Any>> = mutableListOf()
+        storeIds: List<Int>?
+    ): Response<Any>? {
+        val validatedMap
+                = queryParametersResolver.resolveGetProductsInventory(queryParameters, headers, storeIds)
 
-        storeIds.parallelStream().forEach { storeId ->
-            val validatedMap = queryParametersResolver.resolveGetProductsInventory(queryParameters, headers, storeId)
-            val retrofitCall = productsApi.getProductsInventory(map = validatedMap)
+        val retrofitCall = productsApi.getProductsInventory(
+            uniqueQueryParamsMap = validatedMap.uniqueQueryParams,
+            storeIdsQueryParamsMap = validatedMap.storeIdsQueryParams
+        )
+        lateinit var response: Response<Any>
 
-            // You can use retrofit suspended extension inside any coroutine block
-             runBlocking {
-                try {
-                    val response = retrofitCall.awaitResponse()
+        try {
+            response = retrofitCall.execute()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            logger.error("Request to Current RMS API api/v1/products/inventory failed: ${e.message}")
+            Sentry.capture(e)
 
-                    logger.debug("Current RMS API call: api/v1/products/inventory HTTP status: ${response.code()}")
+            throw CurrentRmsAPIException(e.message)
+        }
 
-                    when {
-                        response.isSuccessful -> {
-                            logger.debug("Current RMS API api/v1/products/inventory response body: ${response.body()}")
-                            responses.add(response)
-                        }
-                        else -> {
-                            logger.debug("Request to Current RMS API api/v1/products/inventory failed: ${response.message()}")
-                            handleException(response)
-                        }
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    logger.error("Request to Current RMS API api/v1/products/inventory failed: ${e.message}")
-                    Sentry.capture(e)
+        logger.debug("Current RMS API call: api/v1/products/inventory HTTP status: ${response.code()}")
 
-                    throw e
-                }
+        when {
+            response.isSuccessful -> {
+                logger.debug("Current RMS API api/v1/products/inventory response body: ${response.body()}")
+            }
+            else -> {
+                logger.debug("Request to Current RMS API api/v1/products/inventory failed: ${response.message()}")
+                handleException(response)
             }
         }
 
-        return responses.toList()
+        return response
     }
 
     /**

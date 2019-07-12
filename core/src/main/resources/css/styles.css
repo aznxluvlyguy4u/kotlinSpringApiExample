@@ -1,9 +1,14 @@
 body {
     font-family: 'Roboto', sans-serif;
-    background-color: lightgray;
+    background-color: red;
 }
 
 .responsive {
     width: 33.33%;
     height: 60px;
+}
+
+
+.grid-container {
+    display: grid;
 }

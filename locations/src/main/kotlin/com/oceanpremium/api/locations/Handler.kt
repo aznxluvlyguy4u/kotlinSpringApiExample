@@ -8,6 +8,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler
 import com.oceanpremium.api.core.currentrms.builder.LocationBuilderImpl
 import com.oceanpremium.api.core.currentrms.builder.RegionBuilderImpl
+import com.oceanpremium.api.core.currentrms.builder.StoreBuilderImpl
 import com.oceanpremium.api.core.exception.handler.GlobalExceptionHandler
 import io.sentry.spring.SentryServletContextInitializer
 import org.slf4j.LoggerFactory
@@ -34,7 +35,7 @@ import kotlin.jvm.java as java1
  * The main application entry point that spins up the API.
  */
 @SpringBootApplication
-@Import(LocationBuilderImpl::class, RegionBuilderImpl::class, GlobalExceptionHandler::class)
+@Import(LocationBuilderImpl::class, RegionBuilderImpl::class, StoreBuilderImpl::class, GlobalExceptionHandler::class)
 class LocationsDriver : SpringBootServletInitializer() {
 
     companion object {

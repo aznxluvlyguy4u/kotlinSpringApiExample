@@ -25,6 +25,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         private val logger = LoggerFactory.getLogger(this::class.java)
         private const val ACCESSORIES_KEY = "accessories"
         private const val CUSTOM_FIELDS_KEY = "custom_fields"
+        private const val STORE_QUANTITIES_KEY = "store_quantities"
     }
 
     init {
@@ -67,11 +68,13 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                 val responseBody = response.body() as Map<*, *>
 
                 data = when {
+                    // Product Inventory
                     responseBody.containsKey("products") -> {
 
                         /**
-                         * CurrentRms returns a 200 OK for empty result sets. As a best practice for REST API,
-                         * the response should be a 404 NOT FOUND when an empty result set is returned.
+                         * CurrentRms returns a 200 OK for empty result sets. AND after accepting multi store ids as input,
+                         * when no store ids are given, default response is given of the store id with lowest ID.
+                         * As a best practice for REST API, the response should be a 404 NOT FOUND when an empty result set is returned OR when no store ids is supplied.
                          *
                          * See @link: https://stackoverflow.com/questions/11746894/what-is-the-proper-rest-response-code-for-a-valid-request-but-an-empty-data
                          *
@@ -94,6 +97,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                         mapJsonArray(response)
                     }
 
+                    // Single Product
                     responseBody.containsKey("product") -> {
                         mapJsonObjectToDto(responseBody["product"] as Map<*, *>)
                     }
@@ -138,6 +142,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         val attachments: List<AttachmentDto>? = mapAttachments(itemBody)
         val rawConfigurationIds = mapConfigIds(itemBody)
         val descriptions = mapDescriptionText(itemBody)
+        val storeQuantities: List<StoreQuantityDto>? = mapStoreQuantities(itemBody)
 
         try {
             if (itemBody.containsKey("id")) {
@@ -174,6 +179,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             customFields,
             accessoryIds,
             attachments,
+            storeQuantities,
             rawConfigurationIds
         )
     }
@@ -586,7 +592,8 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                 && itemBody[productDescriptionKey] as String? != null
                 && (itemBody[productDescriptionKey] as String).isNotEmpty()
             ) {
-                descriptions[sectionKey + "1"] = DescriptionSectionDto(mapProductName(itemBody), itemBody[productDescriptionKey] as String)
+                descriptions[sectionKey + "1"] =
+                    DescriptionSectionDto(mapProductName(itemBody), itemBody[productDescriptionKey] as String)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -635,5 +642,60 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         }
 
         return productName
+    }
+
+    /**
+     * Map the quantityAvailable per store when using multi store id querying
+     */
+    private fun mapStoreQuantities(itemBody: Map<*, *>): List<StoreQuantityDto>? {
+        val storeQuantitiesDtos: MutableList<StoreQuantityDto> = mutableListOf()
+
+        try {
+            if (itemBody.containsKey(STORE_QUANTITIES_KEY)
+            ) {
+                @Suppress("UNCHECKED_CAST")
+                val storeQuantities = itemBody.get(key = STORE_QUANTITIES_KEY) as List<Map<*, *>>
+
+                storeQuantities.forEach {
+                    try {
+                        when {
+                            it.containsKey("store_id") && it.containsKey("rental_quantity_available") -> {
+                                val storeId = (it["store_id"] as Double?)?.toInt()
+                                
+                                val rentalQuantityAvailable = when {
+                                    it["rental_quantity_available"].toString() as String? != null
+                                            && it["rental_quantity_available"].toString() as String? != "null" -> {
+                                        it["rental_quantity_available"].toString()
+                                    }
+                                    else ->
+                                        "0.0"
+                                }
+
+                                when {
+                                    storeId != null ->
+                                        storeQuantitiesDtos.add(StoreQuantityDto(storeId, rentalQuantityAvailable))
+                                }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+
+                        val message = "Failed to map product store quantities to Dto: ${e.message}"
+                        logger.error(message)
+
+                        throw BadRequestException(e.message)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+
+            val message = "Failed to map store quantities response to Dto: ${e.message}"
+            logger.error(message)
+
+            throw BadRequestException(e.message)
+        }
+
+        return storeQuantitiesDtos
     }
 }

@@ -1,12 +1,25 @@
 package com.oceanpremium.api.core.currentrms.builder
 
+import com.oceanpremium.api.core.enum.WarehouseStoreType
+import com.oceanpremium.api.core.model.Store
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.*
 
-class Location(var name: String? = null, var id: Int = 0,  var regionId: Int = 0, var storeIds: SortedSet<Int> = sortedSetOf())
+class Location(
+    var name: String? = null,
+    var id: Int = 0,
+    var regionId: Int = 0,
+    var nativeStores: MutableList<Store> = mutableListOf(),
+    var alternativeStores: MutableList<Store> = mutableListOf(),
+    var grayStores: MutableList<Store> = mutableListOf(),
+    var newItemsStores: MutableList<Store> = mutableListOf()
+)
 
-class Region(private val name: String, var id: Int = 0, val locations: MutableList<Location> = mutableListOf(), var storeIds: SortedSet<Int> = sortedSetOf()) {
+class Region(
+    private val name: String,
+    var id: Int = 0,
+    val locations: MutableList<Location> = mutableListOf()
+) {
 
     fun addLocation(location: Location) {
         location.regionId = id
@@ -17,21 +30,12 @@ class Region(private val name: String, var id: Int = 0, val locations: MutableLi
 
         locations.add(location)
     }
-
-    fun addStore(store: Store) {
-        storeIds.add(store.id)
-    }
 }
 
-class Store(private val name: String, var id: Int = 0, private val regions: MutableList<Region> = mutableListOf()) {
-
-    fun addRegion(region: List<Region>) {
-        regions.addAll(region)
-    }
-}
 
 interface LocationBuilder {
     fun getAllLocations(): List<Location>
+    fun findById(locationId: Int): Location?
 }
 
 @Service
@@ -50,13 +54,39 @@ class LocationBuilderImpl(
             region.locations.forEach { location ->
                 location.id = j
                 location.regionId = region.id
-                location.storeIds = region.storeIds
                 j++
             }
 
             locations.addAll(region.locations)
         }
 
-        return locations.sortedWith(compareBy({ it.name }))
+        categorizeWarehouse(locations)
+
+        return locations.sortedWith(compareBy { it.name })
     }
+
+    override fun findById(locationId: Int): Location? {
+        return getAllLocations().firstOrNull { it.id == locationId }
+    }
+
+    private fun categorizeWarehouse(locations: List<Location>) {
+        locations.forEach { location ->
+            location.nativeStores.forEach { store ->
+                store.type = WarehouseStoreType.NATIVE
+            }
+
+            location.alternativeStores.forEach {store ->
+                store.type = WarehouseStoreType.ALTERNATIVE
+            }
+
+            location.grayStores.forEach {store ->
+                store.type = WarehouseStoreType.GRAY
+            }
+
+            location.newItemsStores.forEach {store ->
+                store.type = WarehouseStoreType.NEW_ITEMS
+            }
+        }
+    }
+
 }

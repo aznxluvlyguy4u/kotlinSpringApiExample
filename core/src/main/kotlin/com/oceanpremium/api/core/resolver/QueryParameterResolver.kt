@@ -2,17 +2,16 @@ package com.oceanpremium.api.core.resolver
 
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.util.DateTimeUtil
+import com.oceanpremium.api.core.util.DateTimeUtil.CURRENT_RMS_API_DATE_ISO8601_FORMAT
+import org.joda.time.DateTime
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
 
 interface QueryParametersResolver {
 
     fun resolveGetProducts(map: Map<String, String>, headers: HttpHeaders): Map<String, String>
 
-    fun resolveGetProductsInventory(map: Map<String, String>, headers: HttpHeaders, storeId: Int?): Map<String, String>
+    fun resolveGetProductsInventory(map: Map<String, String>, headers: HttpHeaders, storeIds: List<Int>?): ProductsInventoryValidatedMap
 
     fun resolveGetProductGroups(map: Map<String, String>, headers: HttpHeaders): Map<String, String>
 
@@ -37,14 +36,16 @@ interface QueryParametersResolver {
     }
 }
 
+class ProductsInventoryValidatedMap(val storeIdsQueryParams: List<Int>?, val uniqueQueryParams: Map<String, String>)
+
 @Suppress("KDocUnresolvedReference")
 class QueryParametersResolverImpl : QueryParametersResolver {
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
+        const val STORE_ID_QUERY_PARAMS = "store_id[]"
         private const val ACTIVE_PRODUCT_QUERY = "q[active_eq]"
         private const val FILTER_MODE_QUERY = "filtermode[]"
-        private const val DEFAULT_STORE_ID_QUERY = "store_id"
         private const val START_DATE_QUERY = "starts_at"
         private const val END_DATE_QUERY = "ends_at"
         private const val ACCESSORY_ONLY_QUERY = "q[product_accessory_only_eq]"
@@ -78,7 +79,7 @@ class QueryParametersResolverImpl : QueryParametersResolver {
      * 1  q[product_tags_name_cont]=SEARCH_KEY_STRING
      * 2  q[active_eq]=true
      * 3  filtermode[]=rental
-     * 4  store_id=STORE_ID_INT
+     * 4  store_id[]=STORE_ID_INT
      * 5  q[product_accessory_only_eq]=false
      * 6  starts_at=YYYY-MM-DD
      * 7  ends_at=YYYY-MM-DD
@@ -91,7 +92,7 @@ class QueryParametersResolverImpl : QueryParametersResolver {
      * 1  q[product_group_id_eq]=19
      * 2  q[active_eq]=true
      * 3  filtermode[]=rental
-     * 4  store_id=STORE_ID_INT
+     * 4  store_id[]=STORE_ID_INT
      * 5  q[product_accessory_only_eq]=false
      * 6  starts_at=YYYY-MM-DD
      * 7  ends_at=YYYY-MM-DD
@@ -104,42 +105,37 @@ class QueryParametersResolverImpl : QueryParametersResolver {
      * 1  q[product_id_eq]=247
      * 2  q[active_eq]=true
      * 3  filtermode[]=rental
-     * 4  store_id=STORE_ID_INT
+     * 4  store_id[]=STORE_ID_INT
      * 5  q[product_accessory_only_eq]=false
      * 6  starts_at=YYYY-MM-DD
      * 7  ends_at=YYYY-MM-DD
      * 8  q[product_product_group_name_not_eq]=FunctionalIntegrationTest
      */
-    override fun resolveGetProductsInventory(
-        map: Map<String, String>,
-        headers: HttpHeaders,
-        storeId: Int?
-    ): Map<String, String> {
-        val validatedMap = mutableMapOf<String, String>()
+    override fun resolveGetProductsInventory(map: Map<String, String>, headers: HttpHeaders, storeIds: List<Int>?): ProductsInventoryValidatedMap {
+        val uniqueQueryParamsMap = mutableMapOf<String, String>()
         val host = getHost(headers)
 
+        // Set unique query params to validatedMap
         try {
-
             when {
                 // Only query product with tags containing the search value
-                map.containsKey(PRODUCT_TAGS_SEARCH_QUERY) -> {
-                    validatedMap[PRODUCT_TAGS_SEARCH_QUERY] = map[PRODUCT_TAGS_SEARCH_QUERY] as String
+                map.containsKey(PRODUCT_TAGS_SEARCH_QUERY) ->  {
+                    uniqueQueryParamsMap[PRODUCT_TAGS_SEARCH_QUERY] = map[PRODUCT_TAGS_SEARCH_QUERY] as String
                 }
                 // Only query product with group ids containing the search value
-                map.containsKey(PRODUCT_GROUPS_ID_SEARCH_QUERY) -> {
-                    validatedMap[PRODUCT_GROUPS_ID_SEARCH_QUERY] = map[PRODUCT_GROUPS_ID_SEARCH_QUERY] as String
+                map.containsKey(PRODUCT_GROUPS_ID_SEARCH_QUERY)-> {
+                    uniqueQueryParamsMap[PRODUCT_GROUPS_ID_SEARCH_QUERY] = map[PRODUCT_GROUPS_ID_SEARCH_QUERY] as String
                 }
                 // Only query product with group ids containing the search value
-                map.containsKey(PRODUCT_ID_SEARCH_QUERY) -> {
-                    validatedMap[PRODUCT_ID_SEARCH_QUERY] = map[PRODUCT_ID_SEARCH_QUERY] as String
+                map.containsKey(PRODUCT_ID_SEARCH_QUERY)-> {
+                    uniqueQueryParamsMap[PRODUCT_ID_SEARCH_QUERY] = map[PRODUCT_ID_SEARCH_QUERY] as String
                 }
                 else -> {
                     // Cannot continue, the minimal input is a pickup location which is not present, when no keyword is provided
                     if (!map.containsKey(DELIVERY_LOCATION_KEY)) {
                         throw BadRequestException("Cannot continue search, need at minimum, either a search keyword or a delivery location.")
                     } else {
-                        validatedMap[PRODUCT_TAGS_SEARCH_EQ_QUERY] =
-                            KEYWORD_LESS_TAG
+                        uniqueQueryParamsMap[PRODUCT_TAGS_SEARCH_EQ_QUERY] = KEYWORD_LESS_TAG
                     }
                 }
             }
@@ -148,14 +144,14 @@ class QueryParametersResolverImpl : QueryParametersResolver {
              * Static parameters, add default mandatory query parameters.
              */
             // Only query active products
-            validatedMap[ACTIVE_PRODUCT_QUERY] = "true"
+            uniqueQueryParamsMap[ACTIVE_PRODUCT_QUERY] = "true"
 
             // Only query products of rental type
-            validatedMap[FILTER_MODE_QUERY] = "rental"
+            uniqueQueryParamsMap[FILTER_MODE_QUERY] = "rental"
 
             // Only query products and accessories that are rentable on it self (exclude non-rentable accessories)
             if (!map.containsKey(ACCESSORY_ONLY_QUERY)) {
-                validatedMap[ACCESSORY_ONLY_QUERY] = "false"
+                uniqueQueryParamsMap[ACCESSORY_ONLY_QUERY] = "false"
             }
 
             /**
@@ -171,7 +167,7 @@ class QueryParametersResolverImpl : QueryParametersResolver {
                 logger.debug("Running other then $LOCALHOST, DISABLE functional integration test product querying")
 
                 when {
-                    !map.containsKey(FUNCTIONAL_INTEGRATION_GROUP_QUERY) -> validatedMap[FUNCTIONAL_INTEGRATION_GROUP_QUERY] =
+                    !map.containsKey(FUNCTIONAL_INTEGRATION_GROUP_QUERY) -> uniqueQueryParamsMap[FUNCTIONAL_INTEGRATION_GROUP_QUERY] =
                         FUNCTIONAL_INTEGRATION_GROUP_NAME
                 }
             }
@@ -180,6 +176,11 @@ class QueryParametersResolverImpl : QueryParametersResolver {
              * Dynamic parameters, check if date interval boundaries (start- & end date) are given,
              * otherwise set query date interval to ONE day. If a start date is given but no end date,
              * set end date equal to start date.
+             *
+             * See also @link: https://api.current-rms.com/doc#header-dates
+             * for the needed format of DateTimes to properly consume CurrentRMS API.
+             *
+             * Format needs to be like the following: 2015-06-28T23:00:00.000Z
              */
 
             // A time interval with boundaries is supplied, validate if boundaries are valid
@@ -187,111 +188,76 @@ class QueryParametersResolverImpl : QueryParametersResolver {
                     END_DATE_QUERY
                 )
             ) {
-                val startDate = DateTimeUtil.fromISO8601UTC(
-                    map[START_DATE_QUERY] as String,
-                    format = DateTimeUtil.DEFAULT_API_DATE_FORMAT
-                )
-                val endDate = DateTimeUtil.fromISO8601UTC(
-                    map[END_DATE_QUERY] as String,
-                    format = DateTimeUtil.DEFAULT_API_DATE_FORMAT
-                )
+                val startDate = DateTimeUtil.fromISO8601UTC(map[START_DATE_QUERY] as String, CURRENT_RMS_API_DATE_ISO8601_FORMAT)
+                val endDate = DateTimeUtil.fromISO8601UTC(map[END_DATE_QUERY] as String, CURRENT_RMS_API_DATE_ISO8601_FORMAT)
 
                 when {
                     startDate != null && endDate != null -> when {
                         endDate.isBefore(startDate) -> throw BadRequestException("Collection date: $endDate may not be before delivery date: $startDate")
                         else -> {
-                            validatedMap[START_DATE_QUERY] =
-                                DateTimeUtil.toISO8601UTC(startDate, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)!!
-                            validatedMap[END_DATE_QUERY] =
-                                DateTimeUtil.toISO8601UTC(endDate, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)!!
+                            val startDateAtNoon = startDate.withTime(DateTimeUtil.NOON, 0, 0, 0)
+                            val endDateAtNoon = endDate.withTime(DateTimeUtil.NOON, 0, 0, 0)
+
+                            uniqueQueryParamsMap[START_DATE_QUERY] = DateTimeUtil.toISO8601UTC(startDateAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
+                            uniqueQueryParamsMap[END_DATE_QUERY] = DateTimeUtil.toISO8601UTC(endDateAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
                         }
                     }
                 }
             }
 
             // No time interval boundaries supplied, create an interval of ONE day
-            if (!map.containsKey(START_DATE_QUERY) && !map.containsKey(
-                    END_DATE_QUERY
-                )
-            ) {
-                val todayAtNoon = LocalDateTime.of(LocalDate.now(), LocalTime.NOON)
+            if (!map.containsKey(START_DATE_QUERY) && !map.containsKey(END_DATE_QUERY)) {
+                val todayAtNoon = DateTime().withTime(DateTimeUtil.NOON, 0, 0, 0)
                 val todayAtNoonStr =
-                    DateTimeUtil.toISO8601UTC(todayAtNoon, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)!!
-                validatedMap[START_DATE_QUERY] = todayAtNoonStr
+                    DateTimeUtil.toISO8601UTC(todayAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
+                uniqueQueryParamsMap[START_DATE_QUERY] = todayAtNoonStr
 
                 val tomorrowAtNoon = todayAtNoon.plusDays(1)
                 val tomorrowAtNoonStr =
-                    DateTimeUtil.toISO8601UTC(tomorrowAtNoon, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)!!
-                validatedMap[END_DATE_QUERY] = tomorrowAtNoonStr
+                    DateTimeUtil.toISO8601UTC(tomorrowAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
+                uniqueQueryParamsMap[END_DATE_QUERY] = tomorrowAtNoonStr
             }
 
             // Only a start date is supplied
-            if (map.containsKey(START_DATE_QUERY) && !map.containsKey(
-                    END_DATE_QUERY
-                )
-            ) {
-                val startDate = DateTimeUtil.fromISO8601UTC(
-                    map[START_DATE_QUERY] as String,
-                    format = DateTimeUtil.DEFAULT_API_DATE_FORMAT
-                )
+            if (map.containsKey(START_DATE_QUERY) && !map.containsKey(END_DATE_QUERY)) {
+                val startDate = DateTimeUtil.fromISO8601UTC(map[START_DATE_QUERY] as String, CURRENT_RMS_API_DATE_ISO8601_FORMAT)
 
                 when {
                     startDate != null -> {
-                        val startDateStr =
-                            DateTimeUtil.toISO8601UTC(startDate, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)!!
-                        validatedMap[START_DATE_QUERY] = startDateStr
-                        validatedMap[END_DATE_QUERY] = startDateStr
+                        val startDateAtNoon = startDate.withTime(DateTimeUtil.NOON, 0, 0, 0)
+                        val endDateAtNoon = startDate.plusDays(1)
+
+                        uniqueQueryParamsMap[START_DATE_QUERY] = DateTimeUtil.toISO8601UTC(startDateAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
+                        uniqueQueryParamsMap[END_DATE_QUERY] = DateTimeUtil.toISO8601UTC(endDateAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
                     }
                     else -> throw BadRequestException("Failed to parse delivery date: $startDate")
                 }
             }
 
             // Only an end date is supplied
-            if (!map.containsKey(START_DATE_QUERY) && map.containsKey(
-                    END_DATE_QUERY
-                )
-            ) {
-                val endDate = DateTimeUtil.fromISO8601UTC(
-                    map[END_DATE_QUERY] as String,
-                    format = DateTimeUtil.DEFAULT_API_DATE_FORMAT
-                )
+            if (!map.containsKey(START_DATE_QUERY) && map.containsKey(END_DATE_QUERY)) {
+                val endDate = DateTimeUtil.fromISO8601UTC(map[END_DATE_QUERY] as String, CURRENT_RMS_API_DATE_ISO8601_FORMAT)
 
                 when {
                     endDate != null -> {
-                        val endDateStr =
-                            DateTimeUtil.toISO8601UTC(endDate, format = DateTimeUtil.DEFAULT_API_DATE_FORMAT)!!
-                        validatedMap[START_DATE_QUERY] = endDateStr
-                        validatedMap[END_DATE_QUERY] = endDateStr
+                        val endDateAtNoon = endDate.withTime(DateTimeUtil.NOON, 0, 0, 0)
+                        val startDateAtNoon = endDateAtNoon.minusDays(1)
+
+                        uniqueQueryParamsMap[START_DATE_QUERY] = DateTimeUtil.toISO8601UTC(startDateAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
+                        uniqueQueryParamsMap[END_DATE_QUERY] = DateTimeUtil.toISO8601UTC(endDateAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
                     }
                     else -> throw BadRequestException("Failed to parse delivery date: $endDate")
                 }
             }
 
-            // If a location/collection id is given, grab it, resolve it to store id and append it to the map,
-            // and remove the location/collection id from the map as current rms does not recognize those fields
-            if (map.containsKey(COLLECTION_LOCATION_KEY)) {
-                validatedMap.remove(COLLECTION_LOCATION_KEY)
-            }
-
-            if (map.containsKey(DELIVERY_LOCATION_KEY)) {
-                validatedMap.remove(DELIVERY_LOCATION_KEY)
-            }
-
-            // Use to location/collection id's to resolve to a store id
-            // Only query products on a specific store (for now)
-            if (!map.containsKey(DEFAULT_STORE_ID_QUERY) && storeId != null) {
-                validatedMap[DEFAULT_STORE_ID_QUERY] = "$storeId"
-            }
-
             // Explicit pagination parameters are given, map them
             if (map.containsKey(PAGE_KEY)) {
-                validatedMap[PAGE_KEY] = map[PAGE_KEY] as String
+                uniqueQueryParamsMap[PAGE_KEY] = map[PAGE_KEY] as String
             }
 
             if (map.containsKey(PER_PAGE_KEY)) {
-                validatedMap[PER_PAGE_KEY] = map[PER_PAGE_KEY] as String
+                uniqueQueryParamsMap[PER_PAGE_KEY] = map[PER_PAGE_KEY] as String
             }
-
         } catch (e: Exception) {
             e.printStackTrace()
             val message = "Failed to parse query parameters: ${e.message}"
@@ -300,9 +266,9 @@ class QueryParametersResolverImpl : QueryParametersResolver {
             throw BadRequestException(message)
         }
 
-        logger.debug("Validated query parameters set build: $validatedMap")
+        logger.debug("Validated query parameters set build: $uniqueQueryParamsMap")
 
-        return validatedMap
+        return ProductsInventoryValidatedMap(storeIds, uniqueQueryParamsMap)
     }
 
     override fun resolveGetProducts(map: Map<String, String>, headers: HttpHeaders): Map<String, String> {

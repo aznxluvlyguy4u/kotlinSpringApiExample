@@ -7,7 +7,10 @@ import com.oceanpremium.api.core.resolver.QueryParametersResolverImpl.Companion.
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.enum.ClientRoleType
 import com.oceanpremium.api.core.model.*
+import com.oceanpremium.api.core.util.DateTimeUtil
+import com.oceanpremium.api.core.util.DateTimeUtil.CURRENT_RMS_API_DATE_ISO8601_FORMAT
 import org.assertj.core.api.Assertions.assertThat
+import org.joda.time.DateTime
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,9 +19,9 @@ import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit4.SpringRunner
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
+import java.io.UnsupportedEncodingException
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 class Errors(var errors: List<String>? = null)
 class ErrorResponse(var code: Int? = null, var message: Errors? = null)
@@ -50,14 +53,14 @@ class ProductsControllerTest {
         val id: Int = 148,
         val name: String = "Seabob F5",
         val gibraltarLocationId: Int = 1,
-        val portVendresLocationId: Int = 29
+        val miamiLocationId: Int = 139
     )
 
     companion object {
         private const val endpoint = "/api/v1/products"
         private val testProduct = TestProduct()
         private val testExistingProduct = TestExistingProduct()
-        private val todayAtNoon = LocalDateTime.of(LocalDate.now(), LocalTime.NOON)
+        private val todayAtNoon =  DateTime().withTime(DateTimeUtil.NOON, 0, 0, 0)
         private val tomorrowAtNoon = todayAtNoon.plusDays(1)
     }
 
@@ -261,10 +264,10 @@ class ProductsControllerTest {
         val testProduct: ProductDto? = productItems?.find { p -> p.id == testExistingProduct.id }
         assertThat(testProduct?.rates).isNotNull
         assertThat(testProduct?.rates).isNotEmpty
-        assertThat(testProduct?.rates?.first()?.quantityAvailable).isEqualTo("2.0")
+        assertThat(testProduct?.rates?.first()?.quantityAvailable).isEqualTo("1.0")
 
         // Then query inventory with delivery_location_id set to port vendres
-        val params2 = "delivery_location_id=${testExistingProduct.portVendresLocationId}&q[product_tags_name_cont]=f5"
+        val params2 = "delivery_location_id=${testExistingProduct.miamiLocationId}&q[product_tags_name_cont]=f5"
         val productsResponse2 = restTemplate?.getForObject("$endpoint/inventory?$params2", ProductsResponse::class.java)
 
         assertThat(productsResponse2).isNotNull
@@ -400,7 +403,11 @@ class ProductsControllerTest {
      */
     @Test
     fun testBadRequestStartDateBeforeEndDateGetProductsInventory() {
-        val params = "starts_at=2019-09-15&ends_at=2019-09-01&q[product_tags_name_cont]=seabob"
+        val now = DateTime.now()
+        val startDateStr = DateTimeUtil.toISO8601UTC(now.withHourOfDay(DateTimeUtil.NOON), CURRENT_RMS_API_DATE_ISO8601_FORMAT)
+        val endDateStr = DateTimeUtil.toISO8601UTC(now.plusDays(1), CURRENT_RMS_API_DATE_ISO8601_FORMAT)
+        val params = encodeValue("starts_at=$startDateStr&ends_at=$endDateStr&q[product_tags_name_cont]=seabob")
+
         val productsErrorResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ErrorResponse::class.java)
 
         assertThat(productsErrorResponse).isNotNull
@@ -415,6 +422,15 @@ class ProductsControllerTest {
         }
     }
 
+    // Method to encode a string value using `UTF-8` encoding scheme
+    private fun encodeValue(value: String): String {
+        try {
+            return URLEncoder.encode(value, StandardCharsets.UTF_8.toString())
+        } catch (ex: UnsupportedEncodingException) {
+            throw RuntimeException(ex.cause)
+        }
+
+    }
 
     /**
      * Create rental order of products.
