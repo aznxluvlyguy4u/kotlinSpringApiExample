@@ -102,7 +102,7 @@
                                                             <p align="left">Product name</p>
                                                         </th>
                                                         <th>
-                                                            <p align="center">Rental period</p>
+                                                            <p align="center">Pick Up - Drop Off</p>
                                                         </th>
                                                         <th>
                                                             <p align="left">Unit price (per day)</p>
@@ -113,14 +113,24 @@
                                                     </tr>
                                                     <tr th:each="product : ${availableProducts}">
                                                         <td align="center" th:text="|${product.quantity}x ${product.name}|">name placeholder</td>
-                                                        <td align="center" th:text="|${product.period.startDateTime} - ${product.period.endDateTime}|">period placeholder</td>
+                                                        <td align="center">
+                                                            <div class="grid-container">
+                                                                <div class="grid-item" th:text="|${product.period.startDateTime} - ${product.period.endDateTime}|">start/end date placeholder</div>
+                                                                <div class="grid-item" th:text="|${product.location.delivery.name} - ${product.location.collection.name}|">delivery/pickup placeholder</div>
+                                                            </div>
+                                                        </td>
                                                         <td align="center" th:text="|${product.rates?.get(0)?.price}|">unit price placeholder</td>
                                                         <td align="center" th:text="${product.totalCostProducts}">total cost placeholder</td>
                                                     </tr>
                                                     <th:block th:each="product : ${availableProducts}">
                                                         <tr th:each="accessory : ${product.accessories}">
                                                             <td align="center" th:if="${accessory.availabilityState == T(com.oceanpremium.api.core.enum.AvailabilityStateType).AVAILABLE}" th:text="|${accessory.quantity}x ${accessory.name}|">Accessory item name placeholder</td>
-                                                            <td align="center" th:if="${accessory.availabilityState == T(com.oceanpremium.api.core.enum.AvailabilityStateType).AVAILABLE}" th:text="|${accessory.period.startDateTime} - ${accessory.period.endDateTime}|">period placeholder</td>
+                                                            <td align="center">
+                                                                <div class="grid-container">
+                                                                    <div class="grid-item" th:if="${accessory.availabilityState == T(com.oceanpremium.api.core.enum.AvailabilityStateType).AVAILABLE}" th:text="|${accessory.period.startDateTime} - ${accessory.period.endDateTime}|">start/end date placeholder</div>
+                                                                    <div class="grid-item" th:if="${accessory.availabilityState == T(com.oceanpremium.api.core.enum.AvailabilityStateType).AVAILABLE}" th:text="|${accessory.location.delivery.name} - ${accessory.location.collection.name}|">delivery/pickup placeholder</div>
+                                                                </div>
+                                                            </td>
                                                             <td align="center" th:if="${accessory.availabilityState == T(com.oceanpremium.api.core.enum.AvailabilityStateType).AVAILABLE}" th:text="${accessory.rates?.get(0)?.price}">Accessory item unit price placeholder</td>
                                                             <td align="center" th:if="${accessory.availabilityState == T(com.oceanpremium.api.core.enum.AvailabilityStateType).AVAILABLE}" th:text="${accessory.totalCost}">Accessory total cost placeholder</td>
                                                         </tr>
