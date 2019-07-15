@@ -11,6 +11,8 @@ interface QueryParametersResolver {
 
     fun resolveGetProducts(map: Map<String, String>, headers: HttpHeaders): Map<String, String>
 
+    fun resolveGetProductById(): Map<String, String>
+
     fun resolveGetProductsInventory(map: Map<String, String>, headers: HttpHeaders, storeIds: List<Int>?): ProductsInventoryValidatedMap
 
     fun resolveGetProductGroups(map: Map<String, String>, headers: HttpHeaders): Map<String, String>
@@ -46,6 +48,7 @@ class QueryParametersResolverImpl : QueryParametersResolver {
         const val STORE_ID_QUERY_PARAMS = "store_id[]"
         private const val ACTIVE_PRODUCT_QUERY = "q[active_eq]"
         private const val FILTER_MODE_QUERY = "filtermode[]"
+        private const val INCLUDE_QUERY = "include[]"
         private const val START_DATE_QUERY = "starts_at"
         private const val END_DATE_QUERY = "ends_at"
         private const val ACCESSORY_ONLY_QUERY = "q[product_accessory_only_eq]"
@@ -340,6 +343,15 @@ class QueryParametersResolverImpl : QueryParametersResolver {
 
             throw BadRequestException(message)
         }
+
+        return validatedMap
+    }
+
+    override fun resolveGetProductById(): Map<String, String> {
+        val validatedMap: MutableMap<String, String> = mutableMapOf()
+
+        // Include embedded relational accessories full details
+        validatedMap[INCLUDE_QUERY] = "accessories"
 
         return validatedMap
     }
