@@ -2,11 +2,11 @@ package com.oceanpremium.api.core.resolver
 
 import com.oceanpremium.api.core.currentrms.builder.LocationBuilder
 import com.oceanpremium.api.core.currentrms.builder.StoreBuilder
+import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.model.Store
 import com.oceanpremium.api.core.model.Stores
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import javax.ws.rs.BadRequestException
 
 interface LocationStoreResolver {
     fun resolveStoresByLocation(queryParameters: Map<String, String>): Stores?
@@ -19,6 +19,7 @@ class LocationStoreResolverImpl(
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
+        private val idRegex = "\\d+".toRegex()
     }
 
     /**
@@ -28,6 +29,8 @@ class LocationStoreResolverImpl(
     @Throws(BadRequestException::class)
     override fun resolveStoresByLocation(queryParameters: Map<String, String>): Stores? {
 
+        validateQueryParameter(queryParameters)
+
         return when {
             // Both collection- & delivery location are given
             queryParameters.containsKey(QueryParametersResolverImpl.COLLECTION_LOCATION_KEY)
@@ -36,7 +39,8 @@ class LocationStoreResolverImpl(
                 logger.debug("Both collection- & delivery location are given (only using delivery location)")
 
                 val allStores: MutableList<Store> = mutableListOf()
-                val deliveryLocationId = (queryParameters[QueryParametersResolverImpl.DELIVERY_LOCATION_KEY] as String).toInt()
+                val deliveryLocationId =
+                    (queryParameters[QueryParametersResolverImpl.DELIVERY_LOCATION_KEY] as String).toInt()
                 val deliveryLocation = locationBuilder.findById(deliveryLocationId)
 
                 if (deliveryLocation != null) {
@@ -111,6 +115,26 @@ class LocationStoreResolverImpl(
 
                 null
             }
+        }
+    }
+
+    private fun validateQueryParameter(queryParameters: Map<String, String>) {
+
+        when {
+            queryParameters.containsKey(QueryParametersResolverImpl.DELIVERY_LOCATION_KEY)
+                    && !(queryParameters[QueryParametersResolverImpl.DELIVERY_LOCATION_KEY] as String).matches(idRegex) ->
+                throw BadRequestException(
+                    "Query parameter value for key: ${QueryParametersResolverImpl.DELIVERY_LOCATION_KEY}," +
+                            " is NOT valid. Provide a valid ID of type Integer, for example: " +
+                            "${QueryParametersResolverImpl.DELIVERY_LOCATION_KEY}=1234"
+                )
+            queryParameters.containsKey(QueryParametersResolverImpl.COLLECTION_LOCATION_KEY)
+                    && !(queryParameters[QueryParametersResolverImpl.COLLECTION_LOCATION_KEY] as String).matches(idRegex)
+            -> throw BadRequestException(
+                "Query parameter value for key: ${QueryParametersResolverImpl.DELIVERY_LOCATION_KEY}," +
+                        "is NOT valid. Provide a valid ID of type Integer, for example: " +
+                        "${QueryParametersResolverImpl.COLLECTION_LOCATION_KEY}=1234"
+            )
         }
     }
 
