@@ -22,13 +22,12 @@ class ProductDto(
     val rates: List<PricingDto>,
     val images: List<ImageSource>,
     var customFields: ProductCustomFieldsDto? = null,
-    @JsonIgnore
-    val accesoryIds: List<AccessoryItem>? = null,
     val attachments: List<AttachmentDto>? = null,
     var storeQuantities: List<StoreQuantityDto>? = null,
     @JsonIgnore
     var rawConfigurationIds: List<ConfigPropertyField>? = null,
-    var configurations: List<ConfigProperty>? = null
+    var configurations: List<ConfigProperty>? = null,
+    var accessories: List<ProductDto>? = null
 ) {
-    var accessories: MutableList<ProductDto>? = null
+
 }
