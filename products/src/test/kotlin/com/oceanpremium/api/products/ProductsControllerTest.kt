@@ -88,10 +88,6 @@ class ProductsControllerTest {
 
         val productItems = productsResponse?.data
         assertThat(productItems).isNotEmpty
-
-        productItems?.forEach {
-            assertThat(it.name).startsWith("JVT")
-        }
     }
 
     /**
