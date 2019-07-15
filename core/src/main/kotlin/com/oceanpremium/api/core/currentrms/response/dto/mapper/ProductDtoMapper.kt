@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus
 import retrofit2.Response
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.oceanpremium.api.core.enum.AccessoryType
 import com.oceanpremium.api.core.model.ConfigPropertyField
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.util.FileSizeFormatUtil
@@ -406,61 +407,61 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             val productsItemsBody = itemBody[ACCESSORIES_KEY] as List<Map<*, *>>
 
             productsItemsBody.forEach {
+                var id: Int? = null
 
-                if (it.containsKey("item")) {
-                    val item = it["item"] as Map<String, String>
-
-                    var id: Int? = null
-                    val name: String? = mapProductName(item, true)
-                    var type: String? = null
-                    val productGroup: ProductGroupDto? = mapProductGroupToDto(item)
-                    var customFields: ProductCustomFieldsDto? = null
-                    val rates = mapProductRatesToDto(item)
-                    val imageSources: ImageDto?
-                    val attachments: List<AttachmentDto>? = mapAttachments(item)
-                    val rawConfigurationIds = mapConfigIds(item)
-                    val descriptions = mapDescriptionText(item)
-
-                    try {
-                        if (item.containsKey(accessoryIdKey) && item[accessoryIdKey] != null) {
-                            id = (item[accessoryIdKey] as Double).toInt()
-                        }
-
-                        if (item.containsKey("custom_fields")) {
-                            customFields = mapCustomFieldsToDto(itemBody)
-                        }
-
-                        if (item.containsKey("inclusion_type_name") && item["inclusion_type_name"] != null) {
-                            type = item["inclusion_type_name"] as String
-
-                            logger.debug("Found accessory with Id: $id and type: $type")
-                        }
-
-                        imageSources = mapImageSourcesToDto(item)
-
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-
-                        val message = "Failed to map product response to Dto: ${e.message}"
-                        logger.error(message)
-
-                        throw BadRequestException(e.message)
+                try {
+                    if (it.containsKey(accessoryIdKey) && it[accessoryIdKey] != null) {
+                        id = (it[accessoryIdKey] as Double).toInt()
                     }
 
-                    val accessoryProductItem = ProductDto(
-                        id,
-                        name,
-                        descriptions,
-                        type,
-                        productGroup,
-                        rates.pricings,
-                        imageSources.sources,
-                        customFields,
-                        attachments,
-                        rawConfigurationIds = rawConfigurationIds
-                    )
+                    if (it.containsKey("item")) {
+                        @Suppress("UNCHECKED_CAST")
+                        val item = it["item"] as Map<String, String>
 
-                    items.add(accessoryProductItem)
+                        val name: String? = mapProductName(item, true)
+                        var type: String? = null
+                        val productGroup: ProductGroupDto? = mapProductGroupToDto(item)
+                        var customFields: ProductCustomFieldsDto? = null
+                        val rates = mapProductRatesToDto(item)
+                        val imageSources = mapImageSourcesToDto(item)
+                        val attachments: List<AttachmentDto>? = mapAttachments(item)
+                        val rawConfigurationIds = mapConfigIds(item)
+                        val descriptions = mapDescriptionText(item)
+
+                        when {
+                            item.containsKey("custom_fields") -> customFields = mapCustomFieldsToDto(itemBody)
+                        }
+
+                        when {
+                            it.containsKey("inclusion_type_name") && it["inclusion_type_name"] != null -> {
+                                val accessoryType = it["inclusion_type_name"] as String
+                                type = AccessoryType.valueOf(accessoryType.toUpperCase()).name
+                                logger.debug("Found accessory with Id: $id and type: $type")
+                            }
+                        }
+
+                        val accessoryProductItem = ProductDto(
+                            id,
+                            name,
+                            descriptions,
+                            type,
+                            productGroup,
+                            rates.pricings,
+                            imageSources.sources,
+                            customFields,
+                            attachments,
+                            rawConfigurationIds = rawConfigurationIds
+                        )
+
+                        items.add(accessoryProductItem)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+
+                    val message = "Failed to map product response to Dto: ${e.message}"
+                    logger.error(message)
+
+                    throw BadRequestException(e.message)
                 }
             }
         }

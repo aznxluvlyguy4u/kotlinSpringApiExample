@@ -6,13 +6,6 @@ import com.oceanpremium.api.core.model.ConfigProperty
 import com.oceanpremium.api.core.model.ConfigPropertyField
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-class AccessoryItem(
-    val id: Int,
-    val type: String,
-    val quantity: String? = null
-)
-
-@JsonInclude(JsonInclude.Include.NON_NULL)
 class ProductDto(
     val id: Int?,
     val name: String?,
@@ -28,6 +21,4 @@ class ProductDto(
     var rawConfigurationIds: List<ConfigPropertyField>? = null,
     var configurations: List<ConfigProperty>? = null,
     var accessories: List<ProductDto>? = null
-) {
-
-}
+)
