@@ -279,7 +279,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                     logger.debug("parse rates for accessories: $itemBody")
                     var quantityStr: String? = null
 
-                    if(itemBody.containsKey("quantity")) {
+                    if (itemBody.containsKey("quantity")) {
                         val quantity = (itemBody["quantity"] as String?)?.toDouble()
                         if (quantity != null) {
                             quantityStr = "%.2f".format(quantity)
@@ -288,7 +288,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
 
                     if (itemBody.containsKey("item")) {
                         @Suppress("UNCHECKED_CAST")
-                        val item = itemBody["item"] as Map<*,*>
+                        val item = itemBody["item"] as Map<*, *>
 
                         val rentalRate = item["rental_rate"] as Map<*, *>
                         val rentalPrice = rentalRate["price"] as String?
