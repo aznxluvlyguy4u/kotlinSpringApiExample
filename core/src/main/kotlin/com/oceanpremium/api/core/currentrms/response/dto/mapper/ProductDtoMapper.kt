@@ -279,8 +279,6 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                     logger.debug("parse rates for accessories: $itemBody")
                     var quantityStr: String? = null
 
-                    val x = itemBody["quantity"] as String?
-
                     if(itemBody.containsKey("quantity")) {
                         val quantity = (itemBody["quantity"] as String?)?.toDouble()
                         if (quantity != null) {
