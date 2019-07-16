@@ -194,6 +194,12 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         val imageSources: MutableList<ImageSource> = mutableListOf()
         var imageSourceCandidate: ImageSource? = null
 
+        val dummyLink = "https://op-prod.jongensvantechniek.nl/static/images/logo_dark.png"
+        val dummy = ImageSource(
+            dummyLink,
+            dummyLink
+        )
+
         // Grab custom product image urls (public friendly images)
         // otherwise, no public friendly images where found, thus revert to the product images set for a given product in currentRMS.
         try {
@@ -262,6 +268,10 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
 
         if (imageSourceCandidate != null) {
             imageSources.add(imageSourceCandidate)
+        }
+
+        if (imageSources.size == 0) {
+            imageSources.add(dummy)
         }
 
         return ImageDto(imageSources)
