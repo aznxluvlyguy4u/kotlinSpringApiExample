@@ -134,6 +134,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
     private fun mapJsonObjectToDto(itemBody: Map<*, *>): ProductDto {
         var id: Int? = null
         val name: String? = mapProductName(itemBody)
+        val seoFriendlyProductName = mapSeoFriendlyProductName(itemBody)
         var type: String? = null
         val productGroup: ProductGroupDto? = mapProductGroupToDto(itemBody)
         var customFields: ProductCustomFieldsDto? = null
@@ -181,7 +182,8 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             attachments,
             storeQuantities,
             rawConfigurationIds,
-            accessories = accessories
+            accessories = accessories,
+            seoFriendlyName = seoFriendlyProductName
         )
     }
 
@@ -193,12 +195,6 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
     private fun mapImageSourcesToDto(itemBody: Map<*, *>): ImageDto {
         val imageSources: MutableList<ImageSource> = mutableListOf()
         var imageSourceCandidate: ImageSource? = null
-
-        val dummyLink = "https://op-prod.jongensvantechniek.nl/static/images/logo_dark.png"
-        val dummy = ImageSource(
-            dummyLink,
-            dummyLink
-        )
 
         // Grab custom product image urls (public friendly images)
         // otherwise, no public friendly images where found, thus revert to the product images set for a given product in currentRMS.
@@ -270,18 +266,49 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             imageSources.add(imageSourceCandidate)
         }
 
-        if (imageSources.size == 0) {
-            imageSources.add(dummy)
-        }
-
         return ImageDto(imageSources)
     }
 
     @Throws(BadRequestException::class)
-    private fun mapProductRatesToDto(itemBody: Map<*, *>): RateDto {
+    private fun mapProductRatesToDto(itemBody: Map<*, *>, isAccessory: Boolean = false): RateDto {
         val rates: MutableList<PricingDto> = mutableListOf()
         try {
             when {
+                // Parse rates for accessory products
+                isAccessory -> {
+                    logger.debug("parse rates for accessories: $itemBody")
+                    var quantityStr: String? = null
+
+                    val x = itemBody["quantity"] as String?
+
+                    if(itemBody.containsKey("quantity")) {
+                        val quantity = (itemBody["quantity"] as String?)?.toDouble()
+                        if (quantity != null) {
+                            quantityStr = "%.2f".format(quantity)
+                        }
+                    }
+
+                    if (itemBody.containsKey("item")) {
+                        @Suppress("UNCHECKED_CAST")
+                        val item = itemBody["item"] as Map<*,*>
+
+                        val rentalRate = item["rental_rate"] as Map<*, *>
+                        val rentalPrice = rentalRate["price"] as String?
+                        val rentalLeadChargePeriodName = "Daily"
+
+                        when {
+                            !rentalPrice.isNullOrEmpty() -> {
+                                rates.add(
+                                    PricingDto(
+                                        quantityAvailable = quantityStr,
+                                        price = rentalPrice,
+                                        chargePeriod = rentalLeadChargePeriodName
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
 
                 // Parse rates when availability is requested
                 itemBody.containsKey("rental_price")
@@ -291,8 +318,15 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                     val rentalQuantityAvailable = itemBody["rental_quantity_available"] as String?
                     val rentalLeadChargePeriodName = itemBody["rental_lead_charge_period_name"] as String?
 
-                    rates.add(PricingDto(rentalQuantityAvailable, rentalPrice, rentalLeadChargePeriodName))
+                    rates.add(
+                        PricingDto(
+                            rentalQuantityAvailable,
+                            rentalPrice,
+                            rentalLeadChargePeriodName
+                        )
+                    )
                 }
+
                 // Parse rates when product by id is requested
                 else -> if (itemBody.containsKey("rental_rate")) {
                     @Suppress("UNCHECKED_CAST")
@@ -405,8 +439,6 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
     /**
      * Grab accessory ids to get the full accessories details in additional API calls.
      * There are three types of accessories in Current RMS: Mandatory, Optional , Default.
-     *
-     *
      */
     private fun mapAccessoriesToProductDto(itemBody: Map<*, *>): List<ProductDto> {
         val items: MutableList<ProductDto> = mutableListOf()
@@ -420,9 +452,14 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                 var id: Int? = null
 
                 try {
+
                     if (it.containsKey(accessoryIdKey) && it[accessoryIdKey] != null) {
                         id = (it[accessoryIdKey] as Double).toInt()
                     }
+
+                    val seoFriendlyName = mapSeoFriendlyProductName(it)
+                    val rates = mapProductRatesToDto(it, true)
+
 
                     if (it.containsKey("item")) {
                         @Suppress("UNCHECKED_CAST")
@@ -432,7 +469,6 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                         var type: String? = null
                         val productGroup: ProductGroupDto? = mapProductGroupToDto(item)
                         var customFields: ProductCustomFieldsDto? = null
-                        val rates = mapProductRatesToDto(item)
                         val imageSources = mapImageSourcesToDto(item)
                         val attachments: List<AttachmentDto>? = mapAttachments(item)
                         val rawConfigurationIds = mapConfigIds(item)
@@ -463,12 +499,16 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                             rawConfigurationIds = rawConfigurationIds
                         )
 
+                        when {
+                            seoFriendlyName != null -> accessoryProductItem.seoFriendlyName = seoFriendlyName
+                        }
+
                         items.add(accessoryProductItem)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
 
-                    val message = "Failed to map product response to Dto: ${e.message}"
+                    val message = "Failed to map accessories product response to Dto: ${e.message}"
                     logger.error(message)
 
                     throw BadRequestException(e.message)
@@ -660,43 +700,57 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
     }
 
     /**
-     * Grab the product name either the default product name, or the custom SEO friendly custom field for product name.
+     * Grab the product name.
      */
     private fun mapProductName(itemBody: Map<*, *>): String? {
         var productName: String? = null
         val originalProductNameKey = "name"
-        val customProductName = "custom_product_description_seo_title"
 
         try {
-
-
-                // Grab the default product name, as set in Current RMS
-                if (itemBody.containsKey(originalProductNameKey)) {
-                    productName = itemBody[originalProductNameKey] as String?
-                }
-
-
-            // Override default product name
-            if (itemBody.contains(CUSTOM_FIELDS_KEY)) {
-                @Suppress("UNCHECKED_CAST")
-                val customFieldsBody = itemBody[CUSTOM_FIELDS_KEY] as Map<String, *>
-
-                if (customFieldsBody.containsKey(customProductName)
-                    && (customFieldsBody[customProductName] as String).isNotEmpty()
-                ) {
-                    productName = customFieldsBody[customProductName] as String
-                }
+            if (itemBody.containsKey(originalProductNameKey)) {
+                productName = itemBody[originalProductNameKey] as String?
             }
         } catch (e: Exception) {
             e.printStackTrace()
 
-            val message = "Failed to map product description response to Dto: ${e.message}"
+            val message = "Failed to map product name response to Dto: ${e.message}"
             logger.error(message)
 
             throw BadRequestException(e.message)
         }
 
         return productName
+    }
+
+    /**
+     * Grab the custom SEO friendly custom field.
+     */
+    private fun mapSeoFriendlyProductName(itemBody: Map<*, *>): String? {
+        var seoFriendlyProductName: String? = null
+        val customSeoProductTitle = "custom_product_description_seo_title"
+
+        try {
+            // grab SEO friendly product name
+            if (itemBody.contains(CUSTOM_FIELDS_KEY)) {
+                @Suppress("UNCHECKED_CAST")
+                val customFieldsBody = itemBody[CUSTOM_FIELDS_KEY] as Map<String, *>
+
+                if (customFieldsBody.containsKey(customSeoProductTitle)
+                    && (customFieldsBody[customSeoProductTitle] as String).isNotEmpty()
+                ) {
+                    seoFriendlyProductName = customFieldsBody[customSeoProductTitle] as String
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+
+            val message = "Failed to map product sea product name response to Dto: ${e.message}"
+            logger.error(message)
+
+            throw BadRequestException(e.message)
+        }
+
+        return seoFriendlyProductName
     }
 
     /**
