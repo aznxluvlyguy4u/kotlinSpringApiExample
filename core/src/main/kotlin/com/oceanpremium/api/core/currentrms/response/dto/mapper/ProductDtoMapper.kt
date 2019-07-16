@@ -131,9 +131,9 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
      * Map a single item to dtoMapper
      */
     @Throws(BadRequestException::class)
-    private fun mapJsonObjectToDto(itemBody: Map<*, *>, isAccessory: Boolean = false): ProductDto {
+    private fun mapJsonObjectToDto(itemBody: Map<*, *>): ProductDto {
         var id: Int? = null
-        val name: String? = mapProductName(itemBody, isAccessory)
+        val name: String? = mapProductName(itemBody)
         var type: String? = null
         val productGroup: ProductGroupDto? = mapProductGroupToDto(itemBody)
         var customFields: ProductCustomFieldsDto? = null
@@ -428,7 +428,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                         @Suppress("UNCHECKED_CAST")
                         val item = it["item"] as Map<String, String>
 
-                        val name: String? = mapProductName(item, true)
+                        val name: String? = mapProductName(item)
                         var type: String? = null
                         val productGroup: ProductGroupDto? = mapProductGroupToDto(item)
                         var customFields: ProductCustomFieldsDto? = null
@@ -662,26 +662,19 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
     /**
      * Grab the product name either the default product name, or the custom SEO friendly custom field for product name.
      */
-    private fun mapProductName(itemBody: Map<*, *>, isAccessory: Boolean = false): String? {
+    private fun mapProductName(itemBody: Map<*, *>): String? {
         var productName: String? = null
         val originalProductNameKey = "name"
         val customProductName = "custom_product_description_seo_title"
 
         try {
 
-            if (isAccessory) {
-                logger.debug("item is an accessory, apply specific parsing logic")
-                if(itemBody.containsKey("item")) {
-                    @Suppress("UNCHECKED_CAST")
-                    val item = itemBody["item"] as Map<String, String>
-                    productName = item[originalProductNameKey] as String
-                }
-            } else {
+
                 // Grab the default product name, as set in Current RMS
                 if (itemBody.containsKey(originalProductNameKey)) {
                     productName = itemBody[originalProductNameKey] as String?
                 }
-            }
+
 
             // Override default product name
             if (itemBody.contains(CUSTOM_FIELDS_KEY)) {
