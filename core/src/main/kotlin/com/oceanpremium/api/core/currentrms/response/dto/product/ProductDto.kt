@@ -29,11 +29,14 @@ class ProductDto(
     val images: List<ImageSource>,
     var customFields: ProductCustomFieldsDto? = null,
     val attachments: List<AttachmentDto>? = null,
-    var storeQuantities: List<StoreQuantityDto>? = null,
+    @JsonIgnore
+    var allStoreQuantities: List<StoreQuantityDto>? = null,
     @JsonIgnore
     var rawConfigurationIds: List<ConfigPropertyField>? = null,
     @JsonIgnore
     var configurations: List<ConfigProperty>? = null,
     var accessories: List<ProductDto>? = null,
     var seoFriendlyName: String? = name
-)
+) {
+    var storeQuantities: List<StoreQuantityDto>? = null
+}
