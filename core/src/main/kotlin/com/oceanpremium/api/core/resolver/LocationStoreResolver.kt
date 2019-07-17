@@ -44,18 +44,20 @@ class LocationStoreResolverImpl(
                 val deliveryLocation = locationBuilder.findById(deliveryLocationId)
 
                 if (deliveryLocation != null) {
-                    allStores.addAll(deliveryLocation.nativeStores.sortedWith(compareBy { it.id }))
-                    allStores.addAll(deliveryLocation.alternativeStores.sortedWith(compareBy { it.id }))
-                    allStores.addAll(deliveryLocation.grayStores.sortedWith(compareBy { it.id }))
-                    allStores.addAll(deliveryLocation.newItemsStores.sortedWith(compareBy { it.id }))
+                    allStores.addAll(deliveryLocation.nativeStores.sortedBy { it.id })
+                    allStores.addAll(deliveryLocation.alternativeStores.sortedBy { it.id })
+                    allStores.addAll(deliveryLocation.grayStores.sortedBy { it.id })
+                    allStores.addAll(deliveryLocation.newItemsStores.sortedBy { it.id } )
                 }
+
+                logger.debug("Resolved storeIds: ${allStores.sortedBy { it.id }} for delivery location: $deliveryLocation")
 
                 return Stores(
                     deliveryLocation?.nativeStores,
                     deliveryLocation?.alternativeStores,
                     deliveryLocation?.grayStores,
                     deliveryLocation?.newItemsStores,
-                    allStores
+                    allStores.sortedBy { it.id }
                 )
             }
 
@@ -65,8 +67,8 @@ class LocationStoreResolverImpl(
                 logger.debug("Only collection location is given")
 
                 return Stores(
-                    native = storeBuilder.getAllStores(),
-                    all = storeBuilder.getAllStores()
+                    native = storeBuilder.getAllStores().sortedBy { it.id },
+                    all = storeBuilder.getAllStores().sortedBy { it.id }
                 )
             }
 
@@ -83,18 +85,20 @@ class LocationStoreResolverImpl(
                 val allStores: MutableList<Store> = mutableListOf()
 
                 if (deliveryLocation != null) {
-                    allStores.addAll(deliveryLocation.nativeStores.sortedWith(compareBy { it.id }))
-                    allStores.addAll(deliveryLocation.alternativeStores.sortedWith(compareBy { it.id }))
-                    allStores.addAll(deliveryLocation.grayStores.sortedWith(compareBy { it.id }))
-                    allStores.addAll(deliveryLocation.newItemsStores.sortedWith(compareBy { it.id }))
+                    allStores.addAll(deliveryLocation.nativeStores.sortedBy { it.id })
+                    allStores.addAll(deliveryLocation.alternativeStores.sortedBy { it.id })
+                    allStores.addAll(deliveryLocation.grayStores.sortedBy { it.id })
+                    allStores.addAll(deliveryLocation.newItemsStores.sortedBy { it.id })
                 }
+
+                logger.debug("Resolved storeIds: ${allStores.sortedBy { it.id }} for delivery location: $deliveryLocation")
 
                 return Stores(
                     deliveryLocation?.nativeStores,
                     deliveryLocation?.alternativeStores,
                     deliveryLocation?.grayStores,
                     deliveryLocation?.newItemsStores,
-                    allStores
+                    allStores.sortedBy { it.id }
                 )
             }
 
@@ -103,10 +107,9 @@ class LocationStoreResolverImpl(
                     && !queryParameters.containsKey(QueryParametersResolverImpl.DELIVERY_LOCATION_KEY) -> {
                 logger.debug("Both collection- & delivery location are not given")
 
-
                 return Stores(
-                    native = storeBuilder.getAllStores(),
-                    all = storeBuilder.getAllStores()
+                    native = storeBuilder.getAllStores().sortedBy { it.id },
+                    all = storeBuilder.getAllStores().sortedBy { it.id }
                 )
             }
 
