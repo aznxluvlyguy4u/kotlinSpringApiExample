@@ -64,7 +64,6 @@ class QueryParametersResolverImpl : QueryParametersResolver {
         private const val PRODUCTS_TAG_SEARCH_QUERY = "tags"
         private const val PAGE_KEY = "page"
         private const val PER_PAGE_KEY = "per_page"
-        const val KEYWORD_LESS_TAG = "keywordless"
         const val PRODUCT_TAGS_SEARCH_EQ_QUERY = "q[product_tags_name_eq]"
     }
 
@@ -137,8 +136,6 @@ class QueryParametersResolverImpl : QueryParametersResolver {
                     // Cannot continue, the minimal input is a pickup location which is not present, when no keyword is provided
                     if (!map.containsKey(DELIVERY_LOCATION_KEY)) {
                         throw BadRequestException("Cannot continue search, need at minimum, either a search keyword or a delivery location.")
-                    } else {
-                        uniqueQueryParamsMap[PRODUCT_TAGS_SEARCH_EQ_QUERY] = KEYWORD_LESS_TAG
                     }
                 }
             }
