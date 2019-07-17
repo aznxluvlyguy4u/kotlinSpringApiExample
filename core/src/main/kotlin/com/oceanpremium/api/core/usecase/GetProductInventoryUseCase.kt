@@ -4,6 +4,7 @@ import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.CurrentRmsBaseDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
+import com.oceanpremium.api.core.currentrms.response.dto.product.StoreQuantityDto
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.model.Stores
 import com.oceanpremium.api.core.resolver.LocationStoreResolver
@@ -56,21 +57,41 @@ class GetProductInventoryUseCaseImpl(
         val productInventoryResponse = productsApi.getProductsInventory(queryParameters, headers, allStoreIds)
         logger.debug("Response code for query on storeIds: $allStoreIds - ${productInventoryResponse?.code()}")
 
-        val dto = ProductDtoMapper(productInventoryResponse!!.code(), productInventoryResponse)
-        val combinedDto = ProductDtoMapper(productInventoryResponse.code(), productInventoryResponse)
+        val originalResponseDtos = ProductDtoMapper(productInventoryResponse!!.code(), productInventoryResponse)
+        val filteredResponseDtos = filterStoresWithAvailableProducts(originalResponseDtos)
 
-        if (dto.httpStatus == HttpStatus.OK) {
-            val combinedDtoData: List<ProductDto> = dto.data as List<ProductDto>
+        return ResponseContainer(
+            productInventoryResponse,
+            filteredResponseDtos,
+            stores
+        )
+    }
+
+    /**
+     * Filter out all stores with an availability quantity of zero for each product.
+     */
+    private fun filterStoresWithAvailableProducts(productDtos: ProductDtoMapper): ProductDtoMapper {
+
+        if (productDtos.httpStatus == HttpStatus.OK) {
+            @Suppress("UNCHECKED_CAST")
+            val combinedDtoData: List<ProductDto> = productDtos.data as List<ProductDto>
 
             combinedDtoData.forEach { productDto ->
+                val storeQuantities: MutableList<StoreQuantityDto> = mutableListOf()
                 var totalQuantityAvailable = 0.0
 
-                productDto.storeQuantities?.forEach { storeQuantityDto ->
+                productDto.allStoreQuantities?.forEach { storeQuantityDto ->
                     if (storeQuantityDto.quantityAvailable != null) {
 
                         try {
                             val quantityAvailable = storeQuantityDto.quantityAvailable?.toDouble()!!
-                            totalQuantityAvailable = totalQuantityAvailable.plus(quantityAvailable)
+
+                            when {
+                                quantityAvailable >= 1.0 -> {
+                                    storeQuantities.add(storeQuantityDto)
+                                    totalQuantityAvailable = totalQuantityAvailable.plus(quantityAvailable)
+                                }
+                            }
                         } catch (e: Exception) {
                             e.printStackTrace()
                             logger.error(e.message)
@@ -79,15 +100,13 @@ class GetProductInventoryUseCaseImpl(
                     }
                 }
 
+                productDto.storeQuantities = storeQuantities
                 productDto.rates.first().quantityAvailable = totalQuantityAvailable.toString()
             }
-            combinedDto.data = combinedDtoData
+
+            productDtos.data = combinedDtoData
         }
 
-        return ResponseContainer(
-            productInventoryResponse,
-            combinedDto,
-            stores
-        )
+        return productDtos
     }
 }
