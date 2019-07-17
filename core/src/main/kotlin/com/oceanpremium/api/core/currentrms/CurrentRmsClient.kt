@@ -98,6 +98,20 @@ class CurrentRmsClient {
 
         logger.debug("Build new retrofit client")
         val logging = HttpLoggingInterceptor()
+
+        /**
+         * If you want to debug the outgoing requests,
+         * toggle the logging.level to, for example:
+         *
+         * - Level.HEADERS
+         * - Level.NONE
+         * - Level.BASIC
+         * - Level.BODY
+         *
+         * to log the request outgoing to CURRENT RMS.
+         *
+         * See also @link https://stackoverflow.com/questions/32514410/logging-with-retrofit-2
+         */
         logging.level = HttpLoggingInterceptor.Level.NONE
 
         val currentRmsConfigInterceptor =
