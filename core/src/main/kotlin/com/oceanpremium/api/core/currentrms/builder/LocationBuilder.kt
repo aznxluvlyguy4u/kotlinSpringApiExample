@@ -13,7 +13,12 @@ class Location(
     var alternativeStores: MutableList<Store> = mutableListOf(),
     var grayStores: MutableList<Store> = mutableListOf(),
     var newItemsStores: MutableList<Store> = mutableListOf()
-)
+) {
+
+    override fun toString(): String {
+        return "Location:<id:$id, regionId: $regionId, name: $name>"
+    }
+}
 
 class Region(
     private val name: String,
@@ -29,6 +34,10 @@ class Region(
         }
 
         locations.add(location)
+    }
+
+    override fun toString(): String {
+        return  "Region<id: $id>"
     }
 }
 
