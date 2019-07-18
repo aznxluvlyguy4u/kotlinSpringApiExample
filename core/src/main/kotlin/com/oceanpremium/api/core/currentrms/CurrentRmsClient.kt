@@ -97,26 +97,32 @@ class CurrentRmsClient {
         val currentRmsConfig = getCurrentRmsConfig()
 
         logger.debug("Build new retrofit client")
-        val logging = HttpLoggingInterceptor()
 
         /**
-         * If you want to debug the outgoing requests,
-         * toggle the logging.level to, for example:
+         * If you want to debug the outgoing HTTP requests, toggle the logging.level to, for example:
+         *
+         * Logs request and response lines and their respective headers and bodies (if present):
          *
          * - Level.HEADERS
-         * - Level.NONE
+         *
+         * Logs request and response lines and their respective headers:
+         *
          * - Level.BASIC
+         *
+         * Logs request and response lines and their respective headers and bodies (if present):
+         *
          * - Level.BODY
          *
-         * to log the request outgoing to CURRENT RMS.
+         * Default log level set (no logging):
+         *
+         *  - Level.NONE
          *
          * See also @link https://stackoverflow.com/questions/32514410/logging-with-retrofit-2
          */
+        val logging = HttpLoggingInterceptor()
         logging.level = HttpLoggingInterceptor.Level.NONE
 
-        val currentRmsConfigInterceptor =
-            CurrentRmsConfigInterceptor(currentRmsConfig)
-
+        val currentRmsConfigInterceptor = CurrentRmsConfigInterceptor(currentRmsConfig)
         val httpClientBuilder = OkHttpClient.Builder()
         httpClientBuilder.connectTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
         httpClientBuilder.readTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
