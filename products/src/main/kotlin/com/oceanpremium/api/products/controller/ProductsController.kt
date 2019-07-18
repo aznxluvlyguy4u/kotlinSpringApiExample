@@ -164,7 +164,7 @@ class ProductsController(
             Slogger.send(messageBody = logMessageSales, salesLog = true, inDebugMode = true)
         }
 
-        val result =  getProductInventoryUseCase.execute(queryParameters, headers)
+        val result= getProductInventoryUseCase.execute(queryParameters, headers)
 
         return CurrentRmsApiResponse.build {
             rawResponse = result.response

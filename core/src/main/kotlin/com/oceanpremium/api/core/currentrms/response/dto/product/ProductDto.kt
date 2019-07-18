@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import com.oceanpremium.api.core.model.ConfigProperty
 import com.oceanpremium.api.core.model.ConfigPropertyField
+import com.oceanpremium.api.core.model.Stores
 
 @JsonPropertyOrder(
     "id",
@@ -29,7 +30,6 @@ class ProductDto(
     val images: List<ImageSource>,
     var customFields: ProductCustomFieldsDto? = null,
     val attachments: List<AttachmentDto>? = null,
-    @JsonIgnore
     var allStoreQuantities: List<StoreQuantityDto>? = null,
     @JsonIgnore
     var rawConfigurationIds: List<ConfigPropertyField>? = null,
@@ -38,5 +38,8 @@ class ProductDto(
     var accessories: List<ProductDto>? = null,
     var seoFriendlyName: String? = name
 ) {
+    @JsonIgnore
     var storeQuantities: List<StoreQuantityDto>? = null
+    var stores: Stores? = null
+
 }

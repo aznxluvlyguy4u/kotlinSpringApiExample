@@ -4,15 +4,14 @@ import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.CurrentRmsBaseDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
-import com.oceanpremium.api.core.currentrms.response.dto.product.StoreQuantityDto
+import com.oceanpremium.api.core.enum.WarehouseStoreType
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
+import com.oceanpremium.api.core.model.Store
 import com.oceanpremium.api.core.model.Stores
 import com.oceanpremium.api.core.resolver.LocationStoreResolver
-import io.sentry.Sentry
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
 import retrofit2.Response
 
 class ResponseContainer(
@@ -52,61 +51,82 @@ class GetProductInventoryUseCaseImpl(
         val stores: Stores = locationStoreResolver.resolveStoresByLocation(queryParameters)
             ?: throw BadRequestException("Could not resolve location(s) therefore cannot determine stock")
 
-        val allStoreIds = stores.all?.map { it.id }.orEmpty()
+        val allStoreIds = stores.all?.map { it.id }
 
         val productInventoryResponse = productsApi.getProductsInventory(queryParameters, headers, allStoreIds)
         logger.debug("Response code for query on storeIds: $allStoreIds - ${productInventoryResponse?.code()}")
 
-        val originalResponseDtos = ProductDtoMapper(productInventoryResponse!!.code(), productInventoryResponse)
-        val filteredResponseDtos = filterStoresWithAvailableProducts(originalResponseDtos)
+        val productDtos = ProductDtoMapper(productInventoryResponse!!.code(), productInventoryResponse)
+        val productItems = productDtos.data as List<ProductDto>
+
+        productItems.forEach { productDtoItem ->
+            val mappedStores = mapStoreQuantitiesToStoreDto(productDtoItem, stores.all)
+            val totalQuantityAvailable = determineProductAvailability(mappedStores)
+            productDtoItem.rates.first().quantityAvailable = "$totalQuantityAvailable"
+
+            val native = mappedStores.filter { it.type == WarehouseStoreType.NATIVE }
+            val alternative = mappedStores.filter { it.type == WarehouseStoreType.ALTERNATIVE }
+            val gray = mappedStores.filter { it.type == WarehouseStoreType.GRAY }
+            val newItems = mappedStores.filter { it.type == WarehouseStoreType.NEW_ITEMS }
+            val storesWrapper = Stores(native, alternative, gray, newItems, mappedStores)
+
+            productDtoItem.stores = storesWrapper
+        }
 
         return ResponseContainer(
             productInventoryResponse,
-            filteredResponseDtos,
+            productDtos,
             stores
         )
     }
 
-    /**
-     * Filter out all stores with an availability quantity of zero for each product.
-     */
-    private fun filterStoresWithAvailableProducts(productDtos: ProductDtoMapper): ProductDtoMapper {
+    private fun mapStoreQuantitiesToStoreDto(productDtoItem: ProductDto, stores: List<Store>?): List<Store> {
+        var totalQuantityAvailable = 0.0
+        val matchedStoreItems: MutableList<Store> = mutableListOf()
 
-        if (productDtos.httpStatus == HttpStatus.OK) {
-            @Suppress("UNCHECKED_CAST")
-            val combinedDtoData: List<ProductDto> = productDtos.data as List<ProductDto>
+        logger.debug("********** ${productDtoItem.id} **********")
 
-            combinedDtoData.forEach { productDto ->
-                val storeQuantities: MutableList<StoreQuantityDto> = mutableListOf()
-                var totalQuantityAvailable = 0.0
+        productDtoItem.allStoreQuantities?.forEach { storeQuantityDto ->
+            val matchingStore = stores?.firstOrNull { it.id == storeQuantityDto.storeId }
 
-                productDto.allStoreQuantities?.forEach { storeQuantityDto ->
-                    if (storeQuantityDto.quantityAvailable != null) {
+            if (matchingStore != null) {
+                logger.debug("Found matching store: ${matchingStore.id} ${matchingStore.name} Q: ${storeQuantityDto.quantityAvailable}")
 
-                        try {
-                            val quantityAvailable = storeQuantityDto.quantityAvailable?.toDouble()!!
+                val productItemStore = Store(
+                    matchingStore.id,
+                    matchingStore.name,
+                    matchingStore.minimumDeliveryHours,
+                    matchingStore.deliveryCost,
+                    storeQuantityDto.quantityAvailable
+                )
 
-                            when {
-                                quantityAvailable >= 1.0 -> {
-                                    storeQuantities.add(storeQuantityDto)
-                                    totalQuantityAvailable = totalQuantityAvailable.plus(quantityAvailable)
-                                }
-                            }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            logger.error(e.message)
-                            Sentry.capture(e)
-                        }
-                    }
-                }
+                productItemStore.type = matchingStore.type
 
-                productDto.storeQuantities = storeQuantities
-                productDto.rates.first().quantityAvailable = totalQuantityAvailable.toString()
+                totalQuantityAvailable = totalQuantityAvailable.plus(productItemStore.quantityAvailable!!.toDouble())
+
+                matchedStoreItems.add(productItemStore)
             }
-
-            productDtos.data = combinedDtoData
         }
 
-        return productDtos
+        productDtoItem.rates.first().quantityAvailable = "%.1f".format(totalQuantityAvailable)
+
+        return matchedStoreItems
+    }
+
+    /**
+     * Determines for all queried stores that total availability for given product.
+     */
+    private fun determineProductAvailability(stores: List<Store>?): Int {
+        var totalQuantityAvailable = 0
+
+        stores?.forEach { store ->
+            val quantityPerStore = store.quantityAvailable?.toDouble()?.toInt()
+
+            if (quantityPerStore != null && quantityPerStore > 0) {
+                totalQuantityAvailable += quantityPerStore
+            }
+        }
+
+        return totalQuantityAvailable
     }
 }
