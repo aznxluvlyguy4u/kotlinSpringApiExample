@@ -62,7 +62,7 @@ class GetProductInventoryUseCaseImpl(
         productItems.forEach { productDtoItem ->
             val mappedStores = mapStoreQuantitiesToStoreDto(productDtoItem, stores.all)
             val totalQuantityAvailable = determineProductAvailability(mappedStores)
-            productDtoItem.rates.first().quantityAvailable = "$totalQuantityAvailable"
+            productDtoItem.rates.first().quantityAvailable = "%.1f".format(totalQuantityAvailable.toDouble())
 
             val native = mappedStores.filter { it.type == WarehouseStoreType.NATIVE }
             val alternative = mappedStores.filter { it.type == WarehouseStoreType.ALTERNATIVE }
