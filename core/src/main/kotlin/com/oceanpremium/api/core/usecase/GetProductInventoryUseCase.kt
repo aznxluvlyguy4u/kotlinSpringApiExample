@@ -57,9 +57,9 @@ class GetProductInventoryUseCaseImpl(
         logger.debug("Response code for query on storeIds: $allStoreIds - ${productInventoryResponse?.code()}")
 
         val productDtos = ProductDtoMapper(productInventoryResponse!!.code(), productInventoryResponse)
-        val productItems = productDtos.data as List<ProductDto>
+        val productItems = productDtos.data as List<ProductDto>?
 
-        productItems.forEach { productDtoItem ->
+        productItems?.forEach { productDtoItem ->
             val mappedStores = mapStoreQuantitiesToStoreDto(productDtoItem, stores.all)
             val totalQuantityAvailable = determineProductAvailability(mappedStores)
             productDtoItem.rates.first().quantityAvailable = "%.1f".format(totalQuantityAvailable.toDouble())
