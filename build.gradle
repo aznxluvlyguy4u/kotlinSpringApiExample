@@ -382,4 +382,5 @@ dependencies {
     compile project(':auth')
     compile project(':products')
     compile project(':locations')
+    compile project(':offices')
 }

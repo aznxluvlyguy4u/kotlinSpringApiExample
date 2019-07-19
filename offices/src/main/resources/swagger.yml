@@ -1,0 +1,56 @@
+swagger: '2.0'
+
+info:
+  version: 0.0.1
+  title: Ocean Premium - Locations endpoint
+  description: An API endpoint for retrieving locations
+
+schemes:
+  - https
+
+host: 3rk3xtficb.execute-api.eu-west-1.amazonaws.com
+basePath: /dev/api/v1/locations
+
+produces:
+  - application/json
+
+paths:
+  /locations:
+    get:
+      summary: Find a locations
+      tags:
+        - Location
+      responses:
+        200:
+          description: Found Locations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Location'
+
+components:
+  schemas:
+    Location:
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        storeId:
+          type: integer
+      # Both properties are required
+      required:
+        - id
+        - name
+        - storeId
+definitions:
+  Response:
+    type: object
+    required:
+      - code
+      - data
+    properties:
+      code:
+        type: Int
+      data:
+        type: object
