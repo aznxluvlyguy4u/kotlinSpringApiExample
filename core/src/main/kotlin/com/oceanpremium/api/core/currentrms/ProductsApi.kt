@@ -33,7 +33,8 @@ interface ProductsApi {
      */
     @GET("products/{productId}")
     fun getProductById(
-        @Path("productId") productId: Int
+        @Path("productId") productId: Int,
+        @QueryMap uniqueQueryParamsMap: Map<String, String>
     ): Call<Any>
 
     /**
@@ -79,7 +80,8 @@ class ProductsApiImpl(
      * @inherit
      */
     fun getProductById(productId: Int): Response<Any>? {
-        val retrofitCall = productsApi.getProductById(productId)
+        val validatedQueryMap = queryParametersResolver.resolveGetProductById()
+        val retrofitCall = productsApi.getProductById(productId, validatedQueryMap)
         lateinit var response: Response<Any>
 
         try {

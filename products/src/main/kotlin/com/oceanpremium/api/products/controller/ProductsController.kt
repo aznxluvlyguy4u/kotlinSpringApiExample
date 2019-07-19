@@ -103,26 +103,6 @@ class ProductsController(
             )
         productData?.configurations = resolvedProductConfigurationOptions.data
 
-        // Process product accessories
-        val accessoryDtos: MutableList<ProductDto> = mutableListOf()
-        productData?.accesoryIds?.forEach { accessoryItem ->
-            val accessoryResponse = productsApi.getProductById(accessoryItem.id)
-            val accessoryDto = ProductDtoMapper(accessoryResponse?.code()!!, accessoryResponse)
-            val accessoryData = accessoryDto.data as ProductDto?
-
-            if (accessoryItem.quantity?.toDouble() != null && accessoryItem.quantity!!.toDouble() > 0.0) {
-                accessoryData?.type = accessoryItem.type
-                accessoryData?.rates?.forEach { rates ->
-                    rates.quantityAvailable = accessoryItem.quantity
-                }
-                accessoryDtos.add(accessoryData!!)
-
-                logger.debug("Retrieved accessory for product with id: ${productData.id}: - $accessoryDto")
-            }
-
-        }
-        productData?.accessories = accessoryDtos
-
         return CurrentRmsApiResponse.build {
             rawResponse = productResponse
             dtoMapper = productDto
@@ -184,7 +164,7 @@ class ProductsController(
             Slogger.send(messageBody = logMessageSales, salesLog = true, inDebugMode = true)
         }
 
-        val result =  getProductInventoryUseCase.execute(queryParameters, headers)
+        val result= getProductInventoryUseCase.execute(queryParameters, headers)
 
         return CurrentRmsApiResponse.build {
             rawResponse = result.response

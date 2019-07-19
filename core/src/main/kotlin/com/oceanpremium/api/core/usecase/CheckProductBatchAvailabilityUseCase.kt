@@ -244,7 +244,7 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
     private fun mapStoreQuantitiesToStoreDto(productDtoItem: ProductDto?, stores: Stores ) {
         // Map store quantities to stores dto
         stores.all?.forEach { store ->
-            val storeQuantityDto = productDtoItem?.storeQuantities?.firstOrNull { it.storeId == store.id }
+            val storeQuantityDto = productDtoItem?.allStoreQuantities?.firstOrNull { it.storeId == store.id }
 
             when {
                 storeQuantityDto != null -> store.quantityAvailable = storeQuantityDto.quantityAvailable

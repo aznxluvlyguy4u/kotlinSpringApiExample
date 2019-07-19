@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus
 import retrofit2.Response
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.oceanpremium.api.core.enum.AccessoryType
 import com.oceanpremium.api.core.model.ConfigPropertyField
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.util.FileSizeFormatUtil
@@ -133,16 +134,17 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
     private fun mapJsonObjectToDto(itemBody: Map<*, *>): ProductDto {
         var id: Int? = null
         val name: String? = mapProductName(itemBody)
+        val seoFriendlyProductName = mapSeoFriendlyProductName(itemBody)
         var type: String? = null
         val productGroup: ProductGroupDto? = mapProductGroupToDto(itemBody)
         var customFields: ProductCustomFieldsDto? = null
         val rates = mapProductRatesToDto(itemBody)
-        val accessoryIds = mapAccessoryIds(itemBody)
         val imageSources: ImageDto?
         val attachments: List<AttachmentDto>? = mapAttachments(itemBody)
         val rawConfigurationIds = mapConfigIds(itemBody)
         val descriptions = mapDescriptionText(itemBody)
         val storeQuantities: List<StoreQuantityDto>? = mapStoreQuantities(itemBody)
+        val accessories: List<ProductDto> = mapAccessoriesToProductDto(itemBody)
 
         try {
             if (itemBody.containsKey("id")) {
@@ -177,10 +179,11 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
             rates.pricings,
             imageSources.sources,
             customFields,
-            accessoryIds,
             attachments,
             storeQuantities,
-            rawConfigurationIds
+            rawConfigurationIds,
+            accessories = accessories,
+            seoFriendlyName = seoFriendlyProductName
         )
     }
 
@@ -267,29 +270,71 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
     }
 
     @Throws(BadRequestException::class)
-    private fun mapProductRatesToDto(itemBody: Map<*, *>): RateDto {
+    private fun mapProductRatesToDto(itemBody: Map<*, *>, isAccessory: Boolean = false): RateDto {
         val rates: MutableList<PricingDto> = mutableListOf()
         try {
-            if (itemBody.containsKey("rental_price")
-                && itemBody.containsKey("rental_quantity_available")
-                && itemBody.containsKey("rental_lead_charge_period_name")
-            ) {
-                val rentalPrice = itemBody["rental_price"] as String?
-                val rentalQuantityAvailable = itemBody["rental_quantity_available"] as String?
-                val rentalLeadChargePeriodName = itemBody["rental_lead_charge_period_name"] as String?
+            when {
+                // Parse rates for accessory products
+                isAccessory -> {
+                    logger.debug("parse rates for accessories: $itemBody")
+                    var quantityStr: String? = null
 
-                rates.add(PricingDto(rentalQuantityAvailable, rentalPrice, rentalLeadChargePeriodName))
-            } else {
-                if (itemBody.containsKey("rental_rates")) {
+                    if (itemBody.containsKey("quantity")) {
+                        val quantity = (itemBody["quantity"] as String?)?.toDouble()
+                        if (quantity != null) {
+                            quantityStr = "%.2f".format(quantity)
+                        }
+                    }
+
+                    if (itemBody.containsKey("item")) {
+                        @Suppress("UNCHECKED_CAST")
+                        val item = itemBody["item"] as Map<*, *>
+
+                        val rentalRate = item["rental_rate"] as Map<*, *>
+                        val rentalPrice = rentalRate["price"] as String?
+                        val rentalLeadChargePeriodName = "Daily"
+
+                        when {
+                            !rentalPrice.isNullOrEmpty() -> {
+                                rates.add(
+                                    PricingDto(
+                                        quantityAvailable = quantityStr,
+                                        price = rentalPrice,
+                                        chargePeriod = rentalLeadChargePeriodName
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Parse rates when availability is requested
+                itemBody.containsKey("rental_price")
+                        && itemBody.containsKey("rental_quantity_available")
+                        && itemBody.containsKey("rental_lead_charge_period_name") -> {
+                    val rentalPrice = itemBody["rental_price"] as String?
+                    val rentalQuantityAvailable = itemBody["rental_quantity_available"] as String?
+                    val rentalLeadChargePeriodName = itemBody["rental_lead_charge_period_name"] as String?
+
+                    rates.add(
+                        PricingDto(
+                            rentalQuantityAvailable,
+                            rentalPrice,
+                            rentalLeadChargePeriodName
+                        )
+                    )
+                }
+
+                // Parse rates when product by id is requested
+                else -> if (itemBody.containsKey("rental_rate")) {
                     @Suppress("UNCHECKED_CAST")
-                    val rentalRate = (itemBody["rental_rates"] as List<Map<*, *>>).first()
-
+                    val rentalRate = itemBody["rental_rate"] as Map<*, *>
                     val rentalPrice = rentalRate["price"] as String?
-                    val rentalLeadChargePeriodName = rentalRate["rate_definition_name"] as String?
+                    val rentalLeadChargePeriodName = "Daily"
 
                     when {
-                        !rentalPrice.isNullOrEmpty() -> when {
-                            !rentalLeadChargePeriodName.isNullOrEmpty() -> rates.add(
+                        !rentalPrice.isNullOrEmpty() -> {
+                            rates.add(
                                 PricingDto(
                                     price = rentalPrice,
                                     chargePeriod = rentalLeadChargePeriodName
@@ -391,36 +436,80 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
 
     /**
      * Grab accessory ids to get the full accessories details in additional API calls.
+     * There are three types of accessories in Current RMS: Mandatory, Optional , Default.
      */
-    private fun mapAccessoryIds(itemBody: Map<*, *>): List<AccessoryItem> {
-        val items: MutableList<AccessoryItem> = mutableListOf()
+    private fun mapAccessoriesToProductDto(itemBody: Map<*, *>): List<ProductDto> {
+        val items: MutableList<ProductDto> = mutableListOf()
         val accessoryIdKey = "related_id"
 
         if (itemBody.containsKey(ACCESSORIES_KEY)) {
             @Suppress("UNCHECKED_CAST")
             val productsItemsBody = itemBody[ACCESSORIES_KEY] as List<Map<*, *>>
 
-            var id: Int? = null
-            var type: String? = null
-            var quantity: String? = null
-
             productsItemsBody.forEach {
-                if (it.containsKey(accessoryIdKey) && it[accessoryIdKey] != null) {
-                    id = (it[accessoryIdKey] as Double).toInt()
-                }
+                var id: Int? = null
 
-                if (it.containsKey("inclusion_type_name") && it["inclusion_type_name"] != null) {
-                    type = it["inclusion_type_name"] as String
+                try {
 
-                    logger.debug("Found accessory with Id: $id and type: $type")
-                }
+                    if (it.containsKey(accessoryIdKey) && it[accessoryIdKey] != null) {
+                        id = (it[accessoryIdKey] as Double).toInt()
+                    }
 
-                if (it.containsKey("quantity") && it["quantity"] != null) {
-                    quantity = it["quantity"] as String
-                }
+                    val seoFriendlyName = mapSeoFriendlyProductName(it)
+                    val rates = mapProductRatesToDto(it, true)
 
-                if (id != null && type != null && quantity != null) {
-                    items.add(AccessoryItem(id!!, type!!, quantity!!))
+
+                    if (it.containsKey("item")) {
+                        @Suppress("UNCHECKED_CAST")
+                        val item = it["item"] as Map<String, String>
+
+                        val name: String? = mapProductName(item)
+                        var type: String? = null
+                        val productGroup: ProductGroupDto? = mapProductGroupToDto(item)
+                        var customFields: ProductCustomFieldsDto? = null
+                        val imageSources = mapImageSourcesToDto(item)
+                        val attachments: List<AttachmentDto>? = mapAttachments(item)
+                        val rawConfigurationIds = mapConfigIds(item)
+                        val descriptions = mapDescriptionText(item)
+
+                        when {
+                            item.containsKey("custom_fields") -> customFields = mapCustomFieldsToDto(itemBody)
+                        }
+
+                        when {
+                            it.containsKey("inclusion_type_name") && it["inclusion_type_name"] != null -> {
+                                val accessoryType = it["inclusion_type_name"] as String
+                                type = AccessoryType.valueOf(accessoryType.toUpperCase()).name
+                                logger.debug("Found accessory with Id: $id and type: $type")
+                            }
+                        }
+
+                        val accessoryProductItem = ProductDto(
+                            id,
+                            name,
+                            descriptions,
+                            type,
+                            productGroup,
+                            rates.pricings,
+                            imageSources.sources,
+                            customFields,
+                            attachments,
+                            rawConfigurationIds = rawConfigurationIds
+                        )
+
+                        when {
+                            seoFriendlyName != null -> accessoryProductItem.seoFriendlyName = seoFriendlyName
+                        }
+
+                        items.add(accessoryProductItem)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+
+                    val message = "Failed to map accessories product response to Dto: ${e.message}"
+                    logger.error(message)
+
+                    throw BadRequestException(e.message)
                 }
             }
         }
@@ -551,6 +640,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
         val sectionKey = "section"
         val dimensionsKey = customProductDescriptionKey + "dimensions"
         val productDescriptionKey = "description"
+        val countOfSectionAndParagraphs = 9
 
         // Grab the custom product description
         try {
@@ -563,7 +653,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                         descriptions["dimensions"] = customFieldsBody[dimensionsKey] as String
                     }
 
-                    for (x in 1..9) {
+                    for (x in 1..countOfSectionAndParagraphs) {
                         val headKey = headKeyPrefix + x
                         val paragraphKey = paragraphKeyPrefix + x
 
@@ -608,40 +698,57 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
     }
 
     /**
-     * Grab the product name either the default product name, or the custom SEO friendly custom field for product name.
+     * Grab the product name.
      */
     private fun mapProductName(itemBody: Map<*, *>): String? {
         var productName: String? = null
         val originalProductNameKey = "name"
-        val customProductName = "custom_product_description_seo_title"
 
         try {
-            // Grab the default product name, as set in Current RMS
             if (itemBody.containsKey(originalProductNameKey)) {
                 productName = itemBody[originalProductNameKey] as String?
-            }
-
-            // Override default product name
-            if (itemBody.contains(CUSTOM_FIELDS_KEY)) {
-                @Suppress("UNCHECKED_CAST")
-                val customFieldsBody = itemBody[CUSTOM_FIELDS_KEY] as Map<String, *>
-
-                if (customFieldsBody.containsKey(customProductName)
-                    && (customFieldsBody[customProductName] as String).isNotEmpty()
-                ) {
-                    productName = customFieldsBody[customProductName] as String
-                }
             }
         } catch (e: Exception) {
             e.printStackTrace()
 
-            val message = "Failed to map product description response to Dto: ${e.message}"
+            val message = "Failed to map product name response to Dto: ${e.message}"
             logger.error(message)
 
             throw BadRequestException(e.message)
         }
 
         return productName
+    }
+
+    /**
+     * Grab the custom SEO friendly custom field.
+     */
+    private fun mapSeoFriendlyProductName(itemBody: Map<*, *>): String? {
+        var seoFriendlyProductName: String? = null
+        val customSeoProductTitle = "custom_product_description_seo_title"
+
+        try {
+            // grab SEO friendly product name
+            if (itemBody.contains(CUSTOM_FIELDS_KEY)) {
+                @Suppress("UNCHECKED_CAST")
+                val customFieldsBody = itemBody[CUSTOM_FIELDS_KEY] as Map<String, *>
+
+                if (customFieldsBody.containsKey(customSeoProductTitle)
+                    && (customFieldsBody[customSeoProductTitle] as String).isNotEmpty()
+                ) {
+                    seoFriendlyProductName = customFieldsBody[customSeoProductTitle] as String
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+
+            val message = "Failed to map product sea product name response to Dto: ${e.message}"
+            logger.error(message)
+
+            throw BadRequestException(e.message)
+        }
+
+        return seoFriendlyProductName
     }
 
     /**
@@ -661,7 +768,7 @@ class ProductDtoMapper(code: Int, response: Response<Any>?) : CurrentRmsBaseDtoM
                         when {
                             it.containsKey("store_id") && it.containsKey("rental_quantity_available") -> {
                                 val storeId = (it["store_id"] as Double?)?.toInt()
-                                
+
                                 val rentalQuantityAvailable = when {
                                     it["rental_quantity_available"].toString() as String? != null
                                             && it["rental_quantity_available"].toString() as String? != "null" -> {

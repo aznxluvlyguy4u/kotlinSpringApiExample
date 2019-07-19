@@ -2,8 +2,6 @@ package com.oceanpremium.api.products
 
 import com.oceanpremium.api.core.resolver.QueryParametersResolverImpl.Companion.DELIVERY_LOCATION_KEY
 import com.oceanpremium.api.core.resolver.QueryParametersResolverImpl.Companion.FUNCTIONAL_INTEGRATION_GROUP_NAME
-import com.oceanpremium.api.core.resolver.QueryParametersResolverImpl.Companion.KEYWORD_LESS_TAG
-import com.oceanpremium.api.core.resolver.QueryParametersResolverImpl.Companion.PRODUCT_TAGS_SEARCH_EQ_QUERY
 import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.enum.ClientRoleType
 import com.oceanpremium.api.core.model.*
@@ -208,11 +206,8 @@ class ProductsControllerTest {
 
     @Test
     fun testGetProductsInventoryByNoKeyword() {
-        val keywordLessParameter = "$PRODUCT_TAGS_SEARCH_EQ_QUERY=$KEYWORD_LESS_TAG"
         val deliveryParameter = "$DELIVERY_LOCATION_KEY=13"
-        val params = "$keywordLessParameter&$deliveryParameter"
-
-        val productsResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ProductsResponse::class.java)
+        val productsResponse = restTemplate?.getForObject("$endpoint/inventory?$deliveryParameter", ProductsResponse::class.java)
 
         assertThat(productsResponse).isNotNull
         assertThat(productsResponse?.code).isEqualTo(HttpStatus.OK.value())
@@ -232,9 +227,7 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductsInventoryFailedByNotProvidingMandatoryParameters() {
-        val params = "$PRODUCT_TAGS_SEARCH_EQ_QUERY=$KEYWORD_LESS_TAG"
-
-        val productsResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ProductsResponse::class.java)
+        val productsResponse = restTemplate?.getForObject("$endpoint/inventory", ProductsResponse::class.java)
 
         assertThat(productsResponse).isNotNull
         assertThat(productsResponse?.code).isEqualTo(HttpStatus.BAD_REQUEST.value())

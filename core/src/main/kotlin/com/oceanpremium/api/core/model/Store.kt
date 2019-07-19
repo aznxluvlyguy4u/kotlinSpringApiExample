@@ -24,4 +24,8 @@ class Store(
 
         return DateTimeUtil.toISO8601DurationPeriod(minimumDeliveryHours!!).toString()
     }
+
+    override fun toString(): String {
+        return "Store: <id: $id, type: $type, name: $name>"
+    }
 }
