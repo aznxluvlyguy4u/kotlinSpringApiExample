@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <title>Ocean Premium - CLIENT Order Confirmation</title>
+    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+    <link href='../css/styles.css' rel='stylesheet' type='text/css'>
+</head>
+<body>
+<table>
+    <tr>
+        <td align="center">
+            <table>
+                <tr>
+                    <td class="email-masthead">
+                        <a href="https://oceanpremium.com">
+                            <img height="60px" class="responsive"
+                                 src="https://www.oceanpremium.com/wp-content/uploads/2017/03/op-logo-blue.png"
+                                 alt="Ocean Premium logo"/>
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <table>
+                            <tr>
+                                <td>
+                                    <h1 th:text="|Enquiry from ${name}|">Enquire name placeholder</h1>
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <h3>Date</h3>
+                                                <p th:text="${#dates.format(#dates.createNow(),'YYYY/MM/dd HH:mm')}">
+                                                    Date placeholder</p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <hr>
+                                                <h3>Enquiry details</h3>
+                                                <table id="vertical-1">
+                                                    <tr>
+                                                        <th align="left">Name:</th>
+                                                        <td>
+                                                            <a th:text="${name}">Name</a><br>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th align="left">E-mail address:</th>
+                                                        <td>
+                                                            <a th:text="${emailAddress}">E-mail address placeholder</a><br>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th align="left">Phone number:</th>
+                                                        <td>
+                                                            <a th:text="${phoneNumber}">Phone number placeholder</a><br>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <hr>
+                                                <h3>Message</h3>
+                                                <p th:text="${message}">Message placeholder</p>
+                                                <hr>
+                                            </td>
+                                        </tr>
+
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <table>
+                            <tr>
+                                <td>
+                                    <p>&copy; 2019 Ocean Premium. All rights reserved.</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
