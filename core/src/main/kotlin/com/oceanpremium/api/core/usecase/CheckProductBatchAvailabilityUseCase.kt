@@ -5,7 +5,6 @@ import com.oceanpremium.api.core.enum.AvailabilityStateType
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.model.ProductAvailabilityItemDto
 import com.oceanpremium.api.core.model.ProductAvailabilityResponse
-import com.oceanpremium.api.core.model.Store
 import com.oceanpremium.api.core.model.Stores
 import com.oceanpremium.api.core.util.DateTimeUtil
 import com.oceanpremium.api.core.util.DateTimeUtil.CURRENT_RMS_API_DATE_ISO8601_FORMAT
@@ -220,7 +219,7 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
         productAvailabilityItem.stores = stores
 
         // Determine quantity available per store type and total and update product item state accordingly
-        val totalQuantityAvailable = determineProductAvailability(stores.all)
+        val totalQuantityAvailable = determineProductAvailability(stores, productAvailabilityItem.quantity)
 
         // Check that the total product quantity available, compared to the requested quantity for given product is sufficient
         if (totalQuantityAvailable >= productAvailabilityItem.quantity) {
@@ -255,16 +254,93 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
     /**
      * Determines for all queried stores that total availability for given product.
      */
-    private fun determineProductAvailability(stores: List<Store>?): Int {
+    private fun determineProductAvailability(stores: Stores, quantityRequested: Int): Int {
+
+        var quantityInNative = 0
+        var quantityInAlternative = 0
+        var quantityInGray = 0
+        var quantityInNewItems = 0
         var totalQuantityAvailable = 0
 
-        stores?.forEach { store ->
+
+        // First check quantity of Native
+        stores.native?.forEach { store ->
             val quantityPerStore = store.quantityAvailable?.toDouble()?.toInt()
 
             if (quantityPerStore != null && quantityPerStore > 0) {
-                totalQuantityAvailable += quantityPerStore
+                quantityInNative += quantityPerStore
             }
         }
+
+        // Alternative
+        stores.alternative?.forEach { store ->
+            val quantityPerStore = store.quantityAvailable?.toDouble()?.toInt()
+
+            if (quantityPerStore != null && quantityPerStore > 0) {
+                quantityInAlternative += quantityPerStore
+            }
+        }
+
+        // Gray
+        stores.gray?.forEach { store ->
+            val quantityPerStore = store.quantityAvailable?.toDouble()?.toInt()
+
+            if (quantityPerStore != null && quantityPerStore > 0) {
+                quantityInGray += quantityPerStore
+            }
+        }
+
+        // New Items
+        stores.newItems?.forEach { store ->
+            val quantityPerStore = store.quantityAvailable?.toDouble()?.toInt()
+
+            if (quantityPerStore != null && quantityPerStore > 0) {
+                quantityInNewItems += quantityPerStore
+            }
+        }
+
+        totalQuantityAvailable =
+            totalQuantityAvailable
+            .plus(quantityInNative)
+            .plus(quantityInAlternative)
+            .plus(quantityInGray)
+            .plus(quantityInNewItems)
+
+
+        if (totalQuantityAvailable < quantityRequested) {
+            logger.debug("Quantity requested: $quantityRequested, exceeds total quantity available, can only provide a quantity of: $totalQuantityAvailable")
+        }
+
+        logger.debug("Native Q available: $quantityInNative")
+        logger.debug("Alternative Q available: $quantityInAlternative")
+        logger.debug("Gray Q available: $quantityInGray")
+        logger.debug("New Items Q available: $quantityInNewItems")
+
+        if (quantityInNative >= quantityRequested) {                                     // Native
+            logger.debug("Can provide all quantity requested from Native WH: request: $quantityRequested | available: $quantityInNative")
+        } else if (quantityInAlternative >= quantityRequested.minus(quantityInNative)) { // Alternative
+            logger.debug("Native WH stock is not sufficient: $quantityInNative, need to provide additional quantities from Alternative WH: request: $quantityRequested | available: $quantityInAlternative")
+        } else if (quantityInGray >= quantityRequested                                  // Gray
+                .minus(quantityInNative)
+                .minus(quantityInAlternative)) {
+            logger.debug("Alternative WH stock is not sufficient: $quantityInAlternative need to provide additional quantities Gray WH: $quantityRequested | available: $quantityInGray")
+        } else if (quantityInNewItems >=  quantityRequested                               //New Items
+                .minus(quantityInNative)
+                .minus(quantityInAlternative)
+                .minus(quantityInGray)) {
+            logger.debug("Gray WH stock is not sufficient: $quantityInGray need to provide additional quantities New Items WH: $quantityRequested | available: $quantityInNewItems")
+        } else {
+
+            val remainingQuantity =  quantityRequested
+                .minus(quantityInNative)
+                .minus(quantityInAlternative)
+                .minus(quantityInGray)
+                .minus(quantityInNewItems)
+
+            logger.debug("Remaining quantity that can not be ordered: $remainingQuantity ")
+        }
+
+
 
         return totalQuantityAvailable
     }
