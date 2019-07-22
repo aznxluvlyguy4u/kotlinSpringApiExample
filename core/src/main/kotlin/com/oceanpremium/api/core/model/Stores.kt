@@ -2,6 +2,16 @@ package com.oceanpremium.api.core.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.oceanpremium.api.core.enum.AvailabilityStateType
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+class StockDetermination(
+    val quantityRequested: Int,
+    val quantitySufficient: Int,
+    val quantityDeficient: Int,
+    val stores: Stores? = null,
+    val availabilityState: AvailabilityStateType
+)
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class Stores(
