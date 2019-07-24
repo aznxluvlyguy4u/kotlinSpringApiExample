@@ -6,6 +6,7 @@ import com.oceanpremium.api.core.enum.AvailabilityStateType
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class StockDetermination(
+    val quantiyTotallyAvailable: Int,
     val quantityRequested: Int,
     val quantitySufficient: Int,
     val quantityDeficient: Int,

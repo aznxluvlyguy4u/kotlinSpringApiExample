@@ -1,5 +1,6 @@
 package com.oceanpremium.api.core.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonPropertyOrder
@@ -43,5 +44,5 @@ class ProductAvailabilityItemDto(
     var totalCostAccessories: String? = null
     val uuid: UUID = UUID.randomUUID()
     var stores: Stores? = null
-    var stockDetermination: StockDetermination? = null
+    var stock: StockDetermination? = null
 }
