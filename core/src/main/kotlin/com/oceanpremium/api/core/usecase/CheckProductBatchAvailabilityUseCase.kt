@@ -75,6 +75,10 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
                     accessoriesAvailabilityItem.period = productAvailabilityItem.period
                 }
 
+                if (accessoriesAvailabilityItem.location == null) {
+                    accessoriesAvailabilityItem.location = productAvailabilityItem.location
+                }
+
                 val map = buildQueryParametersMap(accessoriesAvailabilityItem, true, productAvailabilityItem)
 
                 val accessoriesResult = getProductInventoryUseCase.execute(
@@ -334,7 +338,7 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
 
         var availabilityState: AvailabilityStateType?
 
-        // Determnine if quantity requested, can be totally, partially or completely not supplied
+        // Determine if quantity requested, can be totally, partially or completely not supplied
         // First check quantity in:
         //
         // 1) Native
@@ -459,8 +463,11 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
             if (productItem.rates?.first() != null) {
                 var totalAccessoriesCost = 0.0
 
-                productItem.accessories.forEach { accessoryItem ->
+                val parentItemCost =
+                    productItemRentalDays.days * (productItem.stock?.quantitySufficient!! * productItem.rates!!.first().price?.toDouble()!!)
+                productItem.totalCostProducts = "%.2f".format(parentItemCost)
 
+                productItem.accessories.forEach { accessoryItem ->
                     when {
                         accessoryItem.rates?.first() != null -> {
                             if (accessoryItem.availabilityState == AvailabilityStateType.AVAILABLE
@@ -468,6 +475,7 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
                                 val itemCost =
                                     productItemRentalDays.days * (accessoryItem.stock?.quantitySufficient!! * accessoryItem.rates!!.first().price?.toDouble()!!)
                                 accessoryItem.totalCostProducts = "%.2f".format(itemCost)
+                                accessoryItem.totalCost = "%.2f".format(itemCost)
                                 totalAccessoriesCost += itemCost
                             }
                         }
@@ -476,9 +484,7 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
 
                 productItem.totalCostAccessories = "%.2f".format(totalAccessoriesCost)
 
-                val parentItemCost =
-                    productItemRentalDays.days * (productItem.stock?.quantitySufficient!! * productItem.rates!!.first().price?.toDouble()!!)
-                productItem.totalCostProducts = "%.2f".format(parentItemCost)
+
                 productItem.totalCost = "%.2f".format(parentItemCost + totalAccessoriesCost)
 
             }
@@ -488,13 +494,7 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
     private fun buildResponseModel(productItems: List<ProductAvailabilityItemDto>): ProductAvailabilityResponse {
 
         val availableProductItems = productItems.filter {
-            it.availabilityState == AvailabilityStateType.AVAILABLE
-                    || it.availabilityState == AvailabilityStateType.AVAILABLE_BUT_ACCESSORY_NOT_AVAILABLE
-                    || it.availabilityState == AvailabilityStateType.PARTIALLY_AVAILABLE
-        }
-
-        val availableAccessoryItems = productItems.flatMap { it.accessories }.filter {
-            it.availabilityState == AvailabilityStateType.AVAILABLE || it.availabilityState == AvailabilityStateType.PARTIALLY_AVAILABLE
+            it.availabilityState != AvailabilityStateType.NOT_AVAILABLE
         }
 
         val unavailableProductItems = productItems.filter {
@@ -511,7 +511,7 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
 
         val allAvailableProducts: MutableList<ProductAvailabilityItemDto> = mutableListOf()
         allAvailableProducts.addAll(availableProductItems)
-        allAvailableProducts.addAll(availableAccessoryItems)
+//        allAvailableProducts.addAll(availableAccessoryItems)
 
         val totalCostOfAvailableProducts = computeTotalCostOfAllItems(allAvailableProducts)
         val totalCostOfUnavailableProducts = computeTotalCostOfAllItems(allUnavailableProducts)
