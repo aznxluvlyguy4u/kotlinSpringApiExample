@@ -109,11 +109,10 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
                     }
                 }
 
-                if (productAvailabilityItem.availabilityState == AvailabilityStateType.PARTIALLY_AVAILABLE) {
-                    if (accessoriesAvailabilityItem.availabilityState == AvailabilityStateType.NOT_AVAILABLE) {
-                        productAvailabilityItem.availabilityState =
-                            AvailabilityStateType.PARTIALLY_AVAILABLE_AND_ACCESSORY_NOT_AVAILABLE
-                    }
+                if (productAvailabilityItem.availabilityState == AvailabilityStateType.PARTIALLY_AVAILABLE
+                    && accessoriesAvailabilityItem.availabilityState == AvailabilityStateType.NOT_AVAILABLE) {
+                    productAvailabilityItem.availabilityState =
+                        AvailabilityStateType.PARTIALLY_AVAILABLE_AND_ACCESSORY_NOT_AVAILABLE
                 }
             }
 
