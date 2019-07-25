@@ -3,7 +3,6 @@ package com.oceanpremium.api.offices.controller
 import com.oceanpremium.api.core.model.Enquiry
 import com.oceanpremium.api.core.model.Office
 import com.oceanpremium.api.core.model.WrappedResponse
-import com.oceanpremium.api.core.usecase.SendEmailUseCase
 import com.oceanpremium.api.core.usecase.SendEnquiryEmailUseCase
 import com.oceanpremium.api.core.util.Constants
 import com.oceanpremium.api.core.util.ObjectMapperConfig
@@ -24,17 +23,6 @@ class OfficesController(
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
         private val mapper = ObjectMapperConfig.mapper
-
-        val backOfficeEmailAddres = System.getenv("emailer_back_office")
-        val mockedOffice1 = Office(1, "Test office 1", backOfficeEmailAddres)
-        val mockedOffice2 = Office(2, "Test office 2", backOfficeEmailAddres)
-        val mockedOffice3 = Office(3, "Test office 3", backOfficeEmailAddres)
-
-        val offices = listOf(
-            mockedOffice1,
-            mockedOffice2,
-            mockedOffice3
-        )
     }
 
     @RequestMapping("docs")
@@ -54,7 +42,7 @@ class OfficesController(
     @RequestMapping
     @ResponseBody
     fun getOffices(): ResponseEntity<*> {
-        return ResponseEntity(offices, HttpStatus.OK)
+        return ResponseEntity(listOf<Office>(), HttpStatus.OK)
     }
 
     /**
