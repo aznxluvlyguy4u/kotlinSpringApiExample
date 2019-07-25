@@ -191,6 +191,7 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
         }
     }
 
+    @Suppress("UNUSED")
     private fun determineStoresStock(quantityRequested: Int, stores: Stores?): StockDetermination {
         var quantityInNative = 0
         val nativeStoresWithStock = mutableListOf<Store>()
@@ -264,8 +265,6 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
         logger.debug("Gray Q available: $quantityInGray")
         logger.debug("New Items Q available: $quantityInNewItems")
 
-        var remainingQuantity = 0
-
         // determine state of availability
 
         // Available
@@ -280,7 +279,7 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
         // Unavailable
         // 4) Unavailable: total stock level is not sufficient for the requested quantity (zero available in all stores)
 
-        remainingQuantity = when {
+        var remainingQuantity = when {
             totalQuantityAvailable >= quantityRequested -> 0
             else -> quantityRequested - totalQuantityAvailable
         }
