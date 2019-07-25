@@ -95,7 +95,7 @@
                                         </tr>
                                         <tr>
                                             <td>
-                                                <h3>Available products</h3>
+                                                <h3>Request for reservation</h3>
                                                 <table>
                                                     <tr>
                                                         <th>
@@ -110,6 +110,9 @@
                                                         <th>
                                                             <p align="left">Total (unit) cost</p>
                                                         </th>
+                                                        <th>
+                                                            <p align="left">Remarks</p>
+                                                        </th>
                                                     </tr>
                                                     <tr th:each="product : ${products}">
                                                         <td align="center" th:if="${product.availabilityState != 'NOT_AVAILABLE'}" th:text="|${product.quantity}x ${product.name}|">name placeholder</td>
@@ -121,6 +124,8 @@
                                                         </td>
                                                         <td align="center" th:text="|${product.rates?.get(0)?.price}|">unit price placeholder</td>
                                                         <td align="center" th:text="${product.totalCostProducts}">total cost placeholder</td>
+                                                        <td align="center" th:if="${product.stock.quantityDeficient} > 0.0" th:text="|${product.stock.quantitySufficient} of ${product.stock.quantityRequested} available|">total cost placeholder</td>
+
                                                     </tr>
                                                     <th:block th:each="product : ${products}">
                                                         <tr th:each="accessory : ${product.accessories}">
@@ -133,6 +138,7 @@
                                                             </td>
                                                             <td align="center" th:if="${accessory.availabilityState != 'NOT_AVAILABLE'}" th:text="${accessory.rates?.get(0)?.price}">Accessory item unit price placeholder</td>
                                                             <td align="center" th:if="${accessory.availabilityState != 'NOT_AVAILABLE'}" th:text="${accessory.totalCost}">Accessory total cost placeholder</td>
+                                                            <td align="center" th:if="${accessory.stock.quantityDeficient} > 0.0" th:text="| Only ${accessory.stock.quantitySufficient} of ${accessory.stock.quantityRequested} currently available|">total cost placeholder</td>
                                                         </tr>
                                                     </th:block>
                                                     <tr>

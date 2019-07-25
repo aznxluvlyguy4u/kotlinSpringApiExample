@@ -98,31 +98,19 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
                     accessoryDtoItem,
                     true
                 )
-
-                // Restate the availability of the parent product
-                if (productAvailabilityItem.availabilityState == AvailabilityStateType.AVAILABLE) {
-
-                    if (accessoriesAvailabilityItem.availabilityState == AvailabilityStateType.NOT_AVAILABLE) {
-                        productAvailabilityItem.availabilityState =
-                            AvailabilityStateType.AVAILABLE_BUT_ACCESSORY_NOT_AVAILABLE
-                    }
-
-                    if (accessoriesAvailabilityItem.availabilityState == AvailabilityStateType.PARTIALLY_AVAILABLE) {
-                        productAvailabilityItem.availabilityState =
-                            AvailabilityStateType.AVAILABLE_BUT_ACCESSORY_PARTIALLY_AVAILABLE
-                    }
-                }
-
-                if (productAvailabilityItem.availabilityState == AvailabilityStateType.PARTIALLY_AVAILABLE
-                    && accessoriesAvailabilityItem.availabilityState == AvailabilityStateType.NOT_AVAILABLE) {
-                    productAvailabilityItem.availabilityState =
-                        AvailabilityStateType.PARTIALLY_AVAILABLE_AND_ACCESSORY_NOT_AVAILABLE
-                }
             }
 
         }
 
-        return buildResponseModel(productItems)
+        val totalCostOfAvailableProducts = computeTotalCostOfAllItems(productItems)
+
+        return ProductAvailabilityResponse(
+            "%.2f".format(totalCostOfAvailableProducts),
+            productItems,
+            listOf(),                   //currently unused
+            listOf(),                   //currently unused
+            "%.2f".format(0.0)   //currently unused
+        )
     }
 
     @Throws(BadRequestException::class)
@@ -176,48 +164,6 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
         }
     }
 
-    private fun buildQueryParametersMap(
-        productAvailabilityItem: ProductAvailabilityItemDto,
-        isAccessory: Boolean = false,
-        parentProductItem: ProductAvailabilityItemDto? = null
-    ): Map<String, String> {
-        val queryParameters = mutableMapOf<String, String>()
-
-        queryParameters["q[product_id_eq]"] = productAvailabilityItem.id.toString()
-
-        if (isAccessory && parentProductItem != null) {
-            queryParameters["q[product_accessory_only_eq]"] = "true"
-
-            queryParameters["delivery_location_id"] = parentProductItem.location?.delivery?.id.toString()
-
-            if (parentProductItem.location?.collection?.id != null) {
-                queryParameters["collection_location_id"] = parentProductItem.location?.collection?.id.toString()
-            }
-        } else {
-            if (productAvailabilityItem.location != null) {
-                queryParameters["delivery_location_id"] = productAvailabilityItem.location?.delivery?.id.toString()
-
-                if (productAvailabilityItem.location?.collection?.id != null) {
-                    queryParameters["collection_location_id"] =
-                        productAvailabilityItem.location?.collection?.id.toString()
-                }
-            }
-        }
-
-        if (productAvailabilityItem.period?.start != null) {
-            val startDateAtNoon = productAvailabilityItem.period?.start!!.withTime(DateTimeUtil.NOON, 0, 0, 0)
-            queryParameters["starts_at"] =
-                DateTimeUtil.toISO8601UTC(startDateAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
-        }
-
-        if (productAvailabilityItem.period?.end != null) {
-            val endDateAtNoon = productAvailabilityItem.period?.end!!.withTime(DateTimeUtil.NOON, 0, 0, 0)
-            queryParameters["ends_at"] = DateTimeUtil.toISO8601UTC(endDateAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
-        }
-
-        return queryParameters
-    }
-
     private fun updateAvailability(
         productAvailabilityItem: ProductAvailabilityItemDto,
         productDtoItem: ProductDto?,
@@ -231,10 +177,13 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
         productAvailabilityItem.images = productDtoItem?.images
         productAvailabilityItem.name = productDtoItem?.name
         productAvailabilityItem.rates = productDtoItem?.rates
-        // update / override quantityAvailable with truely filtered and determined available quantity
+        productAvailabilityItem.type = productDtoItem?.type
+
+        // update / override quantityAvailable with truly filtered and determined available quantity
         productAvailabilityItem.rates?.first()?.quantityAvailable =
-            "%.1f".format(stockDetermination.quantiyTotallyAvailable.toDouble())
-        productAvailabilityItem.quantityAvailable = stockDetermination.quantiyTotallyAvailable
+            "%.1f".format(stockDetermination.quantityTotallyAvailable.toDouble())
+
+        productAvailabilityItem.quantityAvailable = stockDetermination.quantityTotallyAvailable
 
         // If it is an accessory, do not show the parent total, or accessories total, thus only show that on parent node
         if (isAccessory) {
@@ -464,64 +413,67 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
                 var totalAccessoriesCost = 0.0
 
                 val parentItemCost =
-                    productItemRentalDays.days * (productItem.stock?.quantitySufficient!! * productItem.rates!!.first().price?.toDouble()!!)
+                    productItemRentalDays.days * (productItem.quantity * productItem.rates!!.first().price?.toDouble()!!)
                 productItem.totalCostProducts = "%.2f".format(parentItemCost)
 
                 productItem.accessories.forEach { accessoryItem ->
                     when {
                         accessoryItem.rates?.first() != null -> {
-                            if (accessoryItem.availabilityState == AvailabilityStateType.AVAILABLE
-                                || accessoryItem.availabilityState == AvailabilityStateType.PARTIALLY_AVAILABLE) {
-                                val itemCost =
-                                    productItemRentalDays.days * (accessoryItem.stock?.quantitySufficient!! * accessoryItem.rates!!.first().price?.toDouble()!!)
-                                accessoryItem.totalCostProducts = "%.2f".format(itemCost)
-                                accessoryItem.totalCost = "%.2f".format(itemCost)
-                                totalAccessoriesCost += itemCost
-                            }
+
+                            val itemCost =
+                                productItemRentalDays.days * (accessoryItem.quantity * accessoryItem.rates!!.first().price?.toDouble()!!)
+                            accessoryItem.totalCostProducts = "%.2f".format(itemCost)
+                            accessoryItem.totalCost = "%.2f".format(itemCost)
+                            totalAccessoriesCost += itemCost
                         }
                     }
                 }
 
                 productItem.totalCostAccessories = "%.2f".format(totalAccessoriesCost)
-
-
                 productItem.totalCost = "%.2f".format(parentItemCost + totalAccessoriesCost)
-
             }
         }
     }
 
-    private fun buildResponseModel(productItems: List<ProductAvailabilityItemDto>): ProductAvailabilityResponse {
+    private fun buildQueryParametersMap(
+        productAvailabilityItem: ProductAvailabilityItemDto,
+        isAccessory: Boolean = false,
+        parentProductItem: ProductAvailabilityItemDto? = null
+    ): Map<String, String> {
+        val queryParameters = mutableMapOf<String, String>()
 
-        val availableProductItems = productItems.filter {
-            it.availabilityState != AvailabilityStateType.NOT_AVAILABLE
+        queryParameters["q[product_id_eq]"] = productAvailabilityItem.id.toString()
+
+        if (isAccessory && parentProductItem != null) {
+            queryParameters["q[product_accessory_only_eq]"] = "true"
+
+            queryParameters["delivery_location_id"] = parentProductItem.location?.delivery?.id.toString()
+
+            if (parentProductItem.location?.collection?.id != null) {
+                queryParameters["collection_location_id"] = parentProductItem.location?.collection?.id.toString()
+            }
+        } else {
+            if (productAvailabilityItem.location != null) {
+                queryParameters["delivery_location_id"] = productAvailabilityItem.location?.delivery?.id.toString()
+
+                if (productAvailabilityItem.location?.collection?.id != null) {
+                    queryParameters["collection_location_id"] =
+                        productAvailabilityItem.location?.collection?.id.toString()
+                }
+            }
         }
 
-        val unavailableProductItems = productItems.filter {
-            it.availabilityState == AvailabilityStateType.NOT_AVAILABLE
+        if (productAvailabilityItem.period?.start != null) {
+            val startDateAtNoon = productAvailabilityItem.period?.start!!.withTime(DateTimeUtil.NOON, 0, 0, 0)
+            queryParameters["starts_at"] =
+                DateTimeUtil.toISO8601UTC(startDateAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
         }
 
-        val unavailableAccessoryItems = productItems.flatMap { it.accessories }.filter {
-            it.availabilityState == AvailabilityStateType.NOT_AVAILABLE
+        if (productAvailabilityItem.period?.end != null) {
+            val endDateAtNoon = productAvailabilityItem.period?.end!!.withTime(DateTimeUtil.NOON, 0, 0, 0)
+            queryParameters["ends_at"] = DateTimeUtil.toISO8601UTC(endDateAtNoon, CURRENT_RMS_API_DATE_ISO8601_FORMAT)!!
         }
 
-        val allUnavailableProducts: MutableList<ProductAvailabilityItemDto> = mutableListOf()
-        allUnavailableProducts.addAll(unavailableProductItems)
-        allUnavailableProducts.addAll(unavailableAccessoryItems)
-
-        val allAvailableProducts: MutableList<ProductAvailabilityItemDto> = mutableListOf()
-        allAvailableProducts.addAll(availableProductItems)
-//        allAvailableProducts.addAll(availableAccessoryItems)
-
-        val totalCostOfAvailableProducts = computeTotalCostOfAllItems(allAvailableProducts)
-        val totalCostOfUnavailableProducts = computeTotalCostOfAllItems(allUnavailableProducts)
-
-        return ProductAvailabilityResponse(
-            "%.2f".format(totalCostOfAvailableProducts),
-            productItems,
-            allAvailableProducts,
-            allUnavailableProducts,
-            "%.2f".format(totalCostOfUnavailableProducts)
-        )
+        return queryParameters
     }
 }
