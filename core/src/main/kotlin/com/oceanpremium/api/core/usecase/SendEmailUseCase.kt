@@ -113,19 +113,25 @@ class SendEmailUseCaseImpl(
 
     private fun sendOrderEmail(order: OrderDto, inDebugMode: Boolean) : OrderDto {
         val email = EmailDto(
-            from = emailServiceConfig.sender!!,
-            to = listOf(order.contactDetails.emailAddress),
+            from = emailServiceConfig.sender!!,             // system
+            to = listOf(order.contactDetails.emailAddress), // client
             bcc = listOf(emailServiceConfig.backOffice!!),
             subject = "Request for reservation by ${order.contactDetails.fullName} ${order.contactDetails.phoneNumber}"
         )
 
         try {
             val message = MimeMessage(session)
-            message.setFrom(InternetAddress(email.from))
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email.to.first()))
-            message.sender = InternetAddress(email.from)
+            message.setFrom(InternetAddress(emailServiceConfig.sender!!)) //system
+            message.sender = InternetAddress(emailServiceConfig.sender!!) //system
             message.subject = email.subject
 
+            email.to.forEach {
+                message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(it))
+            }
+
+            email.bcc.forEach {
+                message.setRecipients(Message.RecipientType.BCC, InternetAddress.parse(it))
+            }
             val orderMap = ObjectMapperConfig.serializeToMap(order).toMutableMap()
             orderMap["orderId"] = UUID.randomUUID().toString()
 
@@ -167,18 +173,25 @@ class SendEmailUseCaseImpl(
 
     private fun sendEnquiryEmail(enquiry: Enquiry, inDebugMode: Boolean): Enquiry {
         val email = EmailDto(
-            from = emailServiceConfig.sender!!,
-            to = listOf(enquiry.emailAddress),
-            bcc = listOf(emailServiceConfig.backOffice!!),
+            from = emailServiceConfig.sender!!,            // system
+            to = listOf(enquiry.emailAddress),             // client
+            bcc = listOf(emailServiceConfig.backOffice!!), 
             subject = "Enquiry from: ${enquiry.emailAddress}"
         )
 
         try {
             val message = MimeMessage(session)
-            message.setFrom(InternetAddress(email.from))
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email.to.first()))
-            message.sender = InternetAddress(email.from)
+            message.setFrom(InternetAddress(emailServiceConfig.sender!!)) //system
+            message.sender = InternetAddress(emailServiceConfig.sender!!) //system
             message.subject = email.subject
+
+            email.to.forEach {
+                message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(it))
+            }
+
+            email.bcc.forEach {
+                message.setRecipients(Message.RecipientType.BCC, InternetAddress.parse(it))
+            }
 
             val enquiryMap = ObjectMapperConfig.serializeToMap(enquiry).toMutableMap()
 

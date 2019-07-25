@@ -28,19 +28,14 @@
                             <tr>
                                 <td>
                                     <h1 th:text="|Hi ${contactDetails.fullName}, |">Greetings placeholder</h1>
-                                    <p>Thank you for using Ocean Premium. This is an overview of your request for reservation.</p>
-                                    <p>An Ocean Premium employee will contact you concerning your request.</p>
-                                    <b>Note that an additional amount of transport costs will apply.</b>
+                                    <p>Thank you for using <a href="https://oceanpremium.com">Ocean Premium</a>. This is an overview of your request for reservation.</p>
+                                    <p>An Ocean Premium employee will contact you concerning your request. Also note that: additional transport costs will be applied.</p>
+                                    <br>
                                     <table>
                                         <tr>
                                             <td>
-                                                <h3>Order ID</h3>
-                                                <p th:text="${orderId}">Order ID placeholder</p>
-                                            </td>
-                                            <td>
                                                 <h3>Date</h3>
-                                                <p th:text="${#dates.format(#dates.createNow(),'YYYY/MM/dd HH:mm')}">
-                                                    Date placeholder</p>
+                                                <p th:text="${#dates.format(#dates.createNow(),'YYYY/MM/dd HH:mm')}">Date placeholder</p>
                                             </td>
                                         </tr>
                                         <tr>
@@ -140,9 +135,13 @@
                                                     <tr>
                                                         <td></td><td></td><td></td>
                                                         <td><p><b>Subtotal</b></p></td>
-                                                        <td th:text="${totalCost}"></td>
+                                                        <td th:text="${totalCost}">*</td>
                                                     </tr>
                                                 </table>
+
+
+                                                <i>*Note: Additional transport costs will apply.</i>
+
 <!--                                                <div th:if="${not #lists.isEmpty(unavailableProducts)}">-->
 <!--                                                    <h3>Unavailable products</h3>-->
 <!--                                                    <table>-->
@@ -176,13 +175,12 @@
                                             </td>
                                         </tr>
                                     </table>
-                                    <p>If you have any questions about this order, <br>reach out to our <a
-                                            href="https://oceanpremium.com">support team</a> for help.</p>
-                                    <br>
                                     <p>The Ocean Premium Team</p>
                                 </td>
                             </tr>
                         </table>
+                        <i>Please note: Do not reply to this email. This email is sent from an unattended mailbox. Replies will not be read.</i>
+                        <p>If you have any questions about this order, reach out to our support team at: <a href="mailto:booking@oceanpremium.com">booking@oceanpremium.com</a> for help.</p>
                     </td>
                 </tr>
                 <tr>
