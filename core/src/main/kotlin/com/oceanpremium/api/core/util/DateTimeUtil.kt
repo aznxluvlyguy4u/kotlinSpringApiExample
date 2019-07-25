@@ -11,8 +11,7 @@ object DateTimeUtil {
     const val CURRENT_RMS_API_DATE_ISO8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.sss'Z'" //2019-06-20T12:00:00.000+0000
     val defaultDateFormatter = DateTimeFormat.forPattern(DEFAULT_API_DATE_ISO8601_FORMAT).withOffsetParsed()!!
     val currentRmsDateFormatter = DateTimeFormat.forPattern(CURRENT_RMS_API_DATE_ISO8601_FORMAT).withOffsetParsed()!!
-    val emailerDateFormat = "YYYY/MM/dd HH:mm" +
-            ""
+    val emailerDateFormat = "YYYY/MM/dd"
     const val NOON = 12
 
     fun toISO8601UTC(date: DateTime, format: String? = null): String? {

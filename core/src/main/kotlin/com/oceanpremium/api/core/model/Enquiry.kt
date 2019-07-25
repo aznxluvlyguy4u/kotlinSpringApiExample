@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 
 class Office(
     val id: Int,
-    val name: String? = null,
+    var name: String = "-",
     @JsonIgnore
     val emailAddress: String? = null
 )
