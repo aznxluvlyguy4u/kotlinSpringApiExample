@@ -23,7 +23,7 @@ provider:
   #
   # $ sls deploy --region eu-west-1 --verbose --stage <stage_name>
   #
-  stage:  ${opt:stage, 'dev'}
+  stage:  ${opt:stage, 'prod'}
 
 # The service name which is used to create the stack
 service:
@@ -45,10 +45,10 @@ package:
 
 # The functions defined by HTTP verb / path and parameters (CRUD)
 functions:
-  get-product-api-docs:
+  get-product-api-docs-prod:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
-    name: get-product-api-docs
+    name: get-product-api-docs-prod
     events:
       - http:
           # The URI of the endpoint
@@ -72,10 +72,10 @@ functions:
       emailer_password: ${file(properties.json):products.emailer.password}
       emailer_sender: ${file(properties.json):products.emailer.sender}
       emailer_back_office: ${file(properties.json):products.emailer.back_office}
-  get-products:
+  get-products-prod:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
-    name: get-products
+    name: get-products-prod
     events:
       - http:
           # The URI of the endpoint
@@ -100,10 +100,10 @@ functions:
       emailer_password: ${file(properties.json):products.emailer.password}
       emailer_sender: ${file(properties.json):products.emailer.sender}
       emailer_back_office: ${file(properties.json):products.emailer.back_office}
-  get-product-by-id:
+  get-product-by-id-prod:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
-    name: get-product-by-id
+    name: get-product-by-id-prod
     events:
       - http:
           # The URI of the endpoint
@@ -132,10 +132,10 @@ functions:
       emailer_password: ${file(properties.json):products.emailer.password}
       emailer_sender: ${file(properties.json):products.emailer.sender}
       emailer_back_office: ${file(properties.json):products.emailer.back_office}
-  get-product-groups:
+  get-product-groups-prod:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
-    name: get-product-groups
+    name: get-product-groups-prod
     events:
       - http:
           # The URI of the endpoint
@@ -160,10 +160,10 @@ functions:
       emailer_password: ${file(properties.json):products.emailer.password}
       emailer_sender: ${file(properties.json):products.emailer.sender}
       emailer_back_office: ${file(properties.json):products.emailer.back_office}
-  get-products-inventory:
+  get-products-inventory-prod:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
-    name: get-products-inventory
+    name: get-products-inventory-prod
     events:
       - http:
           # The URI of the endpoint
@@ -188,10 +188,10 @@ functions:
       emailer_password: ${file(properties.json):products.emailer.password}
       emailer_sender: ${file(properties.json):products.emailer.sender}
       emailer_back_office: ${file(properties.json):products.emailer.back_office}
-  post-product-batch-availability:
+  post-product-batch-availability-prod:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
-    name: post-product-batch-availability
+    name: post-product-batch-availability-prod
     events:
       - http:
           # The URI of the endpoint
@@ -216,10 +216,10 @@ functions:
       emailer_password: ${file(properties.json):products.emailer.password}
       emailer_sender: ${file(properties.json):products.emailer.sender}
       emailer_back_office: ${file(properties.json):products.emailer.back_office}
-  post-product-order-placement:
+  post-product-order-placement-prod:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
-    name: post-product-order-placement
+    name: post-product-order-placement-prod
     events:
       - http:
           # The URI of the endpoint

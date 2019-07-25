@@ -23,7 +23,7 @@ provider:
   #
   # $ sls deploy --region eu-west-1 --verbose --stage <stage_name>
   #
-  stage:  ${opt:stage, 'dev'}
+  stage:  ${opt:stage, 'staging'}
 
 # The service name which is used to create the stack
 service:
@@ -45,10 +45,10 @@ package:
 
 # The functions defined by HTTP verb / path and parameters (CRUD)
 functions:
-  get-offices-api-docs:
+  get-offices-api-docs-staging:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.offices.Handler::handleRequest
-    name: get-offices-api-docs
+    name: get-offices-api-docs-staging
     events:
       - http:
           # The URI of the endpoint
@@ -73,10 +73,10 @@ functions:
       emailer_sender: ${file(properties.json):offices.emailer.sender}
       emailer_back_office: ${file(properties.json):offices.emailer.back_office}
 
-  create-offices-enquiry:
+  create-offices-enquiry-staging:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.offices.Handler::handleRequest
-    name: create-offices-enquiry
+    name: create-offices-enquiry-staging
     events:
       - http:
           # The URI of the endpoint
