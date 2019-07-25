@@ -29,6 +29,9 @@ import java.io.InputStream
 import java.io.OutputStream
 import kotlin.jvm.*
 import kotlin.jvm.java as java1
+import java.util.TimeZone
+import javax.annotation.PostConstruct
+
 
 /**
  * The main application entry point that spins up the API.
@@ -56,6 +59,10 @@ class ProductsDriver : SpringBootServletInitializer() {
         @JvmStatic
         fun main(args: Array<String>) {
             SpringApplication.run(ProductsDriver::class.java1, *args)
+        }
+        @PostConstruct
+        fun started() {
+            TimeZone.setDefault(TimeZone.getTimeZone("Europe/Amsterdam"))
         }
     }
 }
