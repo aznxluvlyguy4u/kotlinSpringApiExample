@@ -73,11 +73,11 @@ functions:
       current_rms_token: ${file(properties.json):offices.current_rms.token}
       current_rms_subdomain: ${file(properties.json):offices.current_rms.subdomain}
       current_rms_api_url: ${file(properties.json):offices.current_rms.api_url}
-      emailer_smtp_host: ${file(properties.json):products.emailer.smtp_host}
-      emailer_username: ${file(properties.json):products.emailer.username}
-      emailer_password: ${file(properties.json):products.emailer.password}
-      emailer_sender: ${file(properties.json):products.emailer.sender}
-      emailer_back_office: ${file(properties.json):products.emailer.back_office}
+      emailer_smtp_host: ${file(properties.json):offices.emailer.smtp_host}
+      emailer_username: ${file(properties.json):offices.emailer.username}
+      emailer_password: ${file(properties.json):offices.emailer.password}
+      emailer_sender: ${file(properties.json):offices.emailer.sender}
+      emailer_back_office: ${file(properties.json):offices.emailer.back_office}
 
   create-offices-enquiry:
 #  create-offices-enquiry-staging:
