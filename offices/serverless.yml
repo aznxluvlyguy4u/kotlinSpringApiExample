@@ -24,6 +24,8 @@ provider:
   # $ sls deploy --region eu-west-1 --verbose --stage <stage_name>
   #
   stage:  ${opt:stage, 'dev'}
+#  stage:  ${opt:stage, 'staging'}
+#  stage:  ${opt:stage, 'prod'}
 
 # The service name which is used to create the stack
 service:
@@ -46,9 +48,13 @@ package:
 # The functions defined by HTTP verb / path and parameters (CRUD)
 functions:
   get-offices-api-docs:
+#  get-offices-api-docs-staging:
+#  get-offices-api-docs-prod:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.offices.Handler::handleRequest
     name: get-offices-api-docs
+#    name: get-offices-api-docs-staging
+#    name: get-offices-api-docs-prod
     events:
       - http:
           # The URI of the endpoint
@@ -67,10 +73,20 @@ functions:
       current_rms_token: ${file(properties.json):offices.current_rms.token}
       current_rms_subdomain: ${file(properties.json):offices.current_rms.subdomain}
       current_rms_api_url: ${file(properties.json):offices.current_rms.api_url}
+      emailer_smtp_host: ${file(properties.json):products.emailer.smtp_host}
+      emailer_username: ${file(properties.json):products.emailer.username}
+      emailer_password: ${file(properties.json):products.emailer.password}
+      emailer_sender: ${file(properties.json):products.emailer.sender}
+      emailer_back_office: ${file(properties.json):products.emailer.back_office}
+
   create-offices-enquiry:
+#  create-offices-enquiry-staging:
+#  create-offices-enquiry-prod:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.offices.Handler::handleRequest
     name: create-offices-enquiry
+#    name: create-offices-enquiry-staging
+#    name: create-offices-enquiry-prod
     events:
       - http:
           # The URI of the endpoint
@@ -93,3 +109,8 @@ functions:
       current_rms_token: ${file(properties.json):offices.current_rms.token}
       current_rms_subdomain: ${file(properties.json):offices.current_rms.subdomain}
       current_rms_api_url: ${file(properties.json):offices.current_rms.api_url}
+      emailer_smtp_host: ${file(properties.json):offices.emailer.smtp_host}
+      emailer_username: ${file(properties.json):offices.emailer.username}
+      emailer_password: ${file(properties.json):offices.emailer.password}
+      emailer_sender: ${file(properties.json):offices.emailer.sender}
+      emailer_back_office: ${file(properties.json):offices.emailer.back_office}

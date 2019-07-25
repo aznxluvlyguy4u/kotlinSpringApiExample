@@ -13,7 +13,7 @@ provider:
   # The default timeout (seconds)
   timeout: 30
 
-  # The stage to deploy, stages:(dev | test |  stage | prod) - defaults to dev
+  # The stage to deploy, stages:(dev | test |  staging | prod) - defaults to dev
   #
   # Either deploy through gradle task:
   #
@@ -24,6 +24,8 @@ provider:
   # $ sls deploy --region eu-west-1 --verbose --stage <stage_name>
   #
   stage:  ${opt:stage, 'dev'}
+#  stage:  ${opt:stage, 'staging'}
+#  stage:  ${opt:stage, 'prod'}
 
 # The service name which is used to create the stack
 service:
@@ -46,9 +48,13 @@ package:
 # The functions defined by HTTP verb / path and parameters (CRUD)
 functions:
   get-product-api-docs:
+#  get-product-api-docs-staging:
+#  get-product-api-docs-prd:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
     name: get-product-api-docs
+#    name: get-product-api-docs-staging
+#    name: get-product-api-docs-prod
     events:
       - http:
           # The URI of the endpoint
@@ -73,9 +79,13 @@ functions:
       emailer_sender: ${file(properties.json):products.emailer.sender}
       emailer_back_office: ${file(properties.json):products.emailer.back_office}
   get-products:
+#  get-products-staging:
+#  get-products-prod:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
     name: get-products
+#    name: get-products-staging
+#    name: get-products-prod
     events:
       - http:
           # The URI of the endpoint
@@ -101,9 +111,13 @@ functions:
       emailer_sender: ${file(properties.json):products.emailer.sender}
       emailer_back_office: ${file(properties.json):products.emailer.back_office}
   get-product-by-id:
+#  get-product-by-id-staging:
+#  get-product-by-id-prod:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
     name: get-product-by-id
+#    name: get-product-by-id-staging
+#    name: get-product-by-id-prod
     events:
       - http:
           # The URI of the endpoint
@@ -133,9 +147,13 @@ functions:
       emailer_sender: ${file(properties.json):products.emailer.sender}
       emailer_back_office: ${file(properties.json):products.emailer.back_office}
   get-product-groups:
+#  get-product-groups-staging:
+#  get-product-groups-prod:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
     name: get-product-groups
+#    name: get-product-groups-staging
+#    name: get-product-groups-prod
     events:
       - http:
           # The URI of the endpoint
@@ -161,9 +179,13 @@ functions:
       emailer_sender: ${file(properties.json):products.emailer.sender}
       emailer_back_office: ${file(properties.json):products.emailer.back_office}
   get-products-inventory:
+#  get-products-inventory-staging:
+#  get-products-inventory-prod:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
     name: get-products-inventory
+#    name: get-products-inventory-staging
+#    name: get-products-inventory-prod
     events:
       - http:
           # The URI of the endpoint
@@ -189,9 +211,13 @@ functions:
       emailer_sender: ${file(properties.json):products.emailer.sender}
       emailer_back_office: ${file(properties.json):products.emailer.back_office}
   post-product-batch-availability:
+#  post-product-batch-availability-staging:
+#  post-product-batch-availability-prod:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
     name: post-product-batch-availability
+#    name: post-product-batch-availability-staging
+#    name: post-product-batch-availability-prod
     events:
       - http:
           # The URI of the endpoint
@@ -217,9 +243,13 @@ functions:
       emailer_sender: ${file(properties.json):products.emailer.sender}
       emailer_back_office: ${file(properties.json):products.emailer.back_office}
   post-product-order-placement:
+#  post-product-order-placement-staging:
+#  post-product-order-placement-prod:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.products.Handler::handleRequest
     name: post-product-order-placement
+#    name: post-product-order-placement-staging
+#    name: post-product-order-placement-prod
     events:
       - http:
           # The URI of the endpoint

@@ -24,6 +24,8 @@ provider:
   # $ sls deploy --region eu-west-1 --verbose --stage <stage_name>
   #
   stage:  ${opt:stage, 'dev'}
+#  stage:  ${opt:stage, 'staging'}
+#  stage:  ${opt:stage, 'prod'}
 
 # The service name which is used to create the stack
 service:
@@ -46,9 +48,13 @@ package:
 # The functions defined by HTTP verb / path and parameters (CRUD)
 functions:
   get-location-api-docs:
+#  get-location-api-docs-staging:
+#  get-location-api-docs-prod:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.locations.Handler::handleRequest
     name: get-locations-api-docs
+#    name: get-locations-api-docs-staging
+#    name: get-locations-api-docs-prod
     events:
       - http:
           # The URI of the endpoint
@@ -68,9 +74,13 @@ functions:
       current_rms_subdomain: ${file(properties.json):locations.current_rms.subdomain}
       current_rms_api_url: ${file(properties.json):locations.current_rms.api_url}
   get-locations:
+#  get-locations-staging:
+#  get-locations-prod:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.locations.Handler::handleRequest
     name: get-locations
+#    name: get-locations-staging
+#    name: get-locations-prod
     events:
       - http:
           # The URI of the endpoint
