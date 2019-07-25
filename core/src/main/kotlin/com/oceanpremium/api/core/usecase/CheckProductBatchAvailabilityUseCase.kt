@@ -73,6 +73,7 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
 
                 if (accessoriesAvailabilityItem.period == null) {
                     accessoriesAvailabilityItem.period = productAvailabilityItem.period
+                    accessoriesAvailabilityItem.period?.getDayCounts()
                 }
 
                 if (accessoriesAvailabilityItem.location == null) {

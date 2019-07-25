@@ -29,6 +29,8 @@
                                 <td>
                                     <h1 th:text="|Hi ${contactDetails.fullName}, |">Greetings placeholder</h1>
                                     <p>Thank you for using Ocean Premium. This is an overview of your request for reservation.</p>
+                                    <p>An Ocean Premium employee will contact you concerning your request.</p>
+                                    <b>Note that an additional amount of transport costs will apply.</b>
                                     <table>
                                         <tr>
                                             <td>
@@ -105,40 +107,34 @@
                                                             <p align="center">Pick Up - Drop Off</p>
                                                         </th>
                                                         <th>
-                                                            <p align="left">Unit price (per day)</p>
+                                                            <p align="left">Unit price </p>
                                                         </th>
                                                         <th>
-                                                            <p align="left">Total (unit) cost</p>
-                                                        </th>
-                                                        <th>
-                                                            <p align="left">Remarks</p>
+                                                            <p align="left">Subtotal</p>
                                                         </th>
                                                     </tr>
                                                     <tr th:each="product : ${products}">
-                                                        <td align="center" th:if="${product.availabilityState != 'NOT_AVAILABLE'}" th:text="|${product.quantity}x ${product.name}|">name placeholder</td>
+                                                        <td align="center" th:text="|${product.quantity}x ${product.name}|">name placeholder</td>
                                                         <td align="center">
                                                             <div class="grid-container">
                                                                 <div class="grid-item" th:text="|${product.period.startDateTime} - ${product.period.endDateTime}|">start/end date placeholder</div>
                                                                 <div class="grid-item" th:text="|${product.location?.delivery?.name} - ${product.location?.collection?.name}|">delivery/pickup placeholder</div>
                                                             </div>
                                                         </td>
-                                                        <td align="center" th:text="|${product.rates?.get(0)?.price}|">unit price placeholder</td>
+                                                        <td align="center" th:text="|${product.quantity} x ${product.rates?.get(0)?.price} x ${product.period.dayCount} Days|">unit price placeholder</td>
                                                         <td align="center" th:text="${product.totalCostProducts}">total cost placeholder</td>
-                                                        <td align="center" th:if="${product.stock.quantityDeficient} > 0.0" th:text="|${product.stock.quantitySufficient} of ${product.stock.quantityRequested} available|">total cost placeholder</td>
-
                                                     </tr>
                                                     <th:block th:each="product : ${products}">
                                                         <tr th:each="accessory : ${product.accessories}">
-                                                            <td align="center" th:if="${accessory.availabilityState != 'NOT_AVAILABLE'}" th:text="|${accessory.quantity}x ${accessory.name}|">Accessory item name placeholder</td>
+                                                            <td align="center" th:text="|${accessory.quantity}x ${accessory.name}|">Accessory item name placeholder</td>
                                                             <td align="center">
                                                                 <div class="grid-container">
-                                                                    <div class="grid-item" th:if="${accessory.availabilityState != 'NOT_AVAILABLE'}" th:text="|${accessory.period.startDateTime} - ${accessory.period.endDateTime}|">start/end date placeholder</div>
-                                                                    <div class="grid-item" th:if="${accessory.availabilityState != 'NOT_AVAILABLE'}" th:text="|${accessory.location?.delivery?.name} - ${accessory.location?.collection?.name}|">delivery/pickup placeholder</div>
+                                                                    <div class="grid-item" th:text="|${accessory.period.startDateTime} - ${accessory.period.endDateTime}|">start/end date placeholder</div>
+                                                                    <div class="grid-item" th:text="|${accessory.location?.delivery?.name} - ${accessory.location?.collection?.name}|">delivery/pickup placeholder</div>
                                                                 </div>
                                                             </td>
-                                                            <td align="center" th:if="${accessory.availabilityState != 'NOT_AVAILABLE'}" th:text="${accessory.rates?.get(0)?.price}">Accessory item unit price placeholder</td>
-                                                            <td align="center" th:if="${accessory.availabilityState != 'NOT_AVAILABLE'}" th:text="${accessory.totalCost}">Accessory total cost placeholder</td>
-                                                            <td align="center" th:if="${accessory.stock.quantityDeficient} > 0.0" th:text="| Only ${accessory.stock.quantitySufficient} of ${accessory.stock.quantityRequested} currently available|">total cost placeholder</td>
+                                                            <td align="center" th:text="|${accessory.quantity} x ${accessory.rates?.get(0)?.price} x ${accessory.period.dayCount} Days|">Accessory item unit price placeholder</td>
+                                                            <td align="center" th:text="${accessory.totalCost}">Accessory total cost placeholder</td>
                                                         </tr>
                                                     </th:block>
                                                     <tr>

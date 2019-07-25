@@ -8,6 +8,7 @@ import com.oceanpremium.api.core.config.LocalDateDeserializer
 import com.oceanpremium.api.core.util.DateTimeUtil
 import com.oceanpremium.api.core.util.DateTimeUtil.emailerDateFormat
 import org.joda.time.DateTime
+import org.joda.time.Days
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class RentalPeriod(
@@ -21,13 +22,19 @@ class RentalPeriod(
 
     init {
         getDateStr()
+        getDayCounts()
     }
     var startDateTime : String? = null
     var endDateTime : String? = null
+    var dayCount: Int? = null
 
     private fun getDateStr(){
         startDateTime = DateTimeUtil.toISO8601UTC(start, emailerDateFormat)
         endDateTime = DateTimeUtil.toISO8601UTC(end, emailerDateFormat)
+    }
+
+    fun getDayCounts() {
+        dayCount = Days.daysBetween(start.toLocalDate(), end.toLocalDate()).days
     }
 
 }
