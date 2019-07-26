@@ -1,5 +1,7 @@
 # Deploy instructions
 #
+# see also: https://bitbucket.org/oceanpremium/ocean-premium-api/wiki/Deploy%20to%20different%20environments
+#
 # 0) Uncomment the configurations block in the parent build.gradle file in the root of the project, that looks something like this:
 #
 #    configurations {
