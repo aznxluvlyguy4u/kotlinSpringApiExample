@@ -1,3 +1,20 @@
+# Deploy instructions
+#
+# 0) Uncomment the configurations block in the parent build.gradle file in the root of the project, that looks something like this:
+#
+#    configurations {
+#      runtime.exclude module: "spring-boot-starter-web"
+#       ...
+#    }
+#
+# 1) Either deploy through gradle task:
+#
+# $ ./gradlew products:deploy -Pstage=dev --stacktrace
+#
+# or directly via server-less (which is called by the `deploy` Gradle task):
+#
+# $ sls deploy --region eu-west-1 --verbose --stage dev
+
 # For full config options, check: https://docs.serverless.com
 
 # The provider of the cloud instance and its needed runtime configuration
@@ -12,17 +29,7 @@ provider:
   memorySize: 512
   # The default timeout (seconds)
   timeout: 30
-
-  # The stage to deploy, stages:(dev | test |  staging | prod) - defaults to dev
-  #
-  # Either deploy through gradle task:
-  #
-  # $ ./gradlew moduleName: deploy -Pstage=<stage_name> --stacktrace
-  #
-  # or directly via server-less (which is called by the `deploy` Gradle task):
-  #
-  # $ sls deploy --region eu-west-1 --verbose --stage <stage_name>
-  #
+  # The environment to deploy to
   stage:  ${opt:stage, 'dev'}
 
 # The service name which is used to create the stack
