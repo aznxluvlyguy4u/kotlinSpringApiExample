@@ -45,10 +45,10 @@ package:
 
 # The functions defined by HTTP verb / path and parameters (CRUD)
 functions:
-  get-offices-api-docs-prod:
+  get-offices-api-docs-production:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.offices.Handler::handleRequest
-    name: get-offices-api-docs-prod
+    name: get-offices-api-docs-production
     events:
       - http:
           # The URI of the endpoint
@@ -73,10 +73,10 @@ functions:
       emailer_sender: ${file(properties.json):offices.emailer.sender}
       emailer_back_office: ${file(properties.json):offices.emailer.back_office}
 
-  create-offices-enquiry-prod:
+  create-offices-enquiry-production:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.offices.Handler::handleRequest
-    name: create-offices-enquiry-prod
+    name: create-offices-enquiry-production
     events:
       - http:
           # The URI of the endpoint

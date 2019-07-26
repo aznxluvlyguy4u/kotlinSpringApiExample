@@ -45,10 +45,10 @@ package:
 
 # The functions defined by HTTP verb / path and parameters (CRUD)
 functions:
-  get-location-api-docs-prod:
+  get-location-api-docs-production:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.locations.Handler::handleRequest
-    name: get-locations-api-docs-prod
+    name: get-locations-api-docs-production
     events:
       - http:
           # The URI of the endpoint
@@ -67,10 +67,10 @@ functions:
       current_rms_token: ${file(properties.json):locations.current_rms.token}
       current_rms_subdomain: ${file(properties.json):locations.current_rms.subdomain}
       current_rms_api_url: ${file(properties.json):locations.current_rms.api_url}
-  get-locations-prod:
+  get-locations-production:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.locations.Handler::handleRequest
-    name: get-locations-prod
+    name: get-locations-production
     events:
       - http:
           # The URI of the endpoint
