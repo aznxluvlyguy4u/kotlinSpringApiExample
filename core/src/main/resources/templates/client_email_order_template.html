@@ -28,17 +28,14 @@
                             <tr>
                                 <td>
                                     <h1 th:text="|Hi ${contactDetails.fullName}, |">Greetings placeholder</h1>
-                                    <p>Thank you for using Ocean Premium. This is an overview of your request for reservation.</p>
+                                    <p>Thank you for using <a href="https://oceanpremium.com">Ocean Premium</a>. This is an overview of your request for reservation.</p>
+                                    <p>An Ocean Premium employee will contact you concerning your request. Also note that: additional transport costs will be applied.</p>
+                                    <br>
                                     <table>
                                         <tr>
                                             <td>
-                                                <h3>Order ID</h3>
-                                                <p th:text="${orderId}">Order ID placeholder</p>
-                                            </td>
-                                            <td>
                                                 <h3>Date</h3>
-                                                <p th:text="${#dates.format(#dates.createNow(),'YYYY/MM/dd HH:mm')}">
-                                                    Date placeholder</p>
+                                                <p th:text="${#dates.format(#dates.createNow(),'YYYY/MM/dd HH:mm')}">Date placeholder</p>
                                             </td>
                                         </tr>
                                         <tr>
@@ -95,7 +92,7 @@
                                         </tr>
                                         <tr>
                                             <td>
-                                                <h3>Available products</h3>
+                                                <h3>Request for reservation</h3>
                                                 <table>
                                                     <tr>
                                                         <th>
@@ -105,42 +102,46 @@
                                                             <p align="center">Pick Up - Drop Off</p>
                                                         </th>
                                                         <th>
-                                                            <p align="left">Unit price (per day)</p>
+                                                            <p style="margin-left: 10px;" align="left">Unit price </p>
                                                         </th>
                                                         <th>
-                                                            <p align="left">Total (unit) cost</p>
+                                                            <p style="margin-left: 10px;" align="left">Total item price</p>
                                                         </th>
                                                     </tr>
-                                                    <tr th:each="product : ${availableProducts}">
-                                                        <td align="center" th:text="|${product.quantity}x ${product.name}|">name placeholder</td>
+                                                    <tr th:each="product : ${products}">
+                                                        <td align="left" th:text="|${product.quantity}x ${product.name}|">name placeholder</td>
                                                         <td align="center">
-                                                            <div class="grid-container">
-                                                                <div class="grid-item" th:text="|${product.period.startDateTime} - ${product.period.endDateTime}|">start/end date placeholder</div>
-                                                                <div class="grid-item" th:text="|${product.location?.delivery?.name} - ${product.location?.collection?.name}|">delivery/pickup placeholder</div>
+                                                            <div th:class="grid-container">
+                                                                <div style="margin-top: 20px;" th:class="grid-item" th:text="|${product.period.startDateTime} - ${product.period.endDateTime}|">start/end date placeholder</div>
+                                                                <div th:class="grid-item" th:text="|${product.location?.delivery?.name} - ${product.location?.collection?.name}|">delivery/pickup placeholder</div>
                                                             </div>
                                                         </td>
-                                                        <td align="center" th:text="|${product.rates?.get(0)?.price}|">unit price placeholder</td>
-                                                        <td align="center" th:text="${product.totalCostProducts}">total cost placeholder</td>
+                                                        <td style="margin-left: 10px;" align="center" th:text="|${product.quantity} x ${product.rates?.get(0)?.price} x ${product.period.dayCount} Days|">unit price placeholder</td>
+                                                        <td style="margin-left: 10px;" align="center" th:text="${product.totalCostProducts}">total cost placeholder</td>
                                                     </tr>
-                                                    <th:block th:each="product : ${availableProducts}">
+                                                    <th:block th:each="product : ${products}">
                                                         <tr th:each="accessory : ${product.accessories}">
-                                                            <td align="center" th:if="${accessory.availabilityState == T(com.oceanpremium.api.core.enum.AvailabilityStateType).AVAILABLE}" th:text="|${accessory.quantity}x ${accessory.name}|">Accessory item name placeholder</td>
+                                                            <td align="left" th:text="|${accessory.quantity}x ${accessory.name}|">Accessory item name placeholder</td>
                                                             <td align="center">
                                                                 <div class="grid-container">
-                                                                    <div class="grid-item" th:if="${accessory.availabilityState == T(com.oceanpremium.api.core.enum.AvailabilityStateType).AVAILABLE}" th:text="|${accessory.period.startDateTime} - ${accessory.period.endDateTime}|">start/end date placeholder</div>
-                                                                    <div class="grid-item" th:if="${accessory.availabilityState == T(com.oceanpremium.api.core.enum.AvailabilityStateType).AVAILABLE}" th:text="|${accessory.location?.delivery?.name} - ${accessory.location?.collection?.name}|">delivery/pickup placeholder</div>
+                                                                    <div style="margin-top: 20px;" class="grid-item" th:text="|${accessory.period.startDateTime} - ${accessory.period.endDateTime}|">start/end date placeholder</div>
+                                                                    <div class="grid-item" th:text="|${accessory.location?.delivery?.name} - ${accessory.location?.collection?.name}|">delivery/pickup placeholder</div>
                                                                 </div>
                                                             </td>
-                                                            <td align="center" th:if="${accessory.availabilityState == T(com.oceanpremium.api.core.enum.AvailabilityStateType).AVAILABLE}" th:text="${accessory.rates?.get(0)?.price}">Accessory item unit price placeholder</td>
-                                                            <td align="center" th:if="${accessory.availabilityState == T(com.oceanpremium.api.core.enum.AvailabilityStateType).AVAILABLE}" th:text="${accessory.totalCost}">Accessory total cost placeholder</td>
+                                                            <td style="margin-left: 10px;" align="center" th:text="|${accessory.quantity} x ${accessory.rates?.get(0)?.price} x ${accessory.period.dayCount} Days|">Accessory item unit price placeholder</td>
+                                                            <td style="margin-left: 10px;" align="center" th:text="${accessory.totalCost}">Accessory total cost placeholder</td>
                                                         </tr>
                                                     </th:block>
                                                     <tr>
-                                                        <td></td><td></td><td></td>
+                                                        <td></td><td></td>
                                                         <td><p><b>Subtotal</b></p></td>
-                                                        <td th:text="${totalCost}"></td>
+                                                        <td style="margin-left: -50px;" th:text="|EUR ${totalCost} *|"></td>
                                                     </tr>
                                                 </table>
+
+
+                                                <i>* Note: Additional transport costs will apply.</i>
+
 <!--                                                <div th:if="${not #lists.isEmpty(unavailableProducts)}">-->
 <!--                                                    <h3>Unavailable products</h3>-->
 <!--                                                    <table>-->
@@ -174,13 +175,12 @@
                                             </td>
                                         </tr>
                                     </table>
-                                    <p>If you have any questions about this order, <br>reach out to our <a
-                                            href="https://oceanpremium.com">support team</a> for help.</p>
-                                    <br>
                                     <p>The Ocean Premium Team</p>
                                 </td>
                             </tr>
                         </table>
+                        <i>Do not reply to this email. This email is sent from an unattended mailbox. Replies will not be read.</i><br>
+                        If you have any questions about this order, reach out to our support team at: <a href="mailto:booking@oceanpremium.com">booking@oceanpremium.com</a> for help.
                     </td>
                 </tr>
                 <tr>

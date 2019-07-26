@@ -2,6 +2,7 @@ package com.oceanpremium.api.core.usecase
 
 import com.oceanpremium.api.core.exception.throwable.BadRequestException
 import com.oceanpremium.api.core.exception.throwable.ServerErrorException
+import com.oceanpremium.api.core.model.Enquiry
 import com.oceanpremium.api.core.model.OrderDto
 import com.oceanpremium.api.core.util.ObjectMapperConfig
 import com.sun.mail.smtp.SMTPAddressFailedException
@@ -24,9 +25,13 @@ interface SendEmailUseCase {
     fun execute(order: OrderDto, inDebugMode: Boolean = false): OrderDto
 }
 
+interface SendEnquiryEmailUseCase {
+    fun execute(enquiry: Enquiry, inDebugMode: Boolean = false): Enquiry
+}
+
 class SendEmailUseCaseImpl(
     @Autowired private val templateEngine: SpringTemplateEngine
-) : SendEmailUseCase {
+) : SendEmailUseCase, SendEnquiryEmailUseCase {
 
     internal class EmailDto(
         var from: String,
@@ -47,7 +52,7 @@ class SendEmailUseCaseImpl(
             private const val USERNAME_KEY = "emailer_username"
             private const val PASSWORD_KEY = "emailer_password"
             private const val SENDER_KEY = "emailer_sender"
-            private const val BACK_OFFICE_KEY = "emailer_back_office"
+            const val BACK_OFFICE_KEY = "emailer_back_office"
         }
 
         init {
@@ -72,14 +77,22 @@ class SendEmailUseCaseImpl(
         private val emailServiceConfig = EmailServiceConfig()
         private var session: Session? = null
         private const val CLIENT_EMAIL_ORDER_TEMPLATE = "client_email_order_template"
+        private const val CLIENT_ENQUIRY_TEMPLATE = "client_enquiry_template"
     }
 
     @Throws(MessagingException::class, IOException::class)
     override fun execute(order: OrderDto, inDebugMode: Boolean): OrderDto {
         setupMailClient()
-        sendEmail(order, inDebugMode)
+        sendOrderEmail(order, inDebugMode)
 
         return order
+    }
+
+    override fun execute(enquiry: Enquiry, inDebugMode: Boolean): Enquiry {
+        setupMailClient()
+        sendEnquiryEmail(enquiry, inDebugMode)
+
+        return enquiry
     }
 
     private fun setupMailClient() {
@@ -98,21 +111,27 @@ class SendEmailUseCaseImpl(
         })
     }
 
-    private fun sendEmail(order: OrderDto, inDebugMode: Boolean) : OrderDto {
+    private fun sendOrderEmail(order: OrderDto, inDebugMode: Boolean) : OrderDto {
         val email = EmailDto(
-            from = emailServiceConfig.sender!!,
-            to = listOf(order.contactDetails.emailAddress),
+            from = emailServiceConfig.sender!!,             // system
+            to = listOf(order.contactDetails.emailAddress), // client
             bcc = listOf(emailServiceConfig.backOffice!!),
             subject = "Request for reservation by ${order.contactDetails.fullName} ${order.contactDetails.phoneNumber}"
         )
 
         try {
             val message = MimeMessage(session)
-            message.setFrom(InternetAddress(email.from))
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email.to.first()))
-            message.sender = InternetAddress(email.from)
+            message.setFrom(InternetAddress(emailServiceConfig.sender!!)) //system
+            message.sender = InternetAddress(emailServiceConfig.sender!!) //system
             message.subject = email.subject
 
+            email.to.forEach {
+                message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(it))
+            }
+
+            email.bcc.forEach {
+                message.setRecipients(Message.RecipientType.BCC, InternetAddress.parse(it))
+            }
             val orderMap = ObjectMapperConfig.serializeToMap(order).toMutableMap()
             orderMap["orderId"] = UUID.randomUUID().toString()
 
@@ -150,5 +169,65 @@ class SendEmailUseCaseImpl(
         }
 
         return order
+    }
+
+    private fun sendEnquiryEmail(enquiry: Enquiry, inDebugMode: Boolean): Enquiry {
+        val email = EmailDto(
+            from = emailServiceConfig.sender!!,            // system
+            to = listOf(enquiry.emailAddress),             // client
+            bcc = listOf(emailServiceConfig.backOffice!!), 
+            subject = "Enquiry from: ${enquiry.emailAddress}"
+        )
+
+        try {
+            val message = MimeMessage(session)
+            message.setFrom(InternetAddress(emailServiceConfig.sender!!)) //system
+            message.sender = InternetAddress(emailServiceConfig.sender!!) //system
+            message.subject = email.subject
+
+            email.to.forEach {
+                message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(it))
+            }
+
+            email.bcc.forEach {
+                message.setRecipients(Message.RecipientType.BCC, InternetAddress.parse(it))
+            }
+
+            val enquiryMap = ObjectMapperConfig.serializeToMap(enquiry).toMutableMap()
+
+            context.setVariables(enquiryMap)
+            val html = templateEngine.process(CLIENT_ENQUIRY_TEMPLATE, context)
+            message.setContent(html, "text/html")
+
+            if (inDebugMode) {
+                logger.info("Running e-mailer in DEBUG mode, therefore NOT SENDING out email")
+            } else {
+                logger.info("Running e-mailer in LIVE mode, therefore SENDING out email")
+                Transport.send(message)
+            }
+        } catch (e: MessagingException) {
+            e.printStackTrace()
+
+            Sentry.capture(e)
+
+            logger.error("Failed to send email: ${e.message}")
+            throw ServerErrorException("Failed to send email to address: ${enquiry.emailAddress}: ${e.message}")
+        } catch (e: SMTPAddressFailedException) {
+            e.printStackTrace()
+
+            Sentry.capture(e)
+
+            logger.error("Failed to send email: ${e.message}")
+            throw BadRequestException("E-mail address: ${enquiry.emailAddress} is not valid, please check the address or try with a different one")
+        } catch (e: ConnectException) {
+            e.printStackTrace()
+
+            Sentry.capture(e)
+
+            logger.error("Failed to send email: ${e.message}")
+            throw ServerErrorException("Failed to send email to address: ${enquiry.emailAddress}")
+        }
+
+        return enquiry
     }
 }

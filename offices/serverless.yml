@@ -11,7 +11,7 @@
 #
 # 1) Either deploy through gradle task:
 #
-# $ ./gradlew locations:deploy -Pstage=dev --stacktrace
+# $ ./gradlew offices:deploy -Pstage=dev --stacktrace
 #
 # or directly via server-less (which is called by the `deploy` Gradle task):
 #
@@ -36,7 +36,7 @@ provider:
 
 # The service name which is used to create the stack
 service:
-  name: ocean-premium-locations-api
+  name: ocean-premium-offices-api
 
 # Custom variables
 custom:
@@ -50,18 +50,18 @@ region: eu-west-1
 
 # The path and the name of the deploy-able archive
 package:
-  artifact: build/libs/locations-0.0.1-SNAPSHOT-aws.jar
+  artifact: build/libs/offices-0.0.1-SNAPSHOT-aws.jar
 
 # The functions defined by HTTP verb / path and parameters (CRUD)
 functions:
-  get-location-api-docs:
+  get-offices-api-docs:
     # The function handler to be called for this endpoint
-    handler: com.oceanpremium.api.locations.Handler::handleRequest
-    name: get-locations-api-docs
+    handler: com.oceanpremium.api.offices.Handler::handleRequest
+    name: get-offices-api-docs
     events:
       - http:
           # The URI of the endpoint
-          path: /${self:custom.apiPathPrefix}/locations/docs
+          path: /${self:custom.apiPathPrefix}/offices/docs
           # The HTTP verb
           method: get
           # Additional endpoint configurations like enabling CORS
@@ -71,30 +71,45 @@ functions:
             - Content-Type
           allowCredentials: false
     environment:
-      SENTRY_DSN: ${file(properties.json):locations.sentry_dsn}
-      slack_webhook_jvt: ${file(properties.json):locations.slack.webhook_jvt}
-      current_rms_token: ${file(properties.json):locations.current_rms.token}
-      current_rms_subdomain: ${file(properties.json):locations.current_rms.subdomain}
-      current_rms_api_url: ${file(properties.json):locations.current_rms.api_url}
-  get-locations:
+      SENTRY_DSN: ${file(properties.json):offices.sentry_dsn}
+      slack_webhook_jvt: ${file(properties.json):offices.slack.webhook_jvt}
+      current_rms_token: ${file(properties.json):offices.current_rms.token}
+      current_rms_subdomain: ${file(properties.json):offices.current_rms.subdomain}
+      current_rms_api_url: ${file(properties.json):offices.current_rms.api_url}
+      emailer_smtp_host: ${file(properties.json):offices.emailer.smtp_host}
+      emailer_username: ${file(properties.json):offices.emailer.username}
+      emailer_password: ${file(properties.json):offices.emailer.password}
+      emailer_sender: ${file(properties.json):offices.emailer.sender}
+      emailer_back_office: ${file(properties.json):offices.emailer.back_office}
+
+  create-offices-enquiry:
     # The function handler to be called for this endpoint
-    handler: com.oceanpremium.api.locations.Handler::handleRequest
-    name: get-locations
+    handler: com.oceanpremium.api.offices.Handler::handleRequest
+    name: create-offices-enquiry
     events:
       - http:
           # The URI of the endpoint
-          path: /${self:custom.apiPathPrefix}/locations
+          path: /${self:custom.apiPathPrefix}/offices/{officeId}/enquiries
           # The HTTP verb
-          method: get
+          method: post
           # Additional endpoint configurations like enabling CORS
           cors: true
           # The default headers mandatory for this endpoint
           headers:
             - Content-Type
+          request:
+            parameters:
+              paths:
+                officeId: true
           allowCredentials: false
     environment:
-      SENTRY_DSN: ${file(properties.json):locations.sentry_dsn}
-      slack_webhook_jvt: ${file(properties.json):locations.slack.webhook_jvt}
-      current_rms_token: ${file(properties.json):locations.current_rms.token}
-      current_rms_subdomain: ${file(properties.json):locations.current_rms.subdomain}
-      current_rms_api_url: ${file(properties.json):locations.current_rms.api_url}
+      SENTRY_DSN: ${file(properties.json):offices.sentry_dsn}
+      slack_webhook_jvt: ${file(properties.json):offices.slack.webhook_jvt}
+      current_rms_token: ${file(properties.json):offices.current_rms.token}
+      current_rms_subdomain: ${file(properties.json):offices.current_rms.subdomain}
+      current_rms_api_url: ${file(properties.json):offices.current_rms.api_url}
+      emailer_smtp_host: ${file(properties.json):offices.emailer.smtp_host}
+      emailer_username: ${file(properties.json):offices.emailer.username}
+      emailer_password: ${file(properties.json):offices.emailer.password}
+      emailer_sender: ${file(properties.json):offices.emailer.sender}
+      emailer_back_office: ${file(properties.json):offices.emailer.back_office}

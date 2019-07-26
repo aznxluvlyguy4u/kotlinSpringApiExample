@@ -4,4 +4,5 @@ include 'core'
 include 'auth'
 include 'products'
 include 'locations'
+include 'offices'
 

@@ -289,6 +289,8 @@ allprojects {
         def stagePropertyName = "stage"
         def profilePropertyName = "profile"
         def stageToDeployTo = "dev"
+//        def stageToDeployTo = "staging"
+//        def stageToDeployTo = "prod"
         def deployProfileName = "oceanpremium-serverless-publisher"
         def awsProfileToUse = deployProfileName
         def awsProfileConfigLink = "https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html"
@@ -382,4 +384,5 @@ dependencies {
     compile project(':auth')
     compile project(':products')
     compile project(':locations')
+    compile project(':offices')
 }

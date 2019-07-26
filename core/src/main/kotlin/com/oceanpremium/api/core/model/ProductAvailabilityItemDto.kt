@@ -1,10 +1,12 @@
 package com.oceanpremium.api.core.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import com.oceanpremium.api.core.currentrms.response.dto.product.ImageSource
 import com.oceanpremium.api.core.currentrms.response.dto.product.PricingDto
+import com.oceanpremium.api.core.enum.AccessoryType
 import com.oceanpremium.api.core.enum.AvailabilityStateType
 import java.util.*
 
@@ -43,4 +45,6 @@ class ProductAvailabilityItemDto(
     var totalCostAccessories: String? = null
     val uuid: UUID = UUID.randomUUID()
     var stores: Stores? = null
+    var stock: StockDetermination? = null
+    var type: String? = null
 }

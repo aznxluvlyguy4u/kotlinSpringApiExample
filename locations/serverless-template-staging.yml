@@ -9,13 +9,20 @@
 #       ...
 #    }
 #
-# 1) Either deploy through gradle task:
+# 1) Rename this file to serverless.yml (thus rename the default existing serverless.yml to serverless-template-dev.yml)
 #
-# $ ./gradlew locations:deploy -Pstage=dev --stacktrace
+# 2) Set parent build.gradle variable in the deploy task to staging: def stageToDeployTo = "staging"
+#
+# 3) Either deploy through gradle task:
+#
+# $ ./gradlew locations:deploy -Pstage=staging --stacktrace
 #
 # or directly via server-less (which is called by the `deploy` Gradle task):
 #
-# $ sls deploy --region eu-west-1 --verbose --stage dev
+# $ sls deploy --region eu-west-1 --verbose --stage staging
+#
+# 4) Rename this file back to: serverless-template-staging.yml and thus rename serverless-template-dev.yml back to serverless.yml,
+#    and set in the build.gradle, variable back to stageToDeployTo = "dev"
 
 # For full config options, check: https://docs.serverless.com
 
@@ -32,7 +39,7 @@ provider:
   # The default timeout (seconds)
   timeout: 30
   # The environment to deploy to
-  stage:  ${opt:stage, 'dev'}
+  stage:  ${opt:stage, 'staging'}
 
 # The service name which is used to create the stack
 service:
@@ -54,10 +61,10 @@ package:
 
 # The functions defined by HTTP verb / path and parameters (CRUD)
 functions:
-  get-location-api-docs:
+  get-location-api-docs-staging:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.locations.Handler::handleRequest
-    name: get-locations-api-docs
+    name: get-locations-api-docs-staging
     events:
       - http:
           # The URI of the endpoint
@@ -76,10 +83,10 @@ functions:
       current_rms_token: ${file(properties.json):locations.current_rms.token}
       current_rms_subdomain: ${file(properties.json):locations.current_rms.subdomain}
       current_rms_api_url: ${file(properties.json):locations.current_rms.api_url}
-  get-locations:
+  get-locations-staging:
     # The function handler to be called for this endpoint
     handler: com.oceanpremium.api.locations.Handler::handleRequest
-    name: get-locations
+    name: get-locations-staging
     events:
       - http:
           # The URI of the endpoint

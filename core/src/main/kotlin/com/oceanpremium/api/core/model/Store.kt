@@ -26,6 +26,6 @@ class Store(
     }
 
     override fun toString(): String {
-        return "Store: <id: $id, type: $type, name: $name>"
+        return "Store: <id: $id, type: $type, name: $name, quantity: $quantityAvailable>"
     }
 }
