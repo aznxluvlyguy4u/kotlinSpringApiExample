@@ -90,7 +90,7 @@ class SendEmailUseCaseImpl(
 
     override fun execute(enquiry: Enquiry, inDebugMode: Boolean): Enquiry {
         setupMailClient()
-        sendEnquiryEmail(enquiry, inDebugMode)
+        sendEnquiryEmail(enquiry, enquiry.inDebugMode)
 
         return enquiry
     }
@@ -175,7 +175,7 @@ class SendEmailUseCaseImpl(
         val email = EmailDto(
             from = emailServiceConfig.sender!!,            // system
             to = listOf(enquiry.emailAddress),             // client
-            bcc = listOf(emailServiceConfig.backOffice!!), 
+            bcc = listOf(emailServiceConfig.backOffice!!),
             subject = "Enquiry from: ${enquiry.emailAddress}"
         )
 

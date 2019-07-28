@@ -14,5 +14,6 @@ class Enquiry(
     val emailAddress: String,
     val phoneNumber: String,
     val message: String,
-    val office: Office
+    val office: Office,
+    var inDebugMode: Boolean = false
 )
