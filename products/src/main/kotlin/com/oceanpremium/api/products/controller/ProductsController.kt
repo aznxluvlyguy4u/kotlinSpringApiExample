@@ -141,19 +141,25 @@ class ProductsController(
             }
         }
 
-        if (queryParameters.containsKey("q[product_tags_name_cont]")) {
+        val queryMap = queryParameters.toSortedMap()
+        queryMap.remove("per_page")
+        queryMap.remove("page")
+
+        if (queryMap.containsKey("q[product_tags_name_cont]")) {
             var searchQuery = "_Search Parameters:_ \n"
             searchQuery += "\n```"
-            queryParameters.forEach { (k, v) ->
+            queryMap.forEach { (k, v) ->
                 searchQuery += "$k=$v\n"
             }
-            searchQuery += "```\n_Search Words:_ \n```\n${queryParameters["q[product_tags_name_cont]"]}\n```"
+
+            val keyword = queryMap["q[product_tags_name_cont]"]
+            searchQuery += "```\n_Search Words (Clickable links):_ \n```\n<http://rental.oceanpremium.com/search?keyword=$keyword|$keyword>\n```"
 
             val logMessageSales = "*OP - Sales Analytics* \n_Request Date:_ `${LocalDateTime.now()}`" +
                     "\n\n_Origin:_\n\n```$originIp```\n$searchQuery"
 
             logger.debug(logMessageSales)
-            Slogger.send(messageBody = logMessageSales, salesLog = true, inDebugMode = true)
+            Slogger.send(messageBody = logMessageSales, salesLog = true, inDebugMode = false)
         }
 
         val result= getProductInventoryUseCase.execute(queryParameters, headers)
