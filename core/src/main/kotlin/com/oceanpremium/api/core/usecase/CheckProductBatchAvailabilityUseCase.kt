@@ -139,9 +139,6 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
                             "Duration on the following page for understanding the provided Duration format: https://en.wikipedia.org/w/index.php?title=ISO_8601"
                 )
 
-            } else {
-                val x = Days.daysBetween(productAvailabilityItem.period?.start, productAvailabilityItem.period?.end)
-                logger.debug("${x.days}")
             }
 
             if (productAvailabilityItem.quantity == 0) {
