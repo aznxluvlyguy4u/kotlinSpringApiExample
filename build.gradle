@@ -285,12 +285,12 @@ allprojects {
         dependsOn("shadowJar")
         description 'Deploy serverless function to remote'
 
+        //FIXME For now manually toggle the property to deploy to the concerning environment: dev (default) / staging / prod
+        def stageToDeployTo = "dev"
+        
         def deployRegion = "eu-west-1"
         def stagePropertyName = "stage"
         def profilePropertyName = "profile"
-        def stageToDeployTo = "dev"
-//        def stageToDeployTo = "staging"
-//        def stageToDeployTo = "prod"
         def deployProfileName = "oceanpremium-serverless-publisher"
         def awsProfileToUse = deployProfileName
         def awsProfileConfigLink = "https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html"
