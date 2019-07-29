@@ -4,10 +4,6 @@ import com.oceanpremium.api.core.currentrms.ProductsApiImpl
 import com.oceanpremium.api.core.currentrms.response.CurrentRmsApiResponse
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductDtoMapper
 import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductGroupDtoMapper
-import com.oceanpremium.api.core.model.ConfigProperty
-import com.oceanpremium.api.core.resolver.ProductConfigOptionsResolverImpl
-import com.oceanpremium.api.core.currentrms.response.dto.mapper.ProductConfigsDtoMapper
-import com.oceanpremium.api.core.currentrms.response.dto.product.ProductDto
 import com.oceanpremium.api.core.messenger.Slogger
 import com.oceanpremium.api.core.model.OrderDto
 import com.oceanpremium.api.core.model.ProductAvailabilityItemDto
@@ -85,23 +81,19 @@ class ProductsController(
         val logMessage = "[API] - GET products with request parameters: $productId"
         logger.debug(logMessage)
 
-        // Get all product configurations options
+        /*
+        Currently product configuration options are not used
+
+        Get all product configurations options
         val allConfigOptionsResponse = productsApi.getProductConfigOptions()
         val allConfigOptionsDto = ProductConfigsDtoMapper(allConfigOptionsResponse?.code()!!, allConfigOptionsResponse)
-
-        // Process product
+        val productData = productDto.data as ProductDto?
+        // Resolve the product specific configurations
+        val resolvedProductConfigurationOptions = ProductConfigOptionsResolverImpl(allConfigOptionsDto.data as List<ConfigProperty>,productData)
+        productData?.configurations = resolvedProductConfigurationOptions.data
+        */
         val productResponse = productsApi.getProductById(productId)
         val productDto = ProductDtoMapper(productResponse?.code()!!, productResponse)
-        val productData = productDto.data as ProductDto?
-
-        // Resolve the product specific configurations
-        @Suppress("UNCHECKED_CAST")
-        val resolvedProductConfigurationOptions =
-            ProductConfigOptionsResolverImpl(
-                allConfigOptionsDto.data as List<ConfigProperty>,
-                productData
-            )
-        productData?.configurations = resolvedProductConfigurationOptions.data
 
         return CurrentRmsApiResponse.build {
             rawResponse = productResponse
