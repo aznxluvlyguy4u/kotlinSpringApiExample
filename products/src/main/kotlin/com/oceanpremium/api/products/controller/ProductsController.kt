@@ -159,7 +159,7 @@ class ProductsController(
                     "\n\n_Origin:_\n\n```$originIp```\n$searchQuery"
 
             logger.debug(logMessageSales)
-            Slogger.send(messageBody = logMessageSales, salesLog = true, inDebugMode = false)
+            Slogger.send(messageBody = logMessageSales, salesLog = true, inDebugMode = true)
         }
 
         val result= getProductInventoryUseCase.execute(queryParameters, headers)
