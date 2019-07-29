@@ -8,9 +8,15 @@ import io.sentry.Sentry
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.context.request.WebRequest
+import com.fasterxml.jackson.databind.JsonMappingException
+import org.springframework.web.bind.MethodArgumentNotValidException
+import org.springframework.web.bind.annotation.ResponseBody
+
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class ApiError(var code: Int? = null, var exception: Any? = null, var message: Any? = null)
@@ -45,7 +51,40 @@ class GlobalExceptionHandler {
         }
     }
 
-    /**
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun handleNotReadableException(ex: HttpMessageNotReadableException, request: WebRequest): ResponseEntity<ApiError> {
+        logger.debug("Build 400 Message Not Readable response")
+
+        val exception = BadRequestException(ex.message)
+        val status = HttpStatus.BAD_REQUEST
+        val apiError = when {
+            showStacktrace -> {
+                val errorMessage = ErrorResponse()
+                errorMessage.errors.add(status.reasonPhrase)
+
+                ApiError(
+                    status.value(),
+                    exception,
+                    errorMessage
+                )
+            }
+            else -> {
+                val errorMessage = ErrorResponse()
+                errorMessage.errors.add(status.reasonPhrase)
+
+                ApiError(
+                    code = status.value(),
+                    message = errorMessage
+                )
+            }
+        }
+
+        return ResponseEntity(apiError, status)
+    }
+
+        /**
      * 400 Catch bad request exception, and return a custom error response.
      */
     @ExceptionHandler(BadRequestException::class)
