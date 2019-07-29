@@ -150,7 +150,7 @@ class ProductsController(
             searchQuery += "```\n_Search Words:_ \n```\n${queryParameters["q[product_tags_name_cont]"]}\n```"
 
             val logMessageSales = "*OP - Sales Analytics* \n_Request Date:_ `${LocalDateTime.now()}`" +
-                    "\n\n_Origin:_\n\n```$originIp```\n$searchQuery```"
+                    "\n\n_Origin:_\n\n```$originIp```\n$searchQuery"
 
             logger.debug(logMessageSales)
             Slogger.send(messageBody = logMessageSales, salesLog = true, inDebugMode = true)
