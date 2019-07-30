@@ -34,7 +34,7 @@ class RentalPeriod(
     }
 
     fun getDayCounts() {
-        dayCount = Days.daysBetween(start.toLocalDate(), end.toLocalDate()).days
+        dayCount = Days.daysBetween(start.toLocalDate(), end.toLocalDate()).days.plus(1)
     }
 
 }
