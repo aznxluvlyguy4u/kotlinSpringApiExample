@@ -403,7 +403,7 @@ class CheckProductBatchAvailabilityUseCaseUseCaseImpl(
             if (productItem.period?.start != null && productItem.period?.end != null
                 && Days.daysBetween(productItem.period?.start, productItem.period?.end) != Days.ZERO
             ) {
-                productItemRentalDays = Days.daysBetween(productItem.period?.start, productItem.period?.end)
+                productItemRentalDays = Days.daysBetween(productItem.period?.start, productItem.period?.end).plus(1)
             }
 
             if (productItem.rates?.first() != null) {
