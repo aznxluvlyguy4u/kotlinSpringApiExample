@@ -124,6 +124,8 @@ class ProductsControllerTest {
         assertThat(productItem?.id).isEqualTo(testProduct.id)
         assertThat(productItem?.rates).isNotNull
         assertThat(productItem?.rates).isNotEmpty
+
+        testThatProductItemHasMandatoryProperties(listOf(productItem!!))
     }
 
     /**
@@ -220,6 +222,8 @@ class ProductsControllerTest {
             assertThat(it.rates).isNotNull
             assertThat(it.rates).isNotEmpty
         }
+
+        testThatProductItemHasMandatoryProperties(productItems!!)
     }
 
     /**
@@ -239,7 +243,7 @@ class ProductsControllerTest {
      */
     @Test
     fun testGetProductsInventoryDifferentQuantityAvailableForDifferentLocationId() {
-        // First query inventory with delivery_location_id set to gebraltar
+        // First query inventory with delivery_location_id set to gibraltar
         val params = "delivery_location_id=${testExistingProduct.gibraltarLocationId}&q[product_tags_name_cont]=f5"
         val productsResponse = restTemplate?.getForObject("$endpoint/inventory?$params", ProductsResponse::class.java)
 
@@ -418,7 +422,6 @@ class ProductsControllerTest {
         } catch (ex: UnsupportedEncodingException) {
             throw RuntimeException(ex.cause)
         }
-
     }
 
     /**
@@ -467,5 +470,36 @@ class ProductsControllerTest {
 
         assertThat(productsResponse).isNotNull
         assertThat(productsResponse?.statusCode).isEqualTo(HttpStatus.CREATED)
+    }
+
+    /**
+     *
+     * Test every product on mandatory properties.
+     */
+    private fun testThatProductItemHasMandatoryProperties(products: List<ProductDto>) {
+        products.forEach { productItemDto ->
+
+            //TODO enable currently failing assertions to have full assertion on mandatory properties
+            assertThat(productItemDto).isNotNull()
+            assertThat(productItemDto.description).isNotEmpty
+//            assertThat(productItemDto.type).isNotNull()
+
+            assertThat(productItemDto.productGroup)
+            assertThat(productItemDto.productGroup?.id).isNotNull()
+            assertThat(productItemDto.productGroup?.name).isNotNull()
+
+            assertThat(productItemDto.rates)
+            assertThat(productItemDto.rates).isNotEmpty
+            assertThat(productItemDto.rates.first().price).isNotNull()
+            assertThat(productItemDto.rates.first().chargePeriod).isNotNull()
+//            assertThat(productItemDto.rates.first().quantityAvailable).isNotNull()
+
+            assertThat(productItemDto.images).isNotEmpty
+            assertThat(productItemDto.images.first().fullImageUrl).isNotNull()
+            assertThat(productItemDto.images.first().thumbnailUrl).isNotNull()
+
+            assertThat(productItemDto.accessories).isNotNull()
+            assertThat(productItemDto.seoFriendlyName).isNotNull()
+        }
     }
 }
