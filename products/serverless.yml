@@ -71,6 +71,8 @@ functions:
             - Content-Type
           allowCredentials: false
     environment:
+      # TimeZone, more info: https://docs.aws.amazon.com/lambda/latest/dg/lambda-environment-variables.html
+      TZ: ${file(properties.json):products.timezone}
       SENTRY_DSN: ${file(properties.json):products.sentry_dsn}
       slack_webhook_jvt: ${file(properties.json):products.slack.webhook_jvt}
       current_rms_token: ${file(properties.json):products.current_rms.token}
@@ -98,6 +100,8 @@ functions:
             - Content-Type
           allowCredentials: false
     environment:
+      # TimeZone, more info: https://docs.aws.amazon.com/lambda/latest/dg/lambda-environment-variables.html
+      TZ: ${file(properties.json):products.timezone}
       SENTRY_DSN: ${file(properties.json):products.sentry_dsn}
       slack_webhook_jvt: ${file(properties.json):products.slack.webhook_jvt}
       slack_webhook_op: ${file(properties.json):products.slack.webhook_op}
@@ -130,6 +134,8 @@ functions:
                 productId: true
           allowCredentials: false
     environment:
+      # TimeZone, more info: https://docs.aws.amazon.com/lambda/latest/dg/lambda-environment-variables.html
+      TZ: ${file(properties.json):products.timezone}
       SENTRY_DSN: ${file(properties.json):products.sentry_dsn}
       slack_webhook_jvt: ${file(properties.json):products.slack.webhook_jvt}
       slack_webhook_op: ${file(properties.json):products.slack.webhook_op}
@@ -158,6 +164,8 @@ functions:
             - Content-Type
           allowCredentials: false
     environment:
+      # TimeZone, more info: https://docs.aws.amazon.com/lambda/latest/dg/lambda-environment-variables.html
+      TZ: ${file(properties.json):products.timezone}
       SENTRY_DSN: ${file(properties.json):products.sentry_dsn}
       slack_webhook_jvt: ${file(properties.json):products.slack.webhook_jvt}
       slack_webhook_op: ${file(properties.json):products.slack.webhook_op}
@@ -186,6 +194,8 @@ functions:
             - Content-Type
           allowCredentials: false
     environment:
+      # TimeZone, more info: https://docs.aws.amazon.com/lambda/latest/dg/lambda-environment-variables.html
+      TZ: ${file(properties.json):products.timezone}
       SENTRY_DSN: ${file(properties.json):products.sentry_dsn}
       slack_webhook_jvt: ${file(properties.json):products.slack.webhook_jvt}
       slack_webhook_op: ${file(properties.json):products.slack.webhook_op}
@@ -214,6 +224,8 @@ functions:
             - Content-Type
           allowCredentials: false
     environment:
+      # TimeZone, more info: https://docs.aws.amazon.com/lambda/latest/dg/lambda-environment-variables.html
+      TZ: ${file(properties.json):products.timezone}
       SENTRY_DSN: ${file(properties.json):products.sentry_dsn}
       slack_webhook_jvt: ${file(properties.json):products.slack.webhook_jvt}
       slack_webhook_op: ${file(properties.json):products.slack.webhook_op}
@@ -242,6 +254,8 @@ functions:
             - Content-Type
           allowCredentials: false
     environment:
+      # TimeZone, more info: https://docs.aws.amazon.com/lambda/latest/dg/lambda-environment-variables.html
+      TZ: ${file(properties.json):products.timezone}
       SENTRY_DSN: ${file(properties.json):products.sentry_dsn}
       slack_webhook_jvt: ${file(properties.json):products.slack.webhook_jvt}
       slack_webhook_op: ${file(properties.json):products.slack.webhook_op}
